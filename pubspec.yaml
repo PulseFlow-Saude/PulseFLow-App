@@ -1,0 +1,77 @@
+name: pulseflow_app
+description: PulseFlow - A Flutter application for patient management with MongoDB integration.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  mongo_dart: ^0.10.5
+  provider: ^6.1.5
+  http: ^1.1.0
+  fl_chart: ^0.68.0
+  shared_preferences: ^2.2.0
+  flutter_secure_storage: ^8.0.0
+  get: ^4.6.5
+  form_field_validator: ^1.1.0
+  flutter_masked_text2: ^0.9.1
+  intl: ^0.20.2
+  flutter_dotenv: ^5.1.0
+  jwt_decoder: ^2.0.1
+  crypto: ^3.0.3
+  mailer: ^6.0.1
+  flutter_localizations:
+    sdk: flutter
+  mask_text_input_formatter: ^2.9.0
+  animated_text_kit: ^4.2.3
+  image_picker: ^1.0.4
+  file_picker: ^8.1.2
+  path_provider: ^2.1.4
+  open_filex: ^4.5.0
+  google_fonts: ^6.2.1
+  url_launcher: ^6.3.0
+  firebase_core: ^2.24.2
+  firebase_messaging: ^14.7.10
+  flutter_local_notifications: ^17.2.3
+  permission_handler: ^11.2.0
+  flutter_blue_plus: ^1.32.11
+  health: ^13.1.4
+  table_calendar: ^3.0.9
+  pdf: ^3.10.7
+  package_info_plus: ^8.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/images/
+    - assets/lottie/
+
+# Configuração para gerar ícones do app
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/AppIcon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/images/AppIcon.png"
+    background_color: "#hexcode"
+    theme_color: "#hexcode"
+  windows:
+    generate: true
+    image_path: "assets/images/AppIcon.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/images/AppIcon.png"

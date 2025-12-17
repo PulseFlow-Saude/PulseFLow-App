@@ -1,0 +1,47 @@
+abstract class Routes {
+  static const SPLASH = '/splash';
+  static const LOGIN = '/login';
+  static const REGISTRATION = '/registration';
+  static const HOME = '/home';
+  static const FORGOT_PASSWORD = '/forgot-password';
+  static const RESET_PASSWORD = '/reset-password';
+  static const PROFILE = '/profile';
+  static const APPOINTMENTS_SPECIALTY = '/appointments-specialty';
+  static const APPOINTMENTS_DOCTORS = '/appointments-doctors';
+  static const APPOINTMENT_SCHEDULER = '/appointments-scheduler';
+  static const UPCOMING_APPOINTMENTS = '/upcoming-appointments';
+  static const MEDICAL_RECORDS = '/medical-records';
+  static const PRESCRIPTIONS = '/prescriptions';
+
+  static const VERIFY_2FA = '/verify-2fa';
+  static const MENU = '/menu';
+  static const ENXAQUECA = '/enxaqueca';
+  static const DIABETES = '/diabetes';
+  static const PRESSAO = '/pressao';
+  static const MEDICAL_RECORD_DETAILS = '/medical-record-details';
+  static const EVENTO_CLINICO_FORM = '/evento-clinico-form';
+  static const EVENTO_CLINICO_HISTORY = '/evento-clinico-history';
+  static const CRISE_GASTRITE_FORM = '/crise-gastrite-form';
+  static const CRISE_GASTRITE_HISTORY = '/crise-gastrite-history';
+  static const MENSTRUACAO_FORM = '/menstruacao-form';
+  static const MENSTRUACAO_HISTORY = '/menstruacao-history';
+  static const PULSE_KEY = '/pulse-key';
+  static const SMARTWATCH = '/smartwatch';
+  static const HEALTH_HISTORY = '/health-history';
+  static const HEART_RATE_HISTORY = '/heart-rate-history';
+  static const STEPS_HISTORY = '/steps-history';
+  static const SLEEP_HISTORY = '/sleep-history';
+  static const EXAME_UPLOAD = '/exame-upload';
+  static const EXAME_LIST = '/exame-list';
+  static const HORMONAL = '/hormonal';
+  static const HISTORY_SELECTION = '/history-selection';
+  static const NOTIFICATIONS = '/notifications';
+  static const ACCESS_HISTORY = '/access-history';
+  static const ABOUT = '/about';
+  static const FAQ = '/faq';
+  static const SECURITY = '/security';
+  static const CONTACT = '/contact';
+  static const PRIVACY = '/privacy';
+  static const APP_VERSION = '/app-version';
+  static const SETTINGS = '/settings';
+} 
