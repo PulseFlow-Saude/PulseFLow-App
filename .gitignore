@@ -58,6 +58,7 @@ app.*.map.json
 **/key.properties
 **/keystore.jks
 **/keystore.properties
+web/firebase-config.js
 
 # Database credentials
 **/database_config.dart

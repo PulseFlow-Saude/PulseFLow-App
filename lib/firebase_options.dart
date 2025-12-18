@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'config/app_config.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -43,30 +44,30 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBwXGHNg6eV-ABZKvK1SWGpUxb7Fh-8RRI',
-    appId: '1:1046085330534:web:39e08c1f748fe93b4bafa7',
-    messagingSenderId: '1046085330534',
-    projectId: 'pulseflow-f9154',
-    authDomain: 'pulseflow-f9154.firebaseapp.com',
-    storageBucket: 'pulseflow-f9154.firebasestorage.app',
+  static FirebaseOptions get web => FirebaseOptions(
+    apiKey: AppConfig.firebaseWebApiKey,
+    appId: AppConfig.firebaseWebAppId,
+    messagingSenderId: AppConfig.firebaseMessagingSenderId,
+    projectId: AppConfig.firebaseProjectId,
+    authDomain: AppConfig.firebaseAuthDomain,
+    storageBucket: AppConfig.firebaseStorageBucket,
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC6KsBiLks3LBrbiI2Dy5IO5VN7IxRcsE4',
-    appId: '1:1046085330534:android:4736c817cc5724d74bafa7',
-    messagingSenderId: '1046085330534',
-    projectId: 'pulseflow-f9154',
-    storageBucket: 'pulseflow-f9154.firebasestorage.app',
+  static FirebaseOptions get android => FirebaseOptions(
+    apiKey: AppConfig.firebaseAndroidApiKey,
+    appId: AppConfig.firebaseAndroidAppId,
+    messagingSenderId: AppConfig.firebaseMessagingSenderId,
+    projectId: AppConfig.firebaseProjectId,
+    storageBucket: AppConfig.firebaseStorageBucket,
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBKLZjlo5cTcszypq-DI0ppIO74TNiFgdY',
-    appId: '1:1046085330534:ios:58fd0f5f398ea5264bafa7',
-    messagingSenderId: '1046085330534',
-    projectId: 'pulseflow-f9154',
-    storageBucket: 'pulseflow-f9154.firebasestorage.app',
-    iosBundleId: 'com.example.pacienteApp',
+  static FirebaseOptions get ios => FirebaseOptions(
+    apiKey: AppConfig.firebaseIosApiKey,
+    appId: AppConfig.firebaseIosAppId,
+    messagingSenderId: AppConfig.firebaseMessagingSenderId,
+    projectId: AppConfig.firebaseProjectId,
+    storageBucket: AppConfig.firebaseStorageBucket,
+    iosBundleId: AppConfig.firebaseIosBundleId,
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

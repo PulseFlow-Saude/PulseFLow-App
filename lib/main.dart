@@ -22,7 +22,12 @@ import 'services/app_translations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Inicializar Firebase ANTES de registrar o background handler
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    // Usar configurações padrão se .env não estiver disponível
+  }
+  
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -32,12 +37,6 @@ void main() async {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   } catch (e) {
     // Continuar com notificações locais apenas
-  }
-  
-  try {
-    await dotenv.load(fileName: ".env");
-  } catch (e) {
-    // Usar configurações padrão se .env não estiver disponível
   }
   
   final dbService = Get.put(DatabaseService());

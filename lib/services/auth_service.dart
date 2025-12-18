@@ -167,7 +167,7 @@ class AuthService extends GetxController {
       final user = AppConfig.emailUser;
       final pass = AppConfig.emailPass;
       
-      if (user.isEmpty || pass.isEmpty) {
+      if (user == null || pass == null || user.isEmpty || pass.isEmpty) {
         throw 'Configurações de email não encontradas. Verifique o arquivo .env';
       }
       
@@ -662,7 +662,7 @@ class AuthService extends GetxController {
       final user = AppConfig.emailUser;
       final pass = AppConfig.emailPass;
       
-      if (user.isEmpty || pass.isEmpty) {
+      if (user == null || pass == null || user.isEmpty || pass.isEmpty) {
         return;
       }
 
@@ -767,7 +767,7 @@ class AuthService extends GetxController {
       final user = AppConfig.emailUser;
       final pass = AppConfig.emailPass;
       
-      if (user.isEmpty || pass.isEmpty) {
+      if (user == null || pass == null || user.isEmpty || pass.isEmpty) {
         return;
       }
       
