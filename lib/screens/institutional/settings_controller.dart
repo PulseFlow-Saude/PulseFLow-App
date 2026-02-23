@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,9 +30,20 @@ class SettingsController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
   final isDeletingAccount = false.obs;
 
+  Completer<void>? _prefsLoadedCompleter;
+
+  /// Use em main() antes de runApp() para aplicar o idioma salvo já no primeiro frame.
+  static Future<void> ensureLoaded() async {
+    final c = Get.find<SettingsController>();
+    if (c._prefsLoadedCompleter != null) {
+      await c._prefsLoadedCompleter!.future;
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
+    _prefsLoadedCompleter = Completer<void>();
     _loadPreferences();
   }
 
@@ -44,6 +56,9 @@ class SettingsController extends GetxController {
     accessLogsEmail.value = prefs.getBool(_accessLogsEmailKey) ?? false;
     darkTheme.value = prefs.getBool(_darkThemeKey) ?? false;
     language.value = prefs.getString(_languageKey) ?? 'pt_BR';
+    if (!_prefsLoadedCompleter!.isCompleted) {
+      _prefsLoadedCompleter!.complete();
+    }
   }
 
   Future<void> toggleCriticalAlerts(bool value) async {

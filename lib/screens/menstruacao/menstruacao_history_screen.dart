@@ -98,9 +98,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
         backgroundColor: const Color(0xFF00324A),
         systemOverlayStyle: AppTheme.blueSystemOverlayStyle,
           elevation: 0,
-        title: const Text(
-          'Histórico de Ciclos',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        title: Text(
+          'menstruacao_history_title'.tr,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         leading: const PulseDrawerButton(iconSize: 22),
         centerTitle: true,
@@ -149,7 +149,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                            'Ciclos Registrados',
+                            'menstruacao_cycles_registered'.tr,
                                 style: AppTheme.titleMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -157,7 +157,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                               ),
                           const SizedBox(height: 4),
                               Text(
-                            '${_menstruacoes.length} ciclos acompanhados',
+                            'menstruacao_cycles_tracked'.trParams({'count': '${_menstruacoes.length}'}),
                             style: AppTheme.bodyMedium.copyWith(
                                   color: Colors.white.withOpacity(0.9),
                                 ),
@@ -242,7 +242,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
             child: const Icon(Icons.add_rounded, size: 20),
           ),
           label: Text(
-            'Novo Ciclo',
+            'menstruacao_new_cycle'.tr,
             style: AppTheme.titleMedium.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,
@@ -307,7 +307,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Carregando ciclos menstruais',
+                  'menstruacao_loading'.tr,
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w700,
@@ -315,7 +315,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Aguarde enquanto buscamos seus dados...',
+                  'menstruacao_loading_sub'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                   ),

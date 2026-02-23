@@ -211,6 +211,15 @@ O aplicativo utiliza variáveis de ambiente para configuração. Todas as variá
 | `EMAIL_USER` | Usuário do email (opcional) | `seu_email@exemplo.com` |
 | `EMAIL_PASS` | Senha do email (opcional) | `sua_senha` |
 
+### Tradução / Idiomas
+
+O app suporta múltiplos idiomas (Android e iOS). O usuário escolhe em **Configurações > Experiência > Idioma**.
+
+- **Idiomas disponíveis:** Português (BR), English (US).
+- **Textos:** `lib/services/app_translations.dart`. Use a chave com `.tr` nas telas (ex: `'menu_home'.tr`). Parâmetros: `'chave'.trParams({'nome': valor})` com `@nome` na string.
+- **Datas e números (intl):** use `lib/utils/intl_locale.dart` — `AppDateFormat.shortDate`, `AppDateFormat.time`, `AppDateFormat.custom('pattern')` e `AppNumberFormat.decimal()` para que datas/números sigam o idioma selecionado. Evite `DateFormat('...', 'pt_BR')` fixo.
+- **Adicionar idioma:** inclua um novo mapa em `AppTranslations`, adicione `Locale('xx', 'XX')` em `supportedLocales` no `main.dart` e um item no dropdown de idioma em `settings_screen.dart`.
+
 ### Permissões
 
 #### Android
@@ -282,6 +291,29 @@ Os testes devem ser organizados seguindo a estrutura do projeto, com arquivos de
 - Confirme a URL no arquivo `.env` (variável `API_BASE_URL`)
 - Teste a conectividade de rede
 - Verifique se o firewall não está bloqueando a conexão
+
+### Erro de conexão com MongoDB (celular)
+
+**Problema:** "Falha ao conectar ao MongoDB" ou "Connection timed out" ao criar conta no celular físico.
+
+O app no celular precisa alcançar o MongoDB no seu PC. Faça o seguinte no **computador**:
+
+1. **MongoDB escutando na rede**  
+   O MongoDB precisa aceitar conexões externas (não só localhost).  
+   - Se você inicia o MongoDB manualmente, use:  
+     `mongod --bind_ip_all`  
+   - Se usa arquivo de configuração (ex.: `mongod.cfg`), adicione ou altere:  
+     `net.bindIp: 0.0.0.0`  
+   - Reinicie o serviço/processo do MongoDB após alterar.
+
+2. **Firewall do Windows**  
+   Libere a porta 27017 para conexões de entrada. No **PowerShell como Administrador**:  
+   ```powershell
+   New-NetFirewallRule -DisplayName "MongoDB" -Direction Inbound -LocalPort 27017 -Protocol TCP -Action Allow
+   ```
+
+3. **Rede**  
+   Celular e PC devem estar na **mesma rede Wi‑Fi**. Em `lib/config/database_config.dart` use o IP do PC (ex.: `mongodb://192.168.0.116:27017`).
 
 ### Erro de Firebase
 

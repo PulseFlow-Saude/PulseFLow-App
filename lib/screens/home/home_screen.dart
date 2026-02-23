@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import 'home_controller.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
+import '../../widgets/language_icon_button.dart';
 import 'package:flutter/services.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -26,7 +27,7 @@ class HomeScreen extends StatelessWidget {
         body: Column(
           children: [
             // Header com perfil - sem SafeArea para ocupar toda a área superior
-            _buildHeader(controller),
+            _buildHeader(context, controller),
             
             // Conteúdo principal
             Expanded(
@@ -92,7 +93,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(HomeController controller) {
+  Widget _buildHeader(BuildContext context, HomeController controller) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
@@ -134,21 +135,40 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
               _buildPulseFlowLogo(),
-              Obx(() => IconButton(
-                icon: Stack(
-                  children: [
-                    Container(
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
-                        Icons.notifications_outlined,
+                        Icons.language_rounded,
                         color: Colors.white,
                         size: 24,
                       ),
                     ),
+                    tooltip: 'Idioma',
+                    onPressed: () => LanguageIconButton.showLanguageModal(context),
+                  ),
+                  Obx(() => IconButton(
+                    icon: Stack(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.notifications_outlined,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
                     if (controller.unreadNotificationsCount.value > 0)
                       Positioned(
                         right: 0,
@@ -178,11 +198,13 @@ class HomeScreen extends StatelessWidget {
                       ),
                   ],
                 ),
-                onPressed: () async {
-                  await Get.toNamed(Routes.NOTIFICATIONS);
-                  controller.loadNotificationsCount();
-                },
-              )),
+                    onPressed: () async {
+                      await Get.toNamed(Routes.NOTIFICATIONS);
+                      controller.loadNotificationsCount();
+                    },
+                  )),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 12),

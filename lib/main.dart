@@ -56,8 +56,9 @@ void main() async {
   Get.put(EnxaquecaService());
   Get.put(DiabetesService());
   Get.put(SettingsController());
-  
-         try {
+  await SettingsController.ensureLoaded();
+
+  try {
            Get.put(NotificationService());
          } catch (e) {
            // Erro ao inicializar NotificationService
@@ -161,6 +162,10 @@ class MyApp extends StatelessWidget {
         supportedLocales: const [
           Locale('pt', 'BR'),
           Locale('en', 'US'),
+          Locale('es', 'ES'),
+          Locale('fr', 'FR'),
+          Locale('de', 'DE'),
+          Locale('zh', 'CN'),
         ],
         locale: Locale(
           settings.language.value.split('_').first,

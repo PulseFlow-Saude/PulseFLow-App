@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import '../../services/api_service.dart';
 import '../../models/access_history.dart';
+import '../../utils/intl_locale.dart';
 
 class AccessHistoryController extends GetxController {
   final RxList<AccessHistory> acessos = <AccessHistory>[].obs;
@@ -48,20 +48,21 @@ class AccessHistoryController extends GetxController {
   String formatarDataHora(DateTime dataHora) {
     final now = DateTime.now();
     final difference = now.difference(dataHora);
+    final timeStr = AppDateFormat.time.format(dataHora);
 
     if (difference.inDays == 0) {
-      return DateFormat('HH:mm').format(dataHora);
+      return timeStr;
     } else if (difference.inDays == 1) {
-      return 'Ontem às ${DateFormat('HH:mm').format(dataHora)}';
+      return '${'intl_yesterday'.tr} ${'intl_at'.tr} $timeStr';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} dias atrás às ${DateFormat('HH:mm').format(dataHora)}';
+      return '${'intl_days_ago'.trParams({'count': '${difference.inDays}'})} ${'intl_at'.tr} $timeStr';
     } else {
-      return DateFormat('dd/MM/yyyy HH:mm').format(dataHora);
+      return AppDateFormat.shortDateTime.format(dataHora);
     }
   }
 
   String formatarDataCompleta(DateTime dataHora) {
-    return DateFormat('dd/MM/yyyy às HH:mm').format(dataHora);
+    return AppDateFormat.shortDateTime.format(dataHora);
   }
 }
 

@@ -8,16 +8,16 @@ allprojects {
 tasks.register("prepareFirebaseConfig") {
     doLast {
         val scriptPath = rootProject.projectDir.parentFile.resolve("scripts/generate_firebase_config.js")
-        val nodeCommand = if (System.getProperty("os.name").lowercase().contains("win")) "node.cmd" else "node"
-        
-        exec {
-            commandLine(nodeCommand, scriptPath.absolutePath)
+        if (!scriptPath.exists()) return@doLast
+        try {
+            exec {
+                commandLine("node", scriptPath.absolutePath)
+                isIgnoreExitValue = true
+            }
+        } catch (e: Exception) {
+            // Node pode não estar no PATH quando o Gradle roda; build continua
         }
     }
-}
-
-tasks.named("preBuild").configure {
-    dependsOn("prepareFirebaseConfig")
 }
 
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()

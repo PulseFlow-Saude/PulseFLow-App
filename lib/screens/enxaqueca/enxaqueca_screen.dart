@@ -7,6 +7,7 @@ import '../../models/enxaqueca.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../../widgets/pulse_drawer_button.dart';
+import '../../utils/intl_locale.dart';
 
 String formatarData(DateTime d) {
   final dd = d.day.toString().padLeft(2, '0');
@@ -15,18 +16,9 @@ String formatarData(DateTime d) {
   return "$dd/$mm/$yyyy";
 }
 
-String formatarMesAno(DateTime d) {
-  const meses = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
-  return '${meses[d.month - 1]} de ${d.year}';
-}
+String formatarMesAno(DateTime d) => AppDateFormat.monthYear(d);
 
-String formatarMes(int mes) {
-  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  return meses[mes - 1];
-}
+String formatarMes(int mes) => AppDateFormat.monthShort(mes);
 
 String calcularMediaIntensidade(List<Enxaqueca> data) {
   if (data.isEmpty) return '0';
@@ -64,23 +56,27 @@ Color getCorIntensidade(String intensidade) {
   return Colors.red;
 }
 
-String classificarIntensidade(String intensidade) {
+String _classificarIntensidadeKey(String intensidade) {
   final valor = int.tryParse(intensidade) ?? 0;
-  if (valor <= 0) return 'Sem dor';
-  if (valor <= 2) return 'Leve';
-  if (valor <= 4) return 'Desconforto';
-  if (valor <= 6) return 'Moderada';
-  if (valor <= 8) return 'Intensa';
-  if (valor == 9) return 'Muito intensa';
-  return 'Pior dor'; // 10
+  if (valor <= 0) return 'enxaqueca_no_pain';
+  if (valor <= 2) return 'enxaqueca_light';
+  if (valor <= 4) return 'enxaqueca_discomfort';
+  if (valor <= 6) return 'enxaqueca_moderate';
+  if (valor <= 8) return 'enxaqueca_intense';
+  if (valor == 9) return 'enxaqueca_very_intense';
+  return 'enxaqueca_worst';
 }
 
-String classificarDuracaoHoras(int horas) {
-  if (horas <= 0) return 'Sem duração';
-  if (horas <= 1) return 'Curta';
-  if (horas <= 3) return 'Moderada';
-  return 'Prolongada';
+String classificarIntensidade(String intensidade) => _classificarIntensidadeKey(intensidade).tr;
+
+String _classificarDuracaoKey(int horas) {
+  if (horas <= 0) return 'enxaqueca_no_duration';
+  if (horas <= 1) return 'enxaqueca_short';
+  if (horas <= 3) return 'enxaqueca_moderate';
+  return 'enxaqueca_prolonged';
 }
+
+String classificarDuracaoHoras(int horas) => _classificarDuracaoKey(horas).tr;
 
 class EnxaquecaScreen extends StatelessWidget {
   final String pacienteId;
@@ -104,8 +100,20 @@ class EnxaquecaScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF00324A),
         elevation: 0,
-        title: const Text("Registro de Enxaqueca", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-        leading: const PulseDrawerButton(iconSize: 22),
+        title: Text('enxaqueca_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        leading: Obx(() => mostrarGrafico.value
+            ? const PulseDrawerButton(iconSize: 22)
+            : IconButton(
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                ),
+                onPressed: () => Get.back(),
+              )),
         centerTitle: true,
       ),
       body: Container(
@@ -136,17 +144,16 @@ class EnxaquecaScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Novo registro",
-                              style: TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600),
+                        Text(
+                          'common_new_record'.tr,
+                              style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 16),
-                        // Intensidade em uma linha (100% largura)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Intensidade da Dor',
+                            Text(
+                              'enxaqueca_pain_intensity'.tr,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -209,19 +216,18 @@ class EnxaquecaScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        // Duração (100% largura)
                         TextField(
                           controller: duracaoController,
-                          decoration: const InputDecoration(
-                            labelText: "Duração (horas)",
-                            hintText: "Ex: 2",
+                          decoration: InputDecoration(
+                            labelText: 'enxaqueca_duration'.tr,
+                            hintText: 'enxaqueca_duration_hint'.tr,
                           ),
                           keyboardType: TextInputType.number,
                         ),
                         const SizedBox(height: 16),
                         Obx(() {
                           final dataText = dataSelecionada.value == null
-                              ? 'Selecione a data'
+                              ? 'common_select_date'.tr
                               : formatarData(dataSelecionada.value!);
                           return InkWell(
                             onTap: () async {
@@ -231,9 +237,9 @@ class EnxaquecaScreen extends StatelessWidget {
                                 initialDate: dataSelecionada.value ?? hoje,
                                 firstDate: DateTime(2000),
                                 lastDate: DateTime(hoje.year, hoje.month, hoje.day),
-                                helpText: 'Selecione a data do episódio',
-                                cancelText: 'Cancelar',
-                                confirmText: 'Confirmar',
+                                helpText: 'enxaqueca_date_episode'.tr,
+                                cancelText: 'common_cancel'.tr,
+                                confirmText: 'common_confirm'.tr,
                                 builder: (context, child) {
                                   return Theme(
                                     data: Theme.of(context).copyWith(
@@ -287,7 +293,7 @@ class EnxaquecaScreen extends StatelessWidget {
                                 ),
                                 onPressed: () async {
                                   if (dataSelecionada.value == null) {
-                                    Get.snackbar('Data obrigatória', 'Selecione a data do episódio');
+                                    Get.snackbar('common_date_required'.tr, 'enxaqueca_date_episode'.tr);
                                     return;
                                   }
                                   await controller.adicionarRegistro(
@@ -300,9 +306,9 @@ class EnxaquecaScreen extends StatelessWidget {
                                   duracaoController.clear();
                                   intensidadeSelecionada.value = 0;
                                   dataSelecionada.value = null;
-                                  Get.snackbar('Sucesso', 'Registro de enxaqueca salvo com sucesso');
+                                  Get.snackbar('common_success'.tr, 'enxaqueca_saved'.tr);
                                 },
-                                child: const Text("Registrar", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                                child: Text('common_register'.tr, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -316,7 +322,7 @@ class EnxaquecaScreen extends StatelessWidget {
                                 onPressed: () {
                                   mostrarGrafico.value = !mostrarGrafico.value;
                                 },
-                                    child: Obx(() => Text(mostrarGrafico.value ? "Visualizar registros" : "Visualizar dados", style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
+                                    child: Obx(() => Text(mostrarGrafico.value ? 'common_view_records'.tr : 'common_view_data'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
                               ),
                             ),
                           ],
@@ -388,9 +394,9 @@ class EnxaquecaScreen extends StatelessWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(children: [const Icon(Icons.health_and_safety, color: Color(0xFF00324A), size: 16), const SizedBox(width: 8), Text('Intensidade: ${item.intensidade}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))]),
+                                        Row(children: [const Icon(Icons.health_and_safety, color: Color(0xFF00324A), size: 16), const SizedBox(width: 8), Text('${'enxaqueca_intensity_label'.tr}: ${item.intensidade}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))]),
                                         const SizedBox(height: 4),
-                                        Row(children: [const Icon(Icons.timer, color: Color(0xFF00324A), size: 14), const SizedBox(width: 6), Text('Duração: ${item.duracao} h', style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))]),
+                                        Row(children: [const Icon(Icons.timer, color: Color(0xFF00324A), size: 14), const SizedBox(width: 6), Text('${'enxaqueca_duration_label'.tr}: ${item.duracao} h', style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))]),
                                         const SizedBox(height: 4),
                                         Wrap(
                                           spacing: 8,
@@ -419,10 +425,10 @@ class EnxaquecaScreen extends StatelessWidget {
                                 await launchUrlString(url, mode: LaunchMode.externalApplication);
                               }
                             },
-                            child: const Text(
-                              'Referência: Classificação de intensidade da dor de cabeça',
+                            child: Text(
+                              'enxaqueca_ref'.tr,
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
+                              style: const TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
                             ),
                           ),
                         ),
@@ -457,7 +463,7 @@ Widget _buildChipIntensidade(String intensidade) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)),
-    child: Text(classificarIntensidade(intensidade), style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600)),
+    child: Text(classificarIntensidade(intensidade).tr, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600)),
   );
 }
 
@@ -466,7 +472,7 @@ Widget _buildChipDuracao(int horas) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     decoration: BoxDecoration(color: const Color(0xFF00324A).withOpacity(0.10), borderRadius: BorderRadius.circular(16)),
-    child: Text(classificarDuracaoHoras(horas), style: const TextStyle(color: Color(0xFF00324A), fontSize: 12, fontWeight: FontWeight.w600)),
+    child: Text(classificarDuracaoHoras(horas).tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12, fontWeight: FontWeight.w600)),
   );
 }
 
@@ -498,7 +504,7 @@ class _GraficoEnxaqueca extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Evolução da Intensidade', style: TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
+                      Text('enxaqueca_evolution'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 4),
                       Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14)),
                     ],
@@ -512,10 +518,10 @@ class _GraficoEnxaqueca extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Column(
-                  children: const [
-                    Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)),
-                    SizedBox(height: 8),
-                    Text('Sem dados neste mês', style: TextStyle(color: Color(0xFF00324A), fontSize: 14)),
+                  children: [
+                    const Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)),
+                    const SizedBox(height: 8),
+                    Text('common_no_data_month'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14)),
                   ],
                 ),
               ),
@@ -611,13 +617,13 @@ class _GraficoEnxaqueca extends StatelessWidget {
                   onPressed: onPrevMonth,
                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
                   icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16),
-                  label: const Text('Anterior', style: TextStyle(color: Colors.white, fontSize: 12)),
+                  label: Text('common_prev'.tr, style: const TextStyle(color: Colors.white, fontSize: 12)),
                 ),
                 ElevatedButton.icon(
                   onPressed: onNextMonth,
                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
                   icon: const Icon(Icons.chevron_right, color: Colors.white, size: 16),
-                  label: const Text('Próximo', style: TextStyle(color: Colors.white, fontSize: 12)),
+                  label: Text('common_next'.tr, style: const TextStyle(color: Colors.white, fontSize: 12)),
                 ),
               ],
             ),
@@ -643,9 +649,9 @@ class _MigraineAnalysisSection extends StatelessWidget {
           decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15))),
               child: Row(
                 children: [
-                  Expanded(child: Column(children: [const Text('Menor', style: TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMenorIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
-                  Expanded(child: Column(children: [const Text('Média', style: TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMediaIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
-                  Expanded(child: Column(children: [const Text('Maior', style: TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMaiorIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
+                  Expanded(child: Column(children: [Text('diabetes_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMenorIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
+                  Expanded(child: Column(children: [Text('diabetes_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMediaIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
+                  Expanded(child: Column(children: [Text('diabetes_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMaiorIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
                 ],
               ),
             ),

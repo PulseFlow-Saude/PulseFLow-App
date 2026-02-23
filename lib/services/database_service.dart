@@ -77,7 +77,10 @@ class DatabaseService {
           await Future.delayed(_retryDelay);
         } else {
           _isConnecting = false;
-          throw 'Falha ao conectar após $_maxRetries tentativas: $e';
+          final hint = ' Dica: no celular físico, em lib/config/database_config.dart '
+              'use o IP do seu PC (ex: mongodb://192.168.1.100:27017). '
+              'No emulador use 10.0.2.2. Confirme se o MongoDB está rodando e acessível.';
+          throw 'Falha ao conectar ao MongoDB após $_maxRetries tentativas: $e.$hint';
         }
       }
     }
