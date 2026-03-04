@@ -41,7 +41,7 @@ class MenuScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildSectionHeader('Registros de Saúde'),
+                      _buildSectionHeader('menu_section_health'.tr),
                       const SizedBox(height: 16),
                       _buildHealthRecordsList(pacienteController),
                       const SizedBox(height: 32),
@@ -102,8 +102,8 @@ class MenuScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Menu Principal',
+          Text(
+            'menu_main'.tr,
             style: TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -225,8 +225,8 @@ class MenuScreen extends StatelessWidget {
     final cards = [
       _RecordCardData(
         icon: Icons.attach_file,
-        title: 'Exames anexados',
-        subtitle: 'Arquivos e resultados clínicos',
+        title: 'menu_exams'.tr,
+        subtitle: 'menu_exams_sub'.tr,
         onTap: () {
           HapticFeedback.lightImpact();
           Get.toNamed(Routes.EXAME_UPLOAD);
@@ -234,8 +234,8 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         icon: Icons.psychology,
-        title: 'Controle de Enxaqueca',
-        subtitle: 'Crises, sintomas e tratamentos',
+        title: 'menu_migraine'.tr,
+        subtitle: 'menu_migraine_sub'.tr,
         onTap: () {
           HapticFeedback.lightImpact();
           Get.to(() => EnxaquecaScreen(
@@ -245,8 +245,8 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         icon: Icons.bloodtype,
-        title: 'Monitoramento da Diabetes',
-        subtitle: 'Glicemia, medicamentos e hábitos',
+        title: 'menu_diabetes'.tr,
+        subtitle: 'menu_diabetes_sub'.tr,
         onTap: () {
           HapticFeedback.lightImpact();
           Get.to(() => DiabetesScreen(
@@ -256,8 +256,8 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         customIcon: const BpMenuIcon(size: 40, color: Colors.white),
-        title: 'Pressão arterial',
-        subtitle: 'Registros de aferições e alertas',
+        title: 'menu_bp'.tr,
+        subtitle: 'menu_bp_sub'.tr,
         onTap: () {
           HapticFeedback.lightImpact();
           Get.toNamed(Routes.PRESSAO);
@@ -265,8 +265,8 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         icon: Icons.sick,
-        title: 'Crises de gastrite',
-        subtitle: 'Sintomas, dieta e medicamentos',
+        title: 'menu_gastrite'.tr,
+        subtitle: 'menu_gastrite_sub'.tr,
         onTap: () {
           HapticFeedback.lightImpact();
           Get.toNamed(Routes.CRISE_GASTRITE_FORM);
@@ -274,8 +274,8 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         icon: Icons.event_note,
-        title: 'Eventos clínicos',
-        subtitle: 'Consultas, exames e procedimentos',
+        title: 'menu_events'.tr,
+        subtitle: 'menu_events_sub'.tr,
         onTap: () {
           HapticFeedback.lightImpact();
           Get.toNamed(Routes.EVENTO_CLINICO_FORM);
@@ -283,8 +283,8 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         customIcon: const HormonalIcon(size: 40, color: Colors.white),
-        title: 'Acompanhamento hormonal',
-        subtitle: 'Exames, hormônios e tendências',
+        title: 'menu_hormonal'.tr,
+        subtitle: 'menu_hormonal_sub'.tr,
         onTap: () {
           HapticFeedback.lightImpact();
           Get.toNamed(Routes.HORMONAL);
@@ -292,8 +292,8 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         icon: Icons.favorite,
-        title: 'Ciclo menstrual',
-        subtitle: 'Calendário e sintomas do ciclo',
+        title: 'menu_menstrual'.tr,
+        subtitle: 'menu_menstrual_sub'.tr,
         onTap: () {
           HapticFeedback.lightImpact();
           Get.toNamed(Routes.MENSTRUACAO_FORM);
@@ -320,7 +320,7 @@ class MenuScreen extends StatelessWidget {
     return Semantics(
       button: true,
       label: title,
-      hint: 'Toque para acessar $title',
+      hint: '${'menu_tap_to'.tr} $title',
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -383,7 +383,7 @@ class MenuScreen extends StatelessWidget {
     return Semantics(
       button: true,
       label: title,
-      hint: 'Toque para acessar $title',
+      hint: '${'menu_tap_to'.tr} $title',
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -462,7 +462,7 @@ class _RecordCard extends StatelessWidget {
     return Semantics(
       button: true,
       label: data.title,
-      hint: 'Toque para acessar ${data.title}',
+      hint: '${'menu_tap_to'.tr} ${data.title}',
       child: Container(
         decoration: BoxDecoration(
           gradient: const LinearGradient(

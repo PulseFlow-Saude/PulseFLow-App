@@ -20,6 +20,9 @@ String formatarData(DateTime d) {
 
 String formatarMesAno(DateTime d) => AppDateFormat.monthYear(d);
 
+/// Mês + ano em formato curto para caber no layout (ex: "Fev 2025" / "Feb 2025").
+String formatarMesAnoShort(DateTime d) => AppDateFormat.monthYearShort(d);
+
 String formatarMes(int mes) => AppDateFormat.monthShort(mes);
 
 String calcularMediaGlicemia(List<Diabetes> data) {
@@ -475,7 +478,7 @@ class _GraficoDiabetes extends StatelessWidget {
     final data = registros.toList()
       ..sort((a, b) => a.data.compareTo(b.data));
 
-    final mes = formatarMesAno(mesSelecionado); 
+    final mes = formatarMesAnoShort(mesSelecionado); 
 
     return Card(
       color: const Color(0xFFFFFFFF),
@@ -495,7 +498,11 @@ class _GraficoDiabetes extends StatelessWidget {
                     children: [
                       Text('diabetes_evolution'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 4),
-                      Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14)),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
                     ],
                   ),
                 ),

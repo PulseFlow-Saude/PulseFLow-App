@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import '../diabetes/diabetes_screen.dart' show formatarData, formatarMes, formatarMesAno; // reuse helpers
+import '../diabetes/diabetes_screen.dart' show formatarData, formatarMes, formatarMesAno, formatarMesAnoShort; // reuse helpers
 import 'pressao_controller.dart';
 import '../../models/pressao_arterial.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
@@ -293,7 +293,7 @@ class _GraficoPressao extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = registros.toList()..sort((a, b) => a.data.compareTo(b.data));
-    final mes = formatarMesAno(mesSelecionado);
+    final mes = formatarMesAnoShort(mesSelecionado);
 
     return Card(
       color: const Color(0xFFFFFFFF),
@@ -302,7 +302,7 @@ class _GraficoPressao extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('pressao_record_title'.tr, overflow: TextOverflow.ellipsis, maxLines: 1, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)), const SizedBox(height: 4), Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))])), IconButton(onPressed: onClose, icon: const Icon(Icons.close, color: Color(0xFF00324A), size: 20))]),
+          Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('pressao_record_title'.tr, overflow: TextOverflow.ellipsis, maxLines: 1, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)), const SizedBox(height: 4), FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis))])), IconButton(onPressed: onClose, icon: const Icon(Icons.close, color: Color(0xFF00324A), size: 20))]),
           const SizedBox(height: 20),
           if (data.isEmpty) ...[
             Padding(

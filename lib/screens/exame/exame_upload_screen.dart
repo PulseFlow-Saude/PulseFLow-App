@@ -58,8 +58,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Erro ao selecionar arquivo: ${e.toString()}',
+        'exame_error'.tr,
+        'exame_error_select_file'.tr + ': ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -87,8 +87,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
     
     if (_data == null) {
       Get.snackbar(
-        'Atenção',
-        'Selecione uma data',
+        'exame_attention'.tr,
+        'exame_select_date_msg'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
@@ -99,8 +99,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
 
     if (_selectedFile == null) {
       Get.snackbar(
-        'Atenção',
-        'Selecione um arquivo',
+        'exame_attention'.tr,
+        'exame_select_file_msg'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
@@ -116,7 +116,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
 
       final arquivoFile = File(_selectedFile!.path!);
       if (!await arquivoFile.exists()) {
-        throw Exception('Arquivo não encontrado');
+        throw Exception('exame_file_not_found'.tr);
       }
 
       final nome = _nomeController.text.trim();
@@ -165,8 +165,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
         
         HapticFeedback.mediumImpact();
         Get.snackbar(
-          'Sucesso',
-          uploadResult['message'] ?? 'Exame salvo com sucesso',
+          'exame_success'.tr,
+          uploadResult['message'] ?? 'exame_saved_success'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -184,7 +184,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
     } catch (e) {
       if (mounted) {
         Get.snackbar(
-          'Erro',
+          'exame_error'.tr,
           e.toString(),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
@@ -302,8 +302,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                                   
                                   _buildModernTextField(
                                     controller: _nomeController,
-                                    label: 'Nome do Exame',
-                                    hint: 'Ex: Hemograma completo',
+                                    label: 'exame_name_field'.tr,
+                                    hint: 'exame_name_hint_field'.tr,
                                     icon: Icons.description_outlined,
                                     isRequired: true,
                                     isSmallScreen: isSmallScreen,
@@ -312,8 +312,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                                   
                                   _buildModernTextField(
                                     controller: _categoriaController,
-                                    label: 'Categoria',
-                                    hint: 'Ex: Exames de sangue',
+                                    label: 'exame_categoria_field'.tr,
+                                    hint: 'exame_categoria_hint_field'.tr,
                                     icon: Icons.category_outlined,
                                     isRequired: true,
                                     isSmallScreen: isSmallScreen,
@@ -368,7 +368,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Anexar Exame',
+                  'exame_upload_title'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -377,7 +377,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Adicione um novo exame ao seu prontuário',
+                  'exame_upload_subtitle'.tr,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: isSmallScreen ? 12 : 14,
@@ -438,7 +438,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Informações do Exame',
+                  'exame_info_title'.tr,
                   style: TextStyle(
                     fontSize: isSmallScreen ? 18 : 20,
                     fontWeight: FontWeight.w700,
@@ -447,7 +447,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Preencha os dados do exame',
+                  'exame_info_subtitle'.tr,
                   style: TextStyle(
                     fontSize: isSmallScreen ? 12 : 14,
                     color: const Color(0xFF00324A).withOpacity(0.7),
@@ -536,7 +536,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
             ),
           ),
           validator: isRequired
-              ? (v) => (v == null || v.trim().isEmpty) ? 'Campo obrigatório' : null
+              ? (v) => (v == null || v.trim().isEmpty) ? 'exame_required'.tr : null
               : null,
         ),
       ],
@@ -552,7 +552,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
             Icon(Icons.calendar_today_outlined, size: 18, color: const Color(0xFF00324A)),
             const SizedBox(width: 6),
             Text(
-              'Data do Exame',
+              'exame_date_field'.tr,
               style: TextStyle(
                 fontSize: isSmallScreen ? 14 : 15,
                 fontWeight: FontWeight.w600,
@@ -597,7 +597,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                   child: Text(
                     _data != null
                         ? DateFormat('dd/MM/yyyy').format(_data!)
-                        : 'Selecione a data',
+                        : 'exame_select_date'.tr,
                     style: TextStyle(
                       fontSize: isSmallScreen ? 15 : 16,
                       color: _data != null ? const Color(0xFF212121) : Colors.grey[400],
@@ -626,7 +626,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
             Icon(Icons.attach_file_outlined, size: 18, color: const Color(0xFF00324A)),
             const SizedBox(width: 6),
             Text(
-              'Arquivo do Exame',
+              'exame_file_label'.tr,
               style: TextStyle(
                 fontSize: isSmallScreen ? 14 : 15,
                 fontWeight: FontWeight.w600,
@@ -686,7 +686,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Toque para selecionar arquivo',
+                        'exame_tap_select'.tr,
                         style: TextStyle(
                           fontSize: isSmallScreen ? 14 : 16,
                           fontWeight: FontWeight.w600,
@@ -695,7 +695,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'PDF, PNG, JPG ou HEIC',
+                        'exame_file_types'.tr,
                         style: TextStyle(
                           fontSize: isSmallScreen ? 12 : 13,
                           color: Colors.grey[600],
@@ -737,7 +737,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'Arquivo selecionado',
+                                    'exame_file_selected'.tr,
                                     style: TextStyle(
                                       fontSize: isSmallScreen ? 11 : 12,
                                       fontWeight: FontWeight.w500,
@@ -787,7 +787,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                               },
                               icon: const Icon(Icons.close_rounded, size: 22),
                               color: Colors.grey[600],
-                              tooltip: 'Remover arquivo',
+                              tooltip: 'exame_remove_file'.tr,
                             ),
                           ],
                         ),
@@ -798,7 +798,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                         child: OutlinedButton.icon(
                           onPressed: _pickFile,
                           icon: const Icon(Icons.refresh_outlined, size: 18),
-                          label: const Text('Trocar arquivo'),
+                          label: Text('exame_change_file'.tr),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF00324A),
                             side: const BorderSide(color: Color(0xFF00324A), width: 1.5),
@@ -837,7 +837,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                   )
                 : const Icon(Icons.cloud_upload, size: 22),
             label: Text(
-              _isSaving ? 'Salvando...' : 'Salvar Exame',
+              _isSaving ? 'exame_saving'.tr : 'exame_save'.tr,
               style: TextStyle(
                 fontSize: isSmallScreen ? 16 : 18,
                 fontWeight: FontWeight.w600,
@@ -866,7 +866,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
             },
             icon: const Icon(Icons.visibility_outlined, size: 20),
             label: Text(
-              'Visualizar Exames',
+              'exame_view_exams'.tr,
               style: TextStyle(
                 fontSize: isSmallScreen ? 15 : 16,
                 fontWeight: FontWeight.w600,

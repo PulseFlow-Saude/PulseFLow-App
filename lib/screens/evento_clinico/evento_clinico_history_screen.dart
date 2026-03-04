@@ -91,11 +91,11 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
           }
         }
 
-        final selectedIntensidade = _selectedIntensidadeDor?.trim().toLowerCase();
-        if (selectedIntensidade != null && selectedIntensidade.isNotEmpty) {
+final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
+          if (selectedIntensidadeKey != null && selectedIntensidadeKey.isNotEmpty) {
           final intensidadeValor = int.tryParse(evento.intensidadeDor) ?? 0;
-          final labelEvento = _getIntensityFilterLabel(intensidadeValor).toLowerCase();
-          if (labelEvento != selectedIntensidade) {
+          final eventKey = _getIntensityFilterLabelKey(intensidadeValor);
+          if (eventKey != selectedIntensidadeKey) {
             return false;
           }
         }
@@ -113,28 +113,16 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
     });
   }
 
-  String _getIntensidadeLabel(int intensidade) {
+  String _getIntensidadeLabelKey(int intensidade) {
     switch (intensidade) {
-      case 0:
-        return 'Sem Dor';
-      case 1:
-      case 2:
-        return 'Dor Leve';
-      case 3:
-      case 4:
-        return 'Dor Moderada';
-      case 5:
-      case 6:
-        return 'Dor Moderada a Intensa';
-      case 7:
-      case 8:
-        return 'Dor Intensa';
-      case 9:
-        return 'Dor Muito Intensa';
-      case 10:
-        return 'Dor Insuportável';
-      default:
-        return 'Sem Dor';
+      case 0: return 'pain_0_10';
+      case 1: case 2: return 'pain_1_2_10';
+      case 3: case 4: return 'pain_3_4_10';
+      case 5: case 6: return 'pain_5_6_10';
+      case 7: case 8: return 'pain_7_8_10';
+      case 9: return 'pain_9_10';
+      case 10: return 'pain_10_10';
+      default: return 'pain_0_10';
     }
   }
 
@@ -143,6 +131,12 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
     if (intensidade <= 3) return Colors.green;
     if (intensidade <= 6) return Colors.orange;
     return Colors.red;
+  }
+
+  String _displayTipoEvento(String? t) {
+    if (t == null || t.isEmpty) return '';
+    if (t.startsWith('evento_tipo_')) return t.tr;
+    return t;
   }
 
   @override
@@ -187,8 +181,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
         },
         backgroundColor: const Color(0xFF00324A),
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Novo Evento',
+        label: Text(
+          'evento_new_event'.tr,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -222,9 +216,9 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
             children: [
               const PulseDrawerButton(),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Histórico Evento Clínico',
+                  'evento_history_title'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -287,8 +281,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
               Expanded(
                 child: Row(
                   children: [
-                    const Text(
-                      'Filtros',
+                    Text(
+                      'evento_filters'.tr,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -308,7 +302,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
             children: [
               Expanded(
                 child: _buildEnhancedDropdown(
-                  hint: 'Especialidade',
+                  hint: 'evento_filter_especialidade'.tr,
                   value: _selectedEspecialidade,
                   icon: Icons.medical_services_rounded,
                   onTap: () {
@@ -320,7 +314,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: _buildEnhancedDropdown(
-                  hint: 'Tipo',
+                  hint: 'evento_filter_tipo'.tr,
                   value: _selectedTipo,
                   icon: Icons.event_note_rounded,
                   onTap: () {
@@ -332,7 +326,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: _buildEnhancedDropdown(
-                  hint: 'Dor',
+                  hint: 'evento_filter_intensidade'.tr,
                   value: _selectedIntensidadeDor,
                   icon: Icons.favorite_rounded,
                   onTap: () {
@@ -459,7 +453,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
     for (final evento in _eventos) {
       final intensidade = int.tryParse(evento.intensidadeDor) ?? 0;
       final bucket = _getIntensityBucket(intensidade);
-      map.putIfAbsent(bucket, () => _getIntensityFilterLabel(intensidade));
+      map.putIfAbsent(bucket, () => _getIntensityFilterLabelKey(intensidade));
     }
     final entries = map.entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
@@ -469,8 +463,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
   void _showEspecialidadeFilter(List<String> especialidades) {
     if (especialidades.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhuma especialidade disponível nos eventos.',
+        'evento_filter_label'.tr,
+        'evento_no_especialidade'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -526,7 +520,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                         children: [
                           Expanded(
                             child: Text(
-                              'Filtrar por especialidade',
+                              'evento_filter_by_especialidade'.tr,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -544,7 +538,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                                 isModalOpen = false;
                                 Navigator.pop(context);
                               },
-                              child: const Text('Limpar'),
+                              child: Text('common_clear'.tr),
                             ),
                         ],
                       ),
@@ -554,7 +548,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                       child: TextField(
                         controller: searchController,
                         decoration: InputDecoration(
-                          hintText: 'Buscar especialidade',
+                          hintText: 'evento_search_especialidade'.tr,
                           prefixIcon: const Icon(Icons.search_rounded),
                           filled: true,
                           fillColor: const Color(0xFFF1F5F9),
@@ -598,8 +592,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                               Expanded(
                                 child: Text(
                                   query.isEmpty
-                                      ? 'Nenhuma especialidade disponível atualmente.'
-                                      : 'Nenhuma especialidade encontrada para "$query".',
+                                      ? 'evento_no_especialidade'.tr
+                                      : 'evento_no_especialidade'.tr,
                                   style: const TextStyle(
                                     fontSize: 13,
                                     color: Color(0xFF475569),
@@ -679,8 +673,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
   void _showTipoFilter(List<String> tipos) {
     if (tipos.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhum tipo de evento disponível.',
+        'evento_filter_label'.tr,
+        'evento_no_tipo'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -723,7 +717,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                     children: [
                       Expanded(
                         child: Text(
-                          'Filtrar por tipo de evento',
+                          'evento_filter_by_tipo'.tr,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -742,7 +736,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                             _applyFilters();
                             Navigator.pop(context);
                           },
-                          child: const Text('Limpar'),
+                          child: Text('common_clear'.tr),
                         ),
                     ],
                   ),
@@ -775,7 +769,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                           ),
                         ),
                         title: Text(
-                          tipo,
+                          _displayTipoEvento(tipo),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -801,8 +795,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
   void _showIntensidadeFilter(List<String> intensidades) {
     if (intensidades.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhuma intensidade de dor registrada.',
+        'evento_filter_label'.tr,
+        'evento_no_intensidade'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -816,7 +810,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        final selectedLower = _selectedIntensidadeDor?.trim().toLowerCase();
+        final selectedKey = _selectedIntensidadeDor?.trim();
         return SafeArea(
           top: false,
           child: Container(
@@ -845,7 +839,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                     children: [
                       Expanded(
                         child: Text(
-                          'Filtrar por intensidade da dor',
+                          'evento_filter_by_intensidade'.tr,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -855,7 +849,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (selectedLower != null && selectedLower.isNotEmpty)
+                      if (selectedKey != null && selectedKey.isNotEmpty)
                         TextButton(
                           onPressed: () {
                             setState(() {
@@ -864,7 +858,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                             _applyFilters();
                             Navigator.pop(context);
                           },
-                          child: const Text('Limpar'),
+                          child: Text('common_clear'.tr),
                         ),
                     ],
                   ),
@@ -876,7 +870,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                     separatorBuilder: (_, __) => const SizedBox(height: 6),
                     itemBuilder: (context, index) {
                       final intensidade = intensidades[index];
-                      final isSelected = intensidade.toLowerCase() == selectedLower;
+                      final isSelected = intensidade == selectedKey;
                       return ListTile(
                         onTap: () {
                           setState(() {
@@ -897,7 +891,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                           ),
                         ),
                         title: Text(
-                          intensidade,
+                          intensidade.tr,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -930,22 +924,15 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
     return 6;
   }
 
-  String _getIntensityFilterLabel(int intensidade) {
+  String _getIntensityFilterLabelKey(int intensidade) {
     switch (_getIntensityBucket(intensidade)) {
-      case 0:
-        return 'Sem Dor (0/10)';
-      case 1:
-        return 'Dor Leve (1-2/10)';
-      case 2:
-        return 'Dor Moderada (3-4/10)';
-      case 3:
-        return 'Dor Moderada a Intensa (5-6/10)';
-      case 4:
-        return 'Dor Intensa (7-8/10)';
-      case 5:
-        return 'Dor Muito Intensa (9/10)';
-      default:
-        return 'Dor Insuportável (10/10)';
+      case 0: return 'pain_0_10';
+      case 1: return 'pain_1_2_10';
+      case 2: return 'pain_3_4_10';
+      case 3: return 'pain_5_6_10';
+      case 4: return 'pain_7_8_10';
+      case 5: return 'pain_9_10';
+      default: return 'pain_10_10';
     }
   }
 
@@ -966,8 +953,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Carregando eventos clínicos...',
+          Text(
+            'evento_loading'.tr,
             style: TextStyle(
               color: Color(0xFF64748B),
               fontSize: 16,
@@ -1011,8 +998,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Erro ao carregar eventos',
+            Text(
+              'evento_error_load'.tr,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -1032,7 +1019,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
             ElevatedButton.icon(
               onPressed: _loadEventos,
               icon: const Icon(Icons.refresh, color: Colors.white),
-              label: const Text('Tentar Novamente'),
+              label: Text('evento_try_again'.tr),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00324A),
                 foregroundColor: Colors.white,
@@ -1081,8 +1068,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Nenhum evento encontrado',
+            Text(
+              'evento_empty_title'.tr,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -1090,8 +1077,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Você ainda não registrou nenhum evento clínico.\nComece registrando seu primeiro evento.',
+            Text(
+              'evento_empty_subtitle'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Color(0xFF64748B),
@@ -1105,7 +1092,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                 Get.toNamed('/evento-clinico-form');
               },
               icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text('Registrar Primeiro Evento'),
+              label: Text('evento_register_first'.tr),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00324A),
                 foregroundColor: Colors.white,
@@ -1143,7 +1130,9 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
             children: [
               Expanded(
                 child: Text(
-                  '${_filteredEventos.length} evento${_filteredEventos.length == 1 ? '' : 's'} encontrado${_filteredEventos.length == 1 ? '' : 's'}',
+                  _filteredEventos.length == 1
+                      ? 'evento_events_found_one'.tr
+                      : 'evento_events_found_count'.trParams({'count': '${_filteredEventos.length}'}),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -1336,13 +1325,13 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                   children: [
                     _buildInfoChip(
                       Icons.event_note,
-                      evento.tipoEvento,
+                      _displayTipoEvento(evento.tipoEvento),
                       const Color(0xFF00324A),
                     ),
                     if (int.tryParse(evento.intensidadeDor) != null && int.tryParse(evento.intensidadeDor)! > 0)
                       _buildInfoChip(
                         Icons.favorite,
-                        '${_getIntensidadeLabel(int.parse(evento.intensidadeDor))} (${evento.intensidadeDor}/10)',
+                        '${_getIntensidadeLabelKey(int.parse(evento.intensidadeDor)).tr} (${evento.intensidadeDor}/10)',
                         _getIntensidadeColor(int.parse(evento.intensidadeDor)),
                       ),
                   ],
@@ -1353,8 +1342,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                 // Botão de ação
                 Row(
                   children: [
-                    const Text(
-                      'Toque para ver detalhes',
+                    Text(
+                      'evento_tap_details'.tr,
                       style: TextStyle(
                         fontSize: 13,
                         color: Color(0xFF666666),
@@ -1377,11 +1366,11 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                           ),
                         ],
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Ver detalhes',
+                            'evento_ver_detalhes'.tr,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -1493,7 +1482,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        evento.titulo.isNotEmpty ? evento.titulo : 'Detalhes do Evento',
+                        evento.titulo.isNotEmpty ? evento.titulo : 'evento_detalhes_titulo'.tr,
                         style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 22,
@@ -1531,12 +1520,12 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                 children: [
                   // Informações básicas
                   _buildDetailSection(
-                    title: 'Informações do Registro',
+                    title: 'evento_info_registro'.tr,
                     icon: Icons.info_rounded,
                     children: [
-                      _buildDetailRow('Especialidade', evento.especialidade),
-                      _buildDetailRow('Data do Atendimento', _formatDate(evento.dataHora)),
-                      _buildDetailRow('Tipo da Consulta', evento.tipoEvento),
+                      _buildDetailRow('evento_especialidade'.tr, evento.especialidade),
+                      _buildDetailRow('evento_data_atendimento'.tr, _formatDate(evento.dataHora)),
+                      _buildDetailRow('evento_tipo_consulta'.tr, _displayTipoEvento(evento.tipoEvento)),
                     ],
                   ),
                   
@@ -1550,7 +1539,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                       children: [
                         if (evento.descricao.isNotEmpty) ...[
                           Text(
-                            'Descrição do evento:',
+                            'evento_descricao_label'.tr,
                             style: const TextStyle(
                               color: Color(0xFF1F2937),
                               fontSize: 15,
@@ -1571,7 +1560,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                         ],
                         if (evento.sintomas.isNotEmpty) ...[
                           Text(
-                            'Sintomas:',
+                            'evento_sintomas_label'.tr,
                             style: const TextStyle(
                               color: Color(0xFF1F2937),
                               fontSize: 15,
@@ -1592,7 +1581,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                         ],
                         if (int.tryParse(evento.intensidadeDor) != null && int.tryParse(evento.intensidadeDor)! > 0) ...[
                           Text(
-                            'Intensidade da Dor:',
+                            'evento_intensidade_dor'.tr + ':',
                             style: const TextStyle(
                               color: Color(0xFF1F2937),
                               fontSize: 15,
@@ -1612,7 +1601,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                '${_getIntensidadeLabel(int.parse(evento.intensidadeDor))} (${evento.intensidadeDor}/10)',
+                                '${_getIntensidadeLabelKey(int.parse(evento.intensidadeDor)).tr} (${evento.intensidadeDor}/10)',
                                 style: TextStyle(
                                   color: _getIntensidadeColor(int.parse(evento.intensidadeDor)),
                                   fontSize: 15,
@@ -1629,7 +1618,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                   if (evento.alivio.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _buildDetailSection(
-                      title: 'Medicação/Alívio',
+                      title: 'evento_medicacao_title'.tr,
                       icon: Icons.medication_rounded,
                       children: [
                         Text(
@@ -1669,7 +1658,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                     child: OutlinedButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close_rounded),
-                      label: const Text('Fechar'),
+                      label: Text('evento_fechar'.tr),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF64748B),
                         side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1688,7 +1677,7 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                         await _exportEventoToPdf(evento);
                       },
                       icon: const Icon(Icons.picture_as_pdf_rounded),
-                      label: const Text('Exportar PDF'),
+                      label: Text('evento_export_pdf'.tr),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E3A8A),
                         foregroundColor: Colors.white,
@@ -1864,12 +1853,12 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
                   _pdfInfoRow('Título do evento', _fallbackValue(evento.titulo, fallback: 'Sem título informado')),
                   _pdfInfoRow('Paciente', patientName),
                   _pdfInfoRow('Especialidade', evento.especialidade),
-                  _pdfInfoRow('Tipo do evento', evento.tipoEvento),
+                  _pdfInfoRow('evento_tipo_consulta'.tr, _displayTipoEvento(evento.tipoEvento)),
                   _pdfInfoRow('Data do atendimento', atendimentoEm),
                   if (int.tryParse(evento.intensidadeDor) != null && int.tryParse(evento.intensidadeDor)! > 0)
                     _pdfInfoRow(
                       'Intensidade da dor',
-                      '${evento.intensidadeDor}/10 - ${_getIntensidadeLabel(int.parse(evento.intensidadeDor))}',
+                      '${evento.intensidadeDor}/10 - ${_getIntensidadeLabelKey(int.parse(evento.intensidadeDor)).tr}',
                     ),
                   pw.SizedBox(height: 18),
                   pw.Text(
@@ -1975,8 +1964,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
       await file.writeAsBytes(savedBytes, flush: true);
 
       Get.snackbar(
-        'PDF exportado',
-        'Arquivo salvo como $filename',
+        'evento_pdf_exported'.tr,
+        'evento_file_saved_as'.trParams({'filename': filename}),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -1987,8 +1976,8 @@ class _EventoClinicoHistoryScreenState extends State<EventoClinicoHistoryScreen>
       final openResult = await OpenFilex.open(file.path);
       if (openResult.type != ResultType.done) {
         Get.snackbar(
-          'Abrir arquivo',
-          'Não foi possível abrir o PDF automaticamente. Caminho: ${file.path}',
+          'evento_open_file'.tr,
+          'evento_could_not_open_pdf'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.orange.shade100,
           colorText: const Color(0xFF1E293B),

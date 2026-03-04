@@ -155,10 +155,10 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
             children: [
               const PulseDrawerButton(),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Histórico Clínico',
-                  style: TextStyle(
+                  'mrec_title'.tr,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -200,9 +200,9 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 size: 16,
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Filtros',
-                style: TextStyle(
+              Text(
+                'mrec_filters'.tr,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -218,7 +218,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
             children: [
               Expanded(
                 child: _buildEnhancedDropdown(
-                  hint: 'Especialidade',
+                  hint: 'mrec_especialidade'.tr,
                   icon: Icons.category_outlined,
                   value: _selectedEspecialidade,
                   onTap: () {
@@ -230,7 +230,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
               const SizedBox(width: 8),
               Expanded(
                 child: _buildEnhancedDropdown(
-                  hint: 'Médico',
+                  hint: 'mrec_medico'.tr,
                   icon: Icons.person_search,
                   value: _selectedMedico,
                   onTap: () {
@@ -311,8 +311,10 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
     final hasFilter = ((_selectedEspecialidade != null && _selectedEspecialidade!.isNotEmpty) ||
         (_selectedMedico != null && _selectedMedico!.isNotEmpty));
     final text = hasFilter && totalCount != filteredCount
-        ? '$filteredCount registro${filteredCount != 1 ? 's' : ''} filtrado${filteredCount != 1 ? 's' : ''} de $totalCount'
-        : '$filteredCount registro${filteredCount != 1 ? 's' : ''} encontrado${filteredCount != 1 ? 's' : ''}';
+        ? 'mrec_count_filtered'.trParams({'filtered': '$filteredCount', 'total': '$totalCount'})
+        : filteredCount == 1
+            ? 'mrec_count_found_one'.tr
+            : 'mrec_count_found'.trParams({'count': '$filteredCount'});
 
     return Row(
       children: [
@@ -407,7 +409,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Histórico Clínico',
+                                'mrec_title'.tr,
                                 style: AppTheme.titleMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -418,7 +420,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Acompanhe seus registros clínicos',
+                                'mrec_subtitle'.tr,
                                 style: AppTheme.bodySmall.copyWith(
                                   color: Colors.white.withOpacity(0.9),
                                   fontSize: isTablet ? 12 : 11,
@@ -606,7 +608,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
           ),
           const SizedBox(height: 16),
           Text(
-            'Seu Histórico Clínico',
+            'mrec_hero_title'.tr,
             style: AppTheme.titleLarge.copyWith(
               color: const Color(0xFF1E293B),
               fontWeight: FontWeight.w700,
@@ -615,7 +617,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
           ),
           const SizedBox(height: 8),
           Text(
-            'Visualize todos os registros clínicos em ordem cronológica.',
+            'mrec_hero_subtitle'.tr,
             style: AppTheme.bodyMedium.copyWith(
               color: const Color(0xFF64748B),
             ),
@@ -630,7 +632,9 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                '${controller.notes.length} registros encontrados',
+                controller.notes.length == 1
+                ? 'mrec_count_found_one'.tr
+                : 'mrec_count_found'.trParams({'count': '${controller.notes.length}'}),
                 style: AppTheme.bodySmall.copyWith(
                   color: const Color(0xFF1E3A8A),
                   fontWeight: FontWeight.w600,
@@ -717,7 +721,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Filtros de Pesquisa',
+                    'mrec_filters_search'.tr,
                     style: AppTheme.titleMedium.copyWith(
                       color: const Color(0xFF1E293B),
                       fontWeight: FontWeight.w700,
@@ -762,7 +766,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'Novo',
+                              'mrec_new'.tr,
                               style: AppTheme.bodySmall.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -788,7 +792,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   children: [
                     Expanded(
                       child: _buildSearchField(
-                        hint: 'Buscar por especialidade',
+                        hint: 'mrec_search_especialidade'.tr,
                         prefixIcon: Icons.category_outlined,
                         suffixIcon: Icons.keyboard_arrow_down,
                         onTap: () {},
@@ -797,7 +801,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                     const SizedBox(width: 16),
                     Expanded(
                       child: _buildSearchField(
-                        hint: 'Buscar por médico responsável',
+                        hint: 'mrec_search_medico'.tr,
                         prefixIcon: Icons.search,
                       ),
                     ),
@@ -808,14 +812,14 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 return Column(
                   children: [
                     _buildSearchField(
-                      hint: 'Buscar por especialidade',
+                      hint: 'mrec_search_especialidade'.tr,
                       prefixIcon: Icons.category_outlined,
                       suffixIcon: Icons.keyboard_arrow_down,
                       onTap: () {},
                     ),
                     const SizedBox(height: 16),
                     _buildSearchField(
-                      hint: 'Buscar por médico responsável',
+                      hint: 'mrec_search_medico'.tr,
                       prefixIcon: Icons.search,
                     ),
                   ],
@@ -928,7 +932,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Carregando registros clínicos',
+                  'mrec_loading'.tr,
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w700,
@@ -936,7 +940,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Aguarde enquanto buscamos seus dados...',
+                  'mrec_loading_subtitle'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                   ),
@@ -999,7 +1003,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'Nenhum registro encontrado',
+                  'mrec_empty_title'.tr,
                   style: AppTheme.titleLarge.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w800,
@@ -1007,7 +1011,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Você ainda não possui registros clínicos.\nEntre em contato com seu médico para obter seus registros.',
+                  'mrec_empty_subtitle'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                     height: 1.6,
@@ -1071,7 +1075,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'Nenhum resultado encontrado',
+                  'mrec_no_results_title'.tr,
                   style: AppTheme.titleLarge.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w800,
@@ -1079,7 +1083,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Não há registros que correspondam aos filtros selecionados.\nTente ajustar os filtros para ver mais resultados.',
+                  'mrec_no_results_subtitle'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                     height: 1.6,
@@ -1254,7 +1258,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Médico Responsável',
+                                  'mrec_medico_responsavel'.tr,
                                   style: AppTheme.bodySmall.copyWith(
                                     color: const Color(0xFF64748B),
                                     fontWeight: FontWeight.w500,
@@ -1285,7 +1289,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 Row(
                   children: [
                     Text(
-                      'Clique para ver detalhes',
+                      'mrec_tap_details'.tr,
                       style: AppTheme.bodySmall.copyWith(
                         color: const Color(0xFF64748B),
                         fontWeight: FontWeight.w500,
@@ -1302,7 +1306,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Ver detalhes',
+                            'mrec_ver_detalhes'.tr,
                             style: AppTheme.bodySmall.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -1350,7 +1354,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       final bytes = await rootBundle.load('assets/images/Pulselogo.png');
       final logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
       final patientName =
-          Get.find<MedicalRecordsController>().patient.value?.name ?? 'Paciente não identificado';
+          Get.find<MedicalRecordsController>().patient.value?.name ?? 'mrec_patient_unknown'.tr;
 
       pw.Widget pdfInfoRow(String label, String value) {
         return pw.Container(
@@ -1372,7 +1376,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
               ),
               pw.Expanded(
                 child: pw.Text(
-                  value.isEmpty ? 'Não informado' : value,
+                  value.isEmpty ? 'mrec_not_informed'.tr : value,
                   style: pw.TextStyle(
                     fontSize: 12,
                     color: PdfColors.blueGrey900,
@@ -1388,7 +1392,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       final atendimentoEm = _formatDate(record.data);
 
       final summaryText = record.titulo.isEmpty
-          ? 'Não há informações adicionais registradas para este atendimento.'
+          ? 'mrec_no_extra_info'.tr
           : (record.titulo.length > 220 ? '${record.titulo.substring(0, 220)}...' : record.titulo);
 
       pdf.addPage(
@@ -1409,7 +1413,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
                           pw.Text(
-                            'Histórico Clínico',
+                            'mrec_title'.tr,
                             style: pw.TextStyle(
                               fontSize: 20,
                               fontWeight: pw.FontWeight.bold,
@@ -1418,7 +1422,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                           ),
                           pw.SizedBox(height: 6),
                           pw.Text(
-                            'Documento gerado em $generatedAt',
+                            'mrec_pdf_generated'.trParams({'date': generatedAt}),
                             style: pw.TextStyle(
                               fontSize: 10,
                               color: PdfColors.blueGrey600,
@@ -1435,7 +1439,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   ),
                   pw.SizedBox(height: 24),
                   pw.Text(
-                    'Dados Principais',
+                    'mrec_dados_principais'.tr,
                     style: pw.TextStyle(
                       fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
@@ -1443,14 +1447,14 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                     ),
                   ),
                   pw.SizedBox(height: 8),
-                  pdfInfoRow('Título', record.titulo),
-                  pdfInfoRow('Paciente', patientName),
-                  pdfInfoRow('Especialidade', record.categoria),
-                  pdfInfoRow('Médico responsável', record.medico),
-                  pdfInfoRow('Data do atendimento', atendimentoEm),
+                  pdfInfoRow('mrec_titulo'.tr, record.titulo),
+                  pdfInfoRow('mrec_paciente'.tr, patientName),
+                  pdfInfoRow('mrec_especialidade'.tr, record.categoria),
+                  pdfInfoRow('mrec_medico_responsavel_short'.tr, record.medico),
+                  pdfInfoRow('mrec_data_atendimento'.tr, atendimentoEm),
                   pw.SizedBox(height: 16),
                   pw.Text(
-                    'Resumo do Registro',
+                    'mrec_resumo_registro'.tr,
                     style: pw.TextStyle(
                       fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
@@ -1468,7 +1472,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   ),
                   pw.SizedBox(height: 12),
                   pw.Text(
-                    'Histórico exportado automaticamente pelo aplicativo PulseFlow.',
+                    'mrec_exported_by'.tr,
                     style: pw.TextStyle(
                       fontSize: 9,
                       color: PdfColors.blueGrey600,
@@ -1496,8 +1500,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       await file.writeAsBytes(savedBytes, flush: true);
 
       Get.snackbar(
-        'PDF exportado',
-        'Arquivo salvo como $filename',
+        'mrec_pdf_exported'.tr,
+        'mrec_file_saved'.trParams({'filename': filename}),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -1508,8 +1512,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       final openResult = await OpenFilex.open(file.path);
       if (openResult.type != ResultType.done) {
         Get.snackbar(
-          'Abrir arquivo',
-          'Não foi possível abrir o PDF automaticamente. Caminho: ${file.path}',
+          'mrec_open_file'.tr,
+          'mrec_could_not_open_pdf'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.orange.shade100,
           colorText: const Color(0xFF1E293B),
@@ -1519,8 +1523,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       }
     } catch (e) {
       Get.snackbar(
-        'Erro ao exportar',
-        'Não foi possível gerar o PDF. Tente novamente.',
+        'mrec_export_error'.tr,
+        'mrec_export_error_msg'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100,
         colorText: const Color(0xFF1E293B),
@@ -1620,13 +1624,13 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 children: [
                   // Informações básicas
                   _buildDetailSection(
-                    title: 'Informações do Registro',
+                    title: 'mrec_info_registro'.tr,
                     icon: Icons.info_rounded,
                     children: [
-                      _buildDetailRow('Especialidade', record.categoria),
-                      _buildDetailRow('Data do Atendimento', _formatDate(record.data)),
-                      _buildDetailRow('Médico Responsável', record.medico),
-                      _buildDetailRow('Tipo da Consulta', 'Consulta Regular'),
+                      _buildDetailRow('mrec_especialidade'.tr, record.categoria),
+                      _buildDetailRow('mrec_data_atendimento_label'.tr, _formatDate(record.data)),
+                      _buildDetailRow('mrec_medico_responsavel'.tr, record.medico),
+                      _buildDetailRow('mrec_tipo_consulta'.tr, 'mrec_consulta_regular'.tr),
                     ],
                   ),
                   
@@ -1634,7 +1638,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   
                   // Descrição do registro
                   _buildDetailSection(
-                    title: 'Registro Clínico',
+                    title: 'mrec_registro_clinico'.tr,
                     icon: Icons.description_rounded,
                     children: [
                       Text(
@@ -1671,7 +1675,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                     child: OutlinedButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close_rounded),
-                      label: const Text('Fechar'),
+                      label: Text('mrec_fechar'.tr),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF64748B),
                         side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1690,7 +1694,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                         await _exportRecordToPdf(record);
                       },
                       icon: const Icon(Icons.picture_as_pdf_rounded),
-                      label: const Text('Exportar PDF'),
+                      label: Text('mrec_exportar_pdf'.tr),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E3A8A),
                         foregroundColor: Colors.white,
@@ -1847,8 +1851,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
     final especialidades = _getAvailableEspecialidades(notes);
     if (especialidades.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhuma especialidade disponível nos registros.',
+        'mrec_filter'.tr,
+        'mrec_no_especialidade'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -1904,7 +1908,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                         children: [
                           Expanded(
                             child: Text(
-                              'Filtrar por especialidade',
+                              'mrec_filter_especialidade'.tr,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -1922,7 +1926,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                                 isModalOpen = false;
                                 Navigator.pop(context);
                               },
-                              child: const Text('Limpar'),
+                              child: Text('common_clear'.tr),
                             ),
                         ],
                       ),
@@ -1932,7 +1936,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                       child: TextField(
                         controller: searchController,
                         decoration: InputDecoration(
-                          hintText: 'Buscar especialidade',
+                          hintText: 'mrec_buscar_especialidade'.tr,
                           prefixIcon: const Icon(Icons.search_rounded),
                           filled: true,
                           fillColor: const Color(0xFFF1F5F9),
@@ -1976,8 +1980,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                               Expanded(
                                 child: Text(
                                   query.isEmpty
-                                      ? 'Nenhuma especialidade disponível no momento.'
-                                      : 'Nenhuma especialidade encontrada para "$query".',
+                                      ? 'mrec_no_especialidade_momento'.tr
+                                      : 'mrec_no_especialidade_query'.trParams({'query': query}),
                                   style: const TextStyle(
                                     fontSize: 13,
                                     color: Color(0xFF475569),
@@ -2057,8 +2061,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
     final medicos = _getAvailableMedicos(notes);
     if (medicos.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhum médico disponível nos registros.',
+        'mrec_filter'.tr,
+        'mrec_no_medico'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -2114,7 +2118,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                         children: [
                           Expanded(
                             child: Text(
-                              'Filtrar por médico',
+                              'mrec_filter_medico'.tr,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -2132,7 +2136,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                                 isModalOpen = false;
                                 Navigator.pop(context);
                               },
-                              child: const Text('Limpar'),
+                              child: Text('common_clear'.tr),
                             ),
                         ],
                       ),
@@ -2142,7 +2146,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                       child: TextField(
                         controller: searchController,
                         decoration: InputDecoration(
-                          hintText: 'Buscar médico',
+                          hintText: 'mrec_buscar_medico'.tr,
                           prefixIcon: const Icon(Icons.search_rounded),
                           filled: true,
                           fillColor: const Color(0xFFF1F5F9),
@@ -2186,8 +2190,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                               Expanded(
                                 child: Text(
                                   query.isEmpty
-                                      ? 'Nenhum médico disponível no momento.'
-                                      : 'Nenhum médico encontrado para "$query".',
+                                      ? 'mrec_no_medico_momento'.tr
+                                      : 'mrec_no_medico_query'.trParams({'query': query}),
                                   style: const TextStyle(
                                     fontSize: 13,
                                     color: Color(0xFF475569),
@@ -2290,7 +2294,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
   String _sanitizeFileName(String input) {
     final sanitized = input.replaceAll(RegExp(r'[^\w\s-]'), '').trim();
     if (sanitized.isEmpty) {
-      return 'registro';
+      return 'mrec_filename_fallback'.tr;
     }
     return sanitized.replaceAll(RegExp(r'\s+'), '_').toLowerCase();
   }
@@ -2349,7 +2353,7 @@ class _Sidebar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              name != null ? 'Dra. ${name!}' : 'Paciente',
+              name != null ? '${'mrec_dr_prefix'.tr} ${name!}' : 'mrec_sidebar_patient'.tr,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -2360,11 +2364,11 @@ class _Sidebar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          _SidebarItem(icon: Icons.person_outline, label: 'Perfil Paciente'),
-          _SidebarItem(icon: Icons.description_outlined, label: 'Registro Clínico', isActive: true),
-          _SidebarItem(icon: Icons.attachment_outlined, label: 'Anexo de Exames'),
-          _SidebarItem(icon: Icons.event_note_outlined, label: 'Eventos Clínicos'),
-          _SidebarItem(icon: Icons.bar_chart_outlined, label: 'Relatórios e Dashboards'),
+          _SidebarItem(icon: Icons.person_outline, label: 'mrec_perfil_paciente'.tr),
+          _SidebarItem(icon: Icons.description_outlined, label: 'mrec_registro_clinico_sidebar'.tr, isActive: true),
+          _SidebarItem(icon: Icons.attachment_outlined, label: 'mrec_anexo_exames'.tr),
+          _SidebarItem(icon: Icons.event_note_outlined, label: 'mrec_eventos_clinicos'.tr),
+          _SidebarItem(icon: Icons.bar_chart_outlined, label: 'mrec_relatorios'.tr),
           const Spacer(),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -2376,15 +2380,15 @@ class _Sidebar extends StatelessWidget {
                 Get.offAllNamed(Routes.LOGIN);
               },
               borderRadius: BorderRadius.circular(8),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.logout, color: Colors.red, size: 18),
-                    SizedBox(width: 8),
+                    const Icon(Icons.logout, color: Colors.red, size: 18),
+                    const SizedBox(width: 8),
                     Text(
-                      'Sair',
+                      'mrec_sair'.tr,
                       style: TextStyle(
                         color: Colors.red,
                         fontSize: 16,

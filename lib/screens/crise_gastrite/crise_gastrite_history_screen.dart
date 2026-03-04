@@ -98,9 +98,9 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     final selectedPeriodo = _selectedPeriodo?.trim();
 
     final filtered = _crises.where((crise) {
-      if (selectedIntensidade != null && selectedIntensidade.isNotEmpty) {
-        final label = _getIntensityFilterLabel(crise.intensidadeDor).toLowerCase();
-        if (label != selectedIntensidade) {
+      if (selectedIntensidade != null && selectedIntensidade.trim().isNotEmpty) {
+        final eventKey = _getIntensityFilterLabelKey(crise.intensidadeDor);
+        if (eventKey != selectedIntensidade!.trim()) {
           return false;
         }
       }
@@ -183,8 +183,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
         onPressed: () => Get.toNamed(Routes.CRISE_GASTRITE_FORM),
         backgroundColor: const Color(0xFF00324A),
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Nova Crise',
+        label: Text(
+          'gastrite_new_crisis'.tr,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -218,9 +218,9 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
             children: [
               const PulseDrawerButton(),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Histórico Crise Gastrite',
+                  'gastrite_history_title'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -263,8 +263,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 size: 16,
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Filtros',
+              Text(
+                'gastrite_filters'.tr,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -281,7 +281,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
             children: [
               Expanded(
                 child: _buildFilterDropdown(
-                  hint: 'Intensidade',
+                  hint: 'gastrite_filter_intensidade'.tr,
                   icon: Icons.favorite_rounded,
                   value: _selectedIntensidade,
                   onTap: () {
@@ -293,7 +293,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: _buildFilterDropdown(
-                  hint: 'Período',
+                  hint: 'gastrite_filter_periodo'.tr,
                   icon: Icons.date_range,
                   value: _selectedPeriodo,
                   onTap: () {
@@ -393,7 +393,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     final map = <int, String>{};
     for (final crise in _crises) {
       final bucket = _getIntensityBucket(crise.intensidadeDor);
-      map.putIfAbsent(bucket, () => _getIntensityFilterLabel(crise.intensidadeDor));
+      map.putIfAbsent(bucket, () => _getIntensityFilterLabelKey(crise.intensidadeDor));
     }
     final entries = map.entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
@@ -416,8 +416,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
   void _showIntensidadeFilter(List<String> intensidades) {
     if (intensidades.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhuma intensidade registrada para filtrar.',
+        'gastrite_filter_label'.tr,
+        'gastrite_no_intensidade'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -431,7 +431,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        final selectedValue = _selectedIntensidade?.trim().toLowerCase();
+        final selectedKey = _selectedIntensidade?.trim();
         return SafeArea(
           top: false,
           child: Container(
@@ -460,7 +460,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     children: [
                       Expanded(
                         child: Text(
-                          'Filtrar por intensidade',
+                          'gastrite_filter_by_intensidade'.tr,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -470,7 +470,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (selectedValue != null && selectedValue.isNotEmpty)
+                      if (selectedKey != null && selectedKey.isNotEmpty)
                         TextButton(
                           onPressed: () {
                             setState(() {
@@ -479,7 +479,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                             _applyFilters();
                             Navigator.pop(context);
                           },
-                          child: const Text('Limpar'),
+                          child: Text('common_clear'.tr),
                         ),
                     ],
                   ),
@@ -491,7 +491,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     separatorBuilder: (_, __) => const SizedBox(height: 6),
                     itemBuilder: (context, index) {
                       final intensidade = intensidades[index];
-                      final isSelected = intensidade.toLowerCase() == selectedValue;
+                      final isSelected = intensidade == selectedKey;
                       return ListTile(
                         onTap: () {
                           setState(() {
@@ -512,7 +512,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                           ),
                         ),
                         title: Text(
-                          intensidade,
+                          intensidade.tr,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -538,8 +538,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
   void _showPeriodoFilter(List<String> periodos) {
     if (periodos.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhum período disponível para filtrar.',
+        'gastrite_filter_label'.tr,
+        'gastrite_no_periodo'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -594,7 +594,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         children: [
                           Expanded(
                             child: Text(
-                              'Filtrar por período (MM/AAAA)',
+                              'gastrite_filter_by_periodo'.tr,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -613,7 +613,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                                 _applyFilters();
                                 Navigator.pop(context);
                               },
-                              child: const Text('Limpar'),
+                              child: Text('common_clear'.tr),
                             ),
                         ],
                       ),
@@ -624,7 +624,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         controller: searchController,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                          hintText: 'Digite o período (MM/AAAA)',
+                          hintText: 'gastrite_hint_periodo'.tr,
                           prefixIcon: const Icon(Icons.search_rounded),
                           filled: true,
                           fillColor: const Color(0xFFF1F5F9),
@@ -686,8 +686,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                               Expanded(
                                 child: Text(
                                   query.isEmpty
-                                      ? 'Nenhum período disponível no momento.'
-                                      : 'Nenhum período encontrado para \"$query\". Verifique o formato MM/AAAA.',
+                                      ? 'gastrite_no_period_now'.tr
+                                      : 'gastrite_no_period_for_query'.trParams({'query': query}),
                                   style: const TextStyle(
                                     fontSize: 13,
                                     color: Color(0xFF475569),
@@ -758,8 +758,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     final hasFilters = (_selectedIntensidade != null && _selectedIntensidade!.trim().isNotEmpty) ||
         (_selectedPeriodo != null && _selectedPeriodo!.trim().isNotEmpty);
     final text = hasFilters && filteredCount != totalCount
-        ? '$filteredCount registro${filteredCount == 1 ? '' : 's'} filtrado${filteredCount == 1 ? '' : 's'} de $totalCount'
-        : '$filteredCount registro${filteredCount == 1 ? '' : 's'} encontrado${filteredCount == 1 ? '' : 's'}';
+        ? 'gastrite_count_filtered'.trParams({'filtered': '$filteredCount', 'total': '$totalCount'})
+        : 'gastrite_count_found'.trParams({'count': '$filteredCount'});
 
     return Row(
       children: [
@@ -854,7 +854,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Histórico de Crises',
+                                'gastrite_crises_title'.tr,
                                 style: AppTheme.titleMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -865,7 +865,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Acompanhe suas crises',
+                                'gastrite_crises_subtitle'.tr,
                                 style: AppTheme.bodySmall.copyWith(
                                   color: Colors.white.withOpacity(0.9),
                                   fontSize: isTablet ? 12 : 11,
@@ -965,7 +965,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            'Crises de Gastrite',
+            'gastrite_crises_title'.tr,
             style: AppTheme.titleLarge.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,
@@ -973,7 +973,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Acompanhe o histórico das suas crises de gastrite',
+            'gastrite_crises_subtitle'.tr,
             style: AppTheme.bodyMedium.copyWith(
               color: Colors.white.withOpacity(0.9),
             ),
@@ -1034,7 +1034,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Carregando crises de gastrite',
+                  'gastrite_loading'.tr,
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w700,
@@ -1042,7 +1042,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Aguarde enquanto buscamos seus dados...',
+                  'menstruacao_loading_sub'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                   ),
@@ -1105,7 +1105,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Erro ao carregar crises',
+                  'gastrite_error_load'.tr,
                   style: AppTheme.titleLarge.copyWith(
                     color: Colors.red.shade600,
                     fontWeight: FontWeight.w800,
@@ -1141,7 +1141,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   child: ElevatedButton.icon(
                     onPressed: _loadCrises,
                     icon: const Icon(Icons.refresh_rounded, size: 20),
-                    label: const Text('Tentar Novamente'),
+                    label: Text('evento_try_again'.tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,
@@ -1210,7 +1210,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'Nenhuma crise encontrada',
+                  'gastrite_empty_title'.tr,
                   style: AppTheme.titleLarge.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w800,
@@ -1218,7 +1218,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Você ainda não registrou nenhuma crise de gastrite.\nClique no botão abaixo para começar a acompanhar sua saúde.',
+                  'gastrite_empty_subtitle'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                     height: 1.6,
@@ -1246,7 +1246,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   child: ElevatedButton.icon(
                     onPressed: () => Get.toNamed(Routes.CRISE_GASTRITE_FORM),
                     icon: const Icon(Icons.add_rounded, size: 22),
-                    label: const Text('Registrar Primeira Crise'),
+                    label: Text('gastrite_register_first'.tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,
@@ -1286,23 +1286,16 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     return 5;
   }
 
-  String _getIntensityFilterLabel(int intensidade) {
+  String _getIntensityFilterLabelKey(int intensidade) {
     final bucket = _getIntensityBucket(intensidade);
     switch (bucket) {
-      case 0:
-        return 'Sem Dor (0/10)';
-      case 1:
-        return 'Dor Leve (1-2/10)';
-      case 2:
-        return 'Dor Moderada (3-4/10)';
-      case 3:
-        return 'Dor Moderada a Intensa (5-6/10)';
-      case 4:
-        return 'Dor Intensa (7-8/10)';
-      case 5:
-        return 'Dor Muito Intensa (9-10/10)';
-      default:
-        return 'Dor Moderada';
+      case 0: return 'pain_0_10';
+      case 1: return 'pain_1_2_10';
+      case 2: return 'pain_3_4_10';
+      case 3: return 'pain_5_6_10';
+      case 4: return 'pain_7_8_10';
+      case 5: return 'pain_9_10_range';
+      default: return 'pain_3_4_10';
     }
   }
 
@@ -1332,7 +1325,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            'Nenhuma crise encontrada',
+            'gastrite_empty_title'.tr,
             style: AppTheme.titleMedium.copyWith(
               color: const Color(0xFF1E293B),
               fontWeight: FontWeight.w700,
@@ -1341,7 +1334,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Ajuste os filtros ou limpe a seleção para visualizar outras crises registradas.',
+            'gastrite_ajuste_filtros'.tr,
             style: AppTheme.bodySmall.copyWith(
               color: const Color(0xFF64748B),
             ),
@@ -1420,7 +1413,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                '${_getIntensidadeLabel(crise.intensidadeDor)} (${crise.intensidadeDor}/10)',
+                                '${_getIntensidadeLabelKey(crise.intensidadeDor).tr} (${crise.intensidadeDor}/10)',
                                 style: AppTheme.bodySmall.copyWith(
                                   color: intensityColor,
                                   fontWeight: FontWeight.w600,
@@ -1448,7 +1441,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 
                 // Título
                 Text(
-                  'Crise de Gastrite',
+                  'gastrite_title'.tr,
                   style: AppTheme.titleLarge.copyWith(
                     color: const Color(0xFF0F172A),
                     fontWeight: FontWeight.w800,
@@ -1492,7 +1485,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Sintomas',
+                                  'gastrite_sintomas_label'.tr,
                                   style: AppTheme.bodySmall.copyWith(
                                     color: const Color(0xFF64748B),
                                     fontWeight: FontWeight.w500,
@@ -1535,7 +1528,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Medicação',
+                                  'gastrite_medicacao_label'.tr,
                                   style: AppTheme.bodySmall.copyWith(
                                     color: const Color(0xFF64748B),
                                     fontWeight: FontWeight.w500,
@@ -1583,7 +1576,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Observações',
+                              'gastrite_observacoes_label'.tr,
                               style: AppTheme.bodySmall.copyWith(
                                 color: const Color(0xFF64748B),
                                 fontWeight: FontWeight.w600,
@@ -1631,7 +1624,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Ver detalhes',
+                            'gastrite_ver_detalhes'.tr,
                             style: AppTheme.bodySmall.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -1656,25 +1649,15 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     );
   }
 
-  String _getIntensidadeLabel(int intensidade) {
+  String _getIntensidadeLabelKey(int intensidade) {
     switch (intensidade) {
-      case 1:
-      case 2:
-        return 'Dor Leve';
-      case 3:
-      case 4:
-        return 'Dor Moderada';
-      case 5:
-      case 6:
-        return 'Dor Moderada a Intensa';
-      case 7:
-      case 8:
-        return 'Dor Intensa';
-      case 9:
-      case 10:
-        return 'Dor Muito Intensa';
-      default:
-        return 'Dor Moderada';
+      case 0: return 'pain_no';
+      case 1: case 2: return 'pain_mild';
+      case 3: case 4: return 'pain_moderate';
+      case 5: case 6: return 'pain_moderate_severe';
+      case 7: case 8: return 'pain_severe';
+      case 9: case 10: return 'pain_very_severe';
+      default: return 'pain_moderate';
     }
   }
 
@@ -1691,9 +1674,9 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     final dateOnly = DateTime(date.year, date.month, date.day);
 
     if (dateOnly == today) {
-      return 'Hoje';
+      return 'intl_today'.tr;
     } else if (dateOnly == yesterday) {
-      return 'Ontem';
+      return 'intl_yesterday'.tr;
     } else {
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     }
@@ -1754,8 +1737,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Detalhes da Crise',
+                      Text(
+                        'gastrite_detalhes_crise'.tr,
                         style: TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 22,
@@ -1765,7 +1748,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Crise de Gastrite',
+                        'gastrite_title'.tr,
                         style: const TextStyle(
                           color: Color(0xFF1E3A8A),
                           fontSize: 15,
@@ -1793,12 +1776,12 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 children: [
                   // Informações básicas
                   _buildDetailSection(
-                    title: 'Informações do Registro',
+                    title: 'gastrite_info_registro'.tr,
                     icon: Icons.info_rounded,
                     children: [
-                      _buildDetailRow('Data da Crise', '${crise.data.day.toString().padLeft(2, '0')}/${crise.data.month.toString().padLeft(2, '0')}/${crise.data.year} às ${_formatTime(crise.data)}'),
-                      _buildDetailRow('Intensidade da Dor', '${_getIntensidadeLabel(crise.intensidadeDor)} (${crise.intensidadeDor}/10)'),
-                      _buildDetailRow('Tipo de Registro', 'Crise de Gastrite'),
+                      _buildDetailRow('gastrite_label_data'.tr, '${crise.data.day.toString().padLeft(2, '0')}/${crise.data.month.toString().padLeft(2, '0')}/${crise.data.year} ${'intl_at'.tr} ${_formatTime(crise.data)}'),
+                      _buildDetailRow('gastrite_intensidade'.tr, '${_getIntensidadeLabelKey(crise.intensidadeDor).tr} (${crise.intensidadeDor}/10)'),
+                      _buildDetailRow('gastrite_title'.tr, 'gastrite_title'.tr),
                     ],
                   ),
                   
@@ -1810,7 +1793,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     icon: Icons.description_rounded,
                     children: [
                       Text(
-                        'Sintomas:',
+                        'gastrite_sintomas_label'.tr + ':',
                         style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 15,
@@ -1829,7 +1812,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Alimentos Ingeridos:',
+                        'gastrite_label_alimentos'.tr + ':',
                         style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 15,
@@ -1852,7 +1835,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   if (crise.medicacao.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _buildDetailSection(
-                      title: 'Medicação/Alívio',
+                      title: 'evento_medicacao_title'.tr,
                       icon: Icons.medication_rounded,
                       children: [
                         Text(
@@ -1877,7 +1860,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Alívio após medicação: ${crise.alivioMedicacao ? 'Sim' : 'Não'}',
+                              '${'gastrite_alivio_title'.tr}: ${crise.alivioMedicacao ? 'common_yes'.tr : 'common_no'.tr}',
                               style: TextStyle(
                                 color: crise.alivioMedicacao ? Colors.green : Colors.red,
                                 fontSize: 15,
@@ -1894,7 +1877,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   if (crise.observacoes.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _buildDetailSection(
-                      title: 'Observações',
+                      title: 'gastrite_observacoes_label'.tr,
                       icon: Icons.note_alt_rounded,
                       children: [
                         Text(
@@ -1933,7 +1916,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     child: OutlinedButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close_rounded),
-                      label: const Text('Fechar'),
+                      label: Text('evento_fechar'.tr),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF64748B),
                         side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1955,7 +1938,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         );
                       },
                       icon: const Icon(Icons.edit_rounded),
-                      label: const Text('Editar'),
+                      label: Text('menstruacao_editar'.tr),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E3A8A),
                         foregroundColor: Colors.white,

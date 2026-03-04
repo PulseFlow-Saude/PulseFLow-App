@@ -111,7 +111,7 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
             Padding(
               padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
               child: Text(
-                'Termos de Uso',
+                'terms_title'.tr,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 style: TextStyle(
@@ -127,7 +127,7 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
             Padding(
               padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
               child: Text(
-                'PulseFlow - Plataforma de Saúde Digital',
+                'terms_subtitle'.tr,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 style: TextStyle(
@@ -179,7 +179,7 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
                 ),
                 Expanded(
                   child: Text(
-                    'Termos de Uso e Privacidade',
+                    'terms_header'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: (size.width * 0.055).clamp(20.0, 28.0),
@@ -216,57 +216,57 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSection(
-          title: '1. Sobre o PulseFlow',
-          content: 'O PulseFlow é uma plataforma digital focada na área da saúde, desenvolvida para facilitar a interação segura entre médicos e pacientes. Nossa aplicação oferece funcionalidades como autenticação em dois fatores, visualização de prontuários médicos, anexos de exames e comunicação protegida entre profissionais da saúde e seus pacientes.',
+          title: 'terms_s1_title'.tr,
+          content: 'terms_s1_content'.tr,
           size: size,
         ),
         
         SizedBox(height: size.height * 0.02),
         _buildSection(
-          title: '2. Aceitação dos Termos',
-          content: 'Ao utilizar o PulseFlow, você concorda em cumprir e estar vinculado a estes Termos de Uso. Se você não concordar com qualquer parte destes termos, não deve utilizar nossa plataforma.',
+          title: 'terms_s2_title'.tr,
+          content: 'terms_s2_content'.tr,
           size: size,
         ),
         
         SizedBox(height: size.height * 0.02),
         _buildSection(
-          title: '3. Uso da Plataforma',
-          content: 'O PulseFlow destina-se exclusivamente a fins médicos e de saúde. Os usuários devem:\n\n• Fornecer informações verdadeiras e precisas\n• Manter a confidencialidade de suas credenciais de acesso\n• Utilizar a plataforma de forma ética e responsável\n• Respeitar a privacidade de outros usuários\n• Não compartilhar informações médicas sem autorização',
+          title: 'terms_s3_title'.tr,
+          content: 'terms_s3_content'.tr,
           size: size,
         ),
         
         SizedBox(height: size.height * 0.02),
         _buildSection(
-          title: '4. Proteção de Dados',
-          content: 'Comprometemo-nos a proteger seus dados pessoais e informações médicas de acordo com a Lei Geral de Proteção de Dados (LGPD) e as melhores práticas de segurança. Implementamos medidas técnicas e organizacionais para garantir a segurança e confidencialidade de suas informações.',
+          title: 'terms_s4_title'.tr,
+          content: 'terms_s4_content'.tr,
           size: size,
         ),
         
         SizedBox(height: size.height * 0.02),
         _buildSection(
-          title: '5. Responsabilidades do Usuário',
-          content: 'Você é responsável por:\n\n• Manter a segurança de sua conta e senha\n• Informar-nos imediatamente sobre qualquer uso não autorizado\n• Usar a plataforma apenas para fins legítimos\n• Não tentar acessar sistemas ou dados de outros usuários\n• Cumprir todas as leis e regulamentações aplicáveis',
+          title: 'terms_s5_title'.tr,
+          content: 'terms_s5_content'.tr,
           size: size,
         ),
         
         SizedBox(height: size.height * 0.02),
         _buildSection(
-          title: '6. Limitação de Responsabilidade',
-          content: 'O PulseFlow é fornecido "como está". Não garantimos que a plataforma estará sempre disponível ou livre de erros. Nossa responsabilidade é limitada ao máximo permitido por lei.',
+          title: 'terms_s6_title'.tr,
+          content: 'terms_s6_content'.tr,
           size: size,
         ),
         
         SizedBox(height: size.height * 0.02),
         _buildSection(
-          title: '7. Modificações',
-          content: 'Reservamo-nos o direito de modificar estes termos a qualquer momento. As alterações entrarão em vigor imediatamente após a publicação. O uso continuado da plataforma constitui aceitação dos novos termos.',
+          title: 'terms_s7_title'.tr,
+          content: 'terms_s7_content'.tr,
           size: size,
         ),
         
         SizedBox(height: size.height * 0.02),
         _buildSection(
-          title: '8. Contato',
-          content: 'Para dúvidas sobre estes termos ou sobre o PulseFlow, entre em contato conosco através dos canais oficiais da plataforma.',
+          title: 'terms_s8_title'.tr,
+          content: 'terms_s8_content'.tr,
           size: size,
         ),
         
@@ -377,7 +377,7 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
             SizedBox(width: size.width * 0.02),
             Flexible(
               child: Text(
-                'Entendi os Termos',
+                'terms_btn_accept'.tr,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: fontSize.clamp(14.0, 18.0),

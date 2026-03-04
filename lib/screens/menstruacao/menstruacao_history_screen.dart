@@ -6,6 +6,7 @@ import '../../models/menstruacao.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/intl_locale.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/menstruacao_calendar.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
@@ -979,7 +980,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      DateFormat('dd/MM/yyyy - EEEE', 'pt_BR').format(data),
+                                      AppDateFormat.shortDateWithWeekday(data),
                                       style: const TextStyle(
                                         color: Color(0xFF1F2937),
                                         fontSize: 15,
@@ -1027,7 +1028,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                   Expanded(
                                     child: _buildDayDetailRow(
                                       icon: Icons.water_drop_rounded,
-                                      title: 'Fluxo',
+                                      title: 'menstruacao_fluxo'.tr,
                                       value: dia.fluxo,
                                       valueColor: _getFluxoColor(dia.fluxo),
                                     ),
@@ -1036,8 +1037,8 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                   Expanded(
                                     child: _buildDayDetailRow(
                                       icon: Icons.health_and_safety_rounded,
-                                      title: 'Cólica',
-                                      value: dia.teveColica ? 'Sim' : 'Não',
+                                      title: 'menstruacao_colica'.tr,
+                                      value: dia.teveColica ? 'common_yes'.tr : 'common_no'.tr,
                                       valueColor: dia.teveColica ? const Color(0xFFEF4444) : const Color(0xFF10B981),
                                     ),
                                   ),
@@ -1046,7 +1047,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                               const SizedBox(height: 12),
                               _buildDayDetailRow(
                                 icon: Icons.mood_rounded,
-                                title: 'Humor',
+                                title: 'menstruacao_humor'.tr,
                                 value: dia.humor,
                                 valueColor: _getHumorColor(dia.humor),
                               ),
@@ -1586,7 +1587,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                       ),
                       const SizedBox(height: 4),
                         Text(
-                        DateFormat('dd/MM/yyyy - EEEE', 'pt_BR').format(day),
+                        AppDateFormat.shortDateWithWeekday(day),
                         style: const TextStyle(
                           color: Color(0xFF1E3A8A),
                           fontSize: 15,
@@ -1618,9 +1619,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                     icon: Icons.water_drop_rounded,
                       children: [
                       if (dia != null) ...[
-                        _buildDetailRow('Fluxo', dia.fluxo),
-                        _buildDetailRow('Cólica', dia.teveColica ? 'Sim' : 'Não'),
-                        _buildDetailRow('Humor', dia.humor),
+                        _buildDetailRow('menstruacao_fluxo'.tr, dia.fluxo),
+                        _buildDetailRow('menstruacao_colica'.tr, dia.teveColica ? 'common_yes'.tr : 'common_no'.tr),
+                        _buildDetailRow('menstruacao_humor'.tr, dia.humor),
                       ] else ...[
                         _buildDetailRow('Status', 'Sem dados específicos'),
                         const SizedBox(height: 16),

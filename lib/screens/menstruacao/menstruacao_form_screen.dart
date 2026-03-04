@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../models/menstruacao.dart';
+import '../../utils/intl_locale.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../theme/app_theme.dart';
@@ -197,8 +198,8 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Ciclo Registrado!',
+                      Text(
+                        'menstruacao_cycle_saved_title'.tr,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -215,7 +216,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                   child: Column(
                     children: [
                       Text(
-                        'O ciclo menstrual foi salvo com sucesso no seu histórico.',
+                        'menstruacao_cycle_saved_msg'.tr,
                         style: TextStyle(
                           fontSize: 16,
                           color: AppTheme.textSecondary,
@@ -242,8 +243,8 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
-                            'Ver Calendário',
+                          child: Text(
+                            'menstruacao_ver_calendario'.tr,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -267,7 +268,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
       _formKey.currentState!.save();
 
       if (_dataFim.isBefore(_dataInicio)) {
-        Get.snackbar('Erro', 'A data de fim deve ser posterior à data de início',
+        Get.snackbar('common_error'.tr, 'menstruacao_error_data_fim'.tr,
             backgroundColor: AppTheme.error, colorText: Colors.white);
         return;
       }
@@ -297,7 +298,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
         _showSuccessAlert();
         
       } catch (e) {
-        Get.snackbar('Erro', 'Falha ao salvar ciclo menstrual: $e',
+        Get.snackbar('common_error'.tr, '${'menstruacao_error_falha_salvar'.tr}: $e',
             backgroundColor: AppTheme.error, colorText: Colors.white);
       } finally {
         setState(() {
@@ -362,7 +363,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.menstruacao == null ? 'Novo Ciclo' : 'Editar Ciclo',
+                  widget.menstruacao == null ? 'menstruacao_new_cycle'.tr : 'menstruacao_edit_cycle'.tr,
                   style: AppTheme.titleLarge.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w700,
@@ -370,7 +371,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                   ),
                 ),
                 Text(
-                  'Registre seu ciclo menstrual',
+                  'menstruacao_register_cycle'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
@@ -462,7 +463,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                     Text(
-                            'Selecione o Período',
+                            'menstruacao_selecione_periodo'.tr,
                       style: AppTheme.titleLarge.copyWith(
                               color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w800,
@@ -471,7 +472,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                     ),
                           const SizedBox(height: 4),
                     Text(
-                            'Toque nas datas para marcar início e fim',
+                            'menstruacao_toque_datas'.tr,
                       style: AppTheme.bodyMedium.copyWith(
                               color: AppTheme.textSecondary,
                               fontSize: 14,
@@ -532,10 +533,10 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                       Expanded(
                         child: Text(
                           _selectedStartDate == null 
-                              ? 'Toque na data de início da menstruação'
+                              ? 'menstruacao_toque_inicio'.tr
                               : _selectedEndDate == null
-                                  ? 'Agora toque na data de fim'
-                                  : 'Período selecionado com sucesso!',
+                                  ? 'menstruacao_toque_fim'.tr
+                                  : 'menstruacao_periodo_ok'.tr,
                           style: AppTheme.bodyLarge.copyWith(
                             color: _selectedStartDate != null && _selectedEndDate != null
                                 ? AppTheme.success
@@ -568,7 +569,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                        _buildModernDateIndicator('Início', _selectedStartDate!),
+                        _buildModernDateIndicator('menstruacao_inicio'.tr, _selectedStartDate!),
                           Container(
                             width: 1,
                           height: 50,
@@ -584,7 +585,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                             ),
                           ),
                         ),
-                        _buildModernDateIndicator('Fim', _selectedEndDate),
+                        _buildModernDateIndicator('menstruacao_fim'.tr, _selectedEndDate),
                         ],
                       ),
                     ),
@@ -656,7 +657,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                         Text(
-                              'Período Selecionado',
+                              'menstruacao_periodo_selecionado'.tr,
                               style: AppTheme.titleMedium.copyWith(
                                 color: AppTheme.textPrimary,
                                 fontWeight: FontWeight.w700,
@@ -685,7 +686,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                         },
                         icon: Icon(Icons.edit_rounded, color: AppTheme.primaryBlue, size: 16),
                         label: Text(
-                          'Alterar',
+                          'menstruacao_alterar'.tr,
                           style: AppTheme.bodyMedium.copyWith(
                             color: AppTheme.primaryBlue,
                             fontWeight: FontWeight.w600,
@@ -708,13 +709,13 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildProfessionalStatItem('Duração', '${_dataFim.difference(_dataInicio).inDays + 1} dias'),
+                        _buildProfessionalStatItem('menstruacao_duracao'.tr, '${_dataFim.difference(_dataInicio).inDays + 1} ${'menstruacao_dias'.tr}'),
                         Container(
                           width: 1,
                           height: 40,
                           color: AppTheme.secondaryBlue.withOpacity(0.3),
                         ),
-                        _buildProfessionalStatItem('Dias', '${_dataFim.difference(_dataInicio).inDays + 1}'),
+                        _buildProfessionalStatItem('menstruacao_dias'.tr, '${_dataFim.difference(_dataInicio).inDays + 1}'),
                       ],
                     ),
                   ),
@@ -757,7 +758,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                           Text(
-                              'Detalhes Diários',
+                              'menstruacao_detalhes_diarios'.tr,
                               style: AppTheme.titleMedium.copyWith(
                                 color: AppTheme.textPrimary,
                                 fontWeight: FontWeight.w700,
@@ -765,7 +766,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                               ),
                             ),
                           Text(
-                              'Toque em cada dia para editar',
+                              'menstruacao_toque_editar'.tr,
                               style: AppTheme.bodySmall.copyWith(
                                 color: AppTheme.textSecondary,
                                 fontSize: 12,
@@ -781,7 +782,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          'Editar',
+                          'menstruacao_editar'.tr,
                           style: AppTheme.bodySmall.copyWith(
                             color: AppTheme.primaryBlue,
                             fontWeight: FontWeight.w600,
@@ -824,7 +825,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                           const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Você pode editar os detalhes de cada dia tocando nos cards acima',
+                          'menstruacao_editar_detalhes'.tr,
                           style: AppTheme.bodySmall.copyWith(
                             color: const Color(0xFF6B7280),
                               fontWeight: FontWeight.w500,
@@ -875,7 +876,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                'Registrar Ciclo Completo',
+                                'menstruacao_registrar_completo'.tr,
                                 style: AppTheme.titleMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -952,7 +953,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
         if (date != null) ...[
           const SizedBox(height: 2),
           Text(
-            DateFormat('MMM', 'pt_BR').format(date),
+            AppDateFormat.monthShort(date.month),
             style: AppTheme.bodySmall.copyWith(
               color: AppTheme.primaryBlue,
               fontWeight: FontWeight.w600,
@@ -987,15 +988,21 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _capitalizeFirst(DateFormat('MMMM yyyy', 'pt_BR').format(_currentMonth)),
-                      style: AppTheme.titleLarge.copyWith(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 22,
-                        letterSpacing: -0.5,
+                    Obx(() => FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        _capitalizeFirst(AppDateFormat.monthYearShort(_currentMonth)),
+                        style: AppTheme.titleLarge.copyWith(
+                          color: AppTheme.textPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          letterSpacing: -0.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
+                    )),
                     const SizedBox(height: 4),
                     Text(
                       'Selecione o período do ciclo',
@@ -1098,12 +1105,14 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
               width: 1.5,
             ),
           ),
-          child: Row(
-            children: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day) => 
-              Expanded(
+          child: Obx(() => Row(
+            children: List.generate(7, (i) {
+              final short = AppDateFormat.weekdayShort(i + 1);
+              final char = short.isEmpty ? '' : short.substring(0, 1).toUpperCase();
+              return Expanded(
                 child: Center(
                   child: Text(
-                    day,
+                    char,
                     style: AppTheme.bodyMedium.copyWith(
                       color: AppTheme.textSecondary,
                       fontWeight: FontWeight.w700,
@@ -1112,9 +1121,9 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                     ),
                   ),
                 ),
-              ),
-            ).toList(),
-          ),
+              );
+            }),
+          )),
         ),
         
         const SizedBox(height: 16),
@@ -1286,7 +1295,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                     ),
                   ),
                   Text(
-                    DateFormat('MMM', 'pt_BR').format(data),
+                    AppDateFormat.monthShort(data.month),
                     style: AppTheme.bodySmall.copyWith(
                       color: Colors.white.withOpacity(0.9),
                       fontWeight: FontWeight.w600,
@@ -1306,7 +1315,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                 children: [
                   // Dia da semana
                   Text(
-                    DateFormat('EEEE', 'pt_BR').format(data),
+                    AppDateFormat.weekdayLong(data),
                     style: AppTheme.titleSmall.copyWith(
                       color: AppTheme.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -1319,18 +1328,18 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: _buildProfessionalSummaryItem('Fluxo', dia.fluxo.isEmpty ? 'Não definido' : dia.fluxo, _getFluxoColor(dia.fluxo)),
+                        child: _buildProfessionalSummaryItem('menstruacao_flujo'.tr, dia.fluxo.isEmpty ? 'menstruacao_nao_definido'.tr : dia.fluxo, _getFluxoColor(dia.fluxo)),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: _buildProfessionalSummaryItem('Cólica', dia.teveColica ? 'Sim' : 'Não', 
+                        child: _buildProfessionalSummaryItem('menstruacao_colica'.tr, dia.teveColica ? 'common_yes'.tr : 'common_no'.tr, 
                             dia.teveColica ? const Color(0xFFEF4444) : AppTheme.textSecondary),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   // Segunda linha: Humor ocupando toda a largura
-                  _buildProfessionalSummaryItem('Humor', dia.humor.isEmpty ? 'Não definido' : dia.humor, AppTheme.textSecondary),
+                  _buildProfessionalSummaryItem('menstruacao_humor'.tr, dia.humor.isEmpty ? 'menstruacao_nao_definido'.tr : dia.humor, AppTheme.textSecondary),
                 ],
               ),
             ),
@@ -1452,7 +1461,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${data.day} de ${DateFormat('MMMM', 'pt_BR').format(data)}',
+                            '${data.day} ${AppDateFormat.monthShort(data.month)}',
                             style: AppTheme.titleLarge.copyWith(
         color: Colors.white,
                               fontWeight: FontWeight.w700,
@@ -1460,7 +1469,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                             ),
                           ),
                           Text(
-                            DateFormat('EEEE', 'pt_BR').format(data),
+                            AppDateFormat.weekdayLong(data),
                             style: AppTheme.bodyMedium.copyWith(
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 14,
@@ -1514,7 +1523,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                                  'Configure os detalhes deste dia',
+                                  'menstruacao_configure_dia'.tr,
                                   style: AppTheme.bodyMedium.copyWith(
                                     color: AppTheme.textPrimary,
                                     fontWeight: FontWeight.w600,
@@ -1555,7 +1564,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    'Fluxo Menstrual',
+                                    'menstruacao_flujo'.tr,
                     style: AppTheme.titleMedium.copyWith(
                                       color: AppTheme.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -1602,7 +1611,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                   ),
                                   const SizedBox(width: 12),
                     Text(
-                                    'Sintomas e Humor',
+                                    'menstruacao_sintomas_humor'.tr,
                                     style: AppTheme.titleMedium.copyWith(
                                       color: AppTheme.textPrimary,
                                       fontWeight: FontWeight.w700,
@@ -1644,7 +1653,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                   padding: const EdgeInsets.symmetric(vertical: 16),
                                 ),
                                 child: Text(
-                                  'Cancelar',
+                                  'common_cancel'.tr,
                                   style: AppTheme.bodyMedium.copyWith(
                                     color: AppTheme.textSecondary,
                                     fontWeight: FontWeight.w600,
@@ -1692,7 +1701,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                 },
                                 style: AppTheme.primaryButtonStyle,
                                 child: Text(
-                                  'Salvar',
+                                  'common_save'.tr,
                                   style: AppTheme.bodyMedium.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -1754,7 +1763,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Fluxo',
+          'menstruacao_flujo'.tr,
           style: AppTheme.bodyMedium.copyWith(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -1807,7 +1816,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Cólica',
+          'menstruacao_colica'.tr,
           style: AppTheme.bodyMedium.copyWith(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -1840,7 +1849,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  tempTeveColica ? 'Sim' : 'Não',
+                  tempTeveColica ? 'common_yes'.tr : 'common_no'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: tempTeveColica ? const Color(0xFFEF4444) : const Color(0xFF6B7280),
                     fontWeight: FontWeight.w700,
@@ -1869,7 +1878,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Humor',
+          'menstruacao_humor'.tr,
           style: AppTheme.bodyMedium.copyWith(
             color: Colors.black,
             fontWeight: FontWeight.w600,

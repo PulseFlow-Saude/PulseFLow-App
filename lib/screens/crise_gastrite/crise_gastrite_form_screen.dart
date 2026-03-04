@@ -133,28 +133,16 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
     }
   }
 
-  String _getIntensidadeLabel(int intensidade) {
+  String _getIntensidadeLabelKey(int intensidade) {
     switch (intensidade) {
-      case 0:
-        return 'Sem Dor';
-      case 1:
-      case 2:
-        return 'Dor Leve';
-      case 3:
-      case 4:
-        return 'Dor Moderada';
-      case 5:
-      case 6:
-        return 'Dor Moderada a Intensa';
-      case 7:
-      case 8:
-        return 'Dor Intensa';
-      case 9:
-        return 'Dor Muito Intensa';
-      case 10:
-        return 'Dor Insuportável';
-      default:
-        return 'Sem Dor';
+      case 0: return 'pain_no';
+      case 1: case 2: return 'pain_mild';
+      case 3: case 4: return 'pain_moderate';
+      case 5: case 6: return 'pain_moderate_severe';
+      case 7: case 8: return 'pain_severe';
+      case 9: return 'pain_very_severe';
+      case 10: return 'pain_unbearable';
+      default: return 'pain_no';
     }
   }
 
@@ -206,8 +194,8 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Erro ao salvar crise de gastrite: $e',
+        'common_error'.tr,
+        '${'gastrite_error_save'.tr}: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -278,7 +266,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _isEditing ? 'Editar Crise de Gastrite' : 'Nova Crise de Gastrite',
+                                    _isEditing ? 'gastrite_title_edit'.tr : 'gastrite_title_new'.tr,
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
@@ -287,7 +275,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Registre os sintomas e tratamento',
+                                    'gastrite_subtitle_short'.tr,
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: const Color(0xFF00324A).withOpacity(0.7),
@@ -305,7 +293,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         
                         // Data da Crise
                         _buildModernTextField(
-                          label: 'Data da Crise',
+                          label: 'gastrite_label_data'.tr,
                           value: '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
                           icon: Icons.calendar_today,
                           onTap: _selectDate,
@@ -319,8 +307,8 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         // Sintomas
                         _buildModernTextFormField(
                           controller: _sintomasController,
-                          label: 'Sintomas Relatados',
-                          hint: 'Descreva os sintomas',
+                          label: 'gastrite_label_sintomas'.tr,
+                          hint: 'gastrite_hint_sintomas'.tr,
                           icon: Icons.health_and_safety,
                           isRequired: true,
                           maxLines: 3,
@@ -330,8 +318,8 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         // Alimentos Ingeridos
                         _buildModernTextFormField(
                           controller: _alimentosController,
-                          label: 'Alimentos Ingeridos',
-                          hint: 'Descreva os alimentos consumidos',
+                          label: 'gastrite_label_alimentos'.tr,
+                          hint: 'gastrite_hint_alimentos'.tr,
                           icon: Icons.restaurant,
                           isRequired: true,
                           maxLines: 2,
@@ -341,8 +329,8 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         // Medicação
                         _buildModernTextFormField(
                           controller: _medicacaoController,
-                          label: 'Medicação Usada',
-                          hint: 'Nome da medicação',
+                          label: 'gastrite_label_medicacao'.tr,
+                          hint: 'gastrite_hint_medicacao'.tr,
                           icon: Icons.medication,
                           isRequired: true,
                         ),
@@ -355,8 +343,8 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         // Observações Adicionais
                         _buildModernTextFormField(
                           controller: _observacoesController,
-                          label: 'Observações Adicionais',
-                          hint: 'Observações adicionais (opcional)',
+                          label: 'gastrite_label_observacoes'.tr,
+                          hint: 'gastrite_hint_observacoes'.tr,
                           icon: Icons.note_alt,
                           maxLines: 4,
                         ),
@@ -403,7 +391,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _isEditing ? 'Editar Crise de Gastrite' : 'Registro de Crise de Gastrite',
+                  _isEditing ? 'gastrite_title_edit'.tr : 'gastrite_title'.tr,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -411,7 +399,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                   ),
                 ),
                 Text(
-                  'Documente sua crise de gastrite',
+                  'gastrite_subtitle'.tr,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
@@ -444,8 +432,8 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              'Limpar',
+            child: Text(
+              'gastrite_clear'.tr,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
               ),
@@ -475,7 +463,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                     ),
                   )
                 : Text(
-                    _isEditing ? 'Atualizar' : 'Salvar',
+                    _isEditing ? 'gastrite_update'.tr : 'gastrite_save'.tr,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                     ),
@@ -534,8 +522,8 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Sucesso!',
+                      Text(
+                        'gastrite_success'.tr,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
@@ -553,8 +541,8 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                     children: [
                       Text(
                         _isEditing
-                            ? 'Crise de gastrite atualizada com sucesso!'
-                            : 'Crise de gastrite registrada com sucesso!',
+                            ? 'gastrite_success_updated'.tr
+                            : 'gastrite_success_saved'.tr,
                         style: const TextStyle(
                           fontSize: 16,
                           color: Color(0xFF374151),
@@ -618,7 +606,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Alívio após Medicação',
+          'gastrite_alivio_title'.tr,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -645,7 +633,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Houve alívio após tomar a medicação?',
+                      'gastrite_alivio_question'.tr,
                       style: const TextStyle(
                         color: Color(0xFF1E293B),
                         fontWeight: FontWeight.w600,
@@ -659,7 +647,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Não',
+                    'common_no'.tr,
                     style: TextStyle(
                       color: _alivioMedicacao ? const Color(0xFF64748B) : const Color(0xFF1E293B),
                       fontWeight: FontWeight.w600,
@@ -677,7 +665,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                   ),
                   const SizedBox(width: 16),
                   Text(
-                    'Sim',
+                    'common_yes'.tr,
                     style: TextStyle(
                       color: _alivioMedicacao ? const Color(0xFF1E293B) : const Color(0xFF64748B),
                       fontWeight: FontWeight.w600,
@@ -746,7 +734,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Intensidade da Dor',
+          'gastrite_intensidade'.tr,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -773,7 +761,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '${_getIntensidadeLabel(_intensidadeDor)} (${_intensidadeDor}/10)',
+                      '${_getIntensidadeLabelKey(_intensidadeDor).tr} (${_intensidadeDor}/10)',
                       style: TextStyle(
                         color: _getIntensidadeColor(_intensidadeDor),
                         fontWeight: FontWeight.w700,
@@ -849,7 +837,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
           maxLines: maxLines,
           validator: (value) {
             if (isRequired && (value == null || value.trim().isEmpty)) {
-              return 'Este campo é obrigatório';
+              return 'common_field_required'.tr;
             }
             return null;
           },

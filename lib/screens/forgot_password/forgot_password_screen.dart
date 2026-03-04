@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'forgot_password_controller.dart';
+import '../../widgets/language_icon_button.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -107,38 +108,32 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         : (size.width * 0.35).clamp(80.0, 140.0);
     final spacing = isSmallHeight ? 4.0 : size.height * 0.015;
 
-    return Center(
-      child: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/images/pulseflow2.png',
-              width: logoSize,
-              height: logoSize,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(height: spacing),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
-              child: Text(
-                'Esqueceu sua senha?',
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                style: TextStyle(
-                  fontSize: (size.width * 0.05).clamp(18.0, 28.0),
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
+    return Stack(
+      children: [
+        Center(
+          child: SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/pulseflow2.png',
+                  width: logoSize,
+                  height: logoSize,
+                  fit: BoxFit.contain,
                 ),
-                overflow: TextOverflow.visible,
-              ),
+                SizedBox(height: spacing),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        const Positioned(
+          top: 8,
+          right: 8,
+          child: LanguageIconButton(),
+        ),
+      ],
     );
   }
 
@@ -193,7 +188,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          'Recuperar Senha',
+          'forgot_logo_title'.tr,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+            letterSpacing: 0.2,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'forgot_title'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 28,
@@ -204,7 +210,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         ),
         SizedBox(height: 8),
         Text(
-          'Enviaremos um código para seu e-mail',
+          'forgot_subtitle'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,
@@ -227,9 +233,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         keyboardType: TextInputType.emailAddress,
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          labelText: 'E-mail',
+          labelText: 'forgot_email'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
-          hintText: 'Digite seu e-mail cadastrado',
+          hintText: 'forgot_email_hint'.tr,
           prefixIcon: Icon(Icons.email_outlined, color: const Color(0xFF00324A)),
           filled: true,
           fillColor: Colors.grey[50],
@@ -257,10 +263,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Por favor, digite seu e-mail';
+            return 'forgot_email_required'.tr;
           }
           if (!GetUtils.isEmail(value)) {
-            return 'Por favor, digite um e-mail válido';
+            return 'forgot_email_invalid'.tr;
           }
           return null;
         },
@@ -312,7 +318,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                   Icon(Icons.send, color: Colors.white, size: 20),
                   SizedBox(width: 8),
                   Text(
-                    'Enviar Código',
+                    'forgot_send_code'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -342,7 +348,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             Icon(Icons.arrow_back, color: const Color(0xFF00324A), size: 20),
             SizedBox(width: 8),
             Text(
-              'Voltar para o login',
+              'forgot_back_login'.tr,
               style: TextStyle(
                 color: const Color(0xFF00324A),
                 fontSize: 16,

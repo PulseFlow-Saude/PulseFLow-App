@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../models/menstruacao.dart';
@@ -54,7 +55,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Calendário Menstrual',
+                      'menstruacao_calendar_title'.tr,
                       style: AppTheme.titleMedium.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -62,7 +63,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Acompanhe seus ciclos no calendário',
+                      'menstruacao_calendar_subtitle'.tr,
                       style: AppTheme.bodySmall.copyWith(
                         color: Colors.white.withOpacity(0.9),
                       ),
@@ -290,7 +291,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
           child: Column(
             children: [
               Text(
-                'Legenda',
+                'menstruacao_legenda'.tr,
                 style: AppTheme.bodyMedium.copyWith(
                   color: const Color(0xFF00324A),
                   fontWeight: FontWeight.w600,
@@ -300,9 +301,9 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildLegendItem('Leve', const Color(0xFF10B981)),
-                  _buildLegendItem('Moderado', const Color(0xFFF59E0B)),
-                  _buildLegendItem('Intenso', const Color(0xFFEF4444)),
+                  _buildLegendItem('menstruacao_fluxo_leve'.tr, const Color(0xFF10B981)),
+                  _buildLegendItem('menstruacao_fluxo_moderado'.tr, const Color(0xFFF59E0B)),
+                  _buildLegendItem('menstruacao_fluxo_intenso'.tr, const Color(0xFFEF4444)),
                 ],
               ),
             ],

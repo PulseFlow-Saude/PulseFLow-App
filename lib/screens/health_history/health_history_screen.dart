@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import '../../utils/intl_locale.dart';
 import '../../services/database_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/health_data_service.dart';
@@ -109,7 +110,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
       initialDateRange: _selectedDateFrom != null && _selectedDateTo != null
           ? DateTimeRange(start: _selectedDateFrom!, end: _selectedDateTo!)
           : null,
-      locale: const Locale('pt', 'BR'),
+      locale: Get.locale ?? const Locale('pt', 'BR'),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -149,8 +150,8 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
           ),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Histórico de Saúde',
+        title: Text(
+          'health_title'.tr,
           style: TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -213,8 +214,8 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
               if (authService.currentUser?.id != null) {
                 try {
                   Get.snackbar(
-                    'Sincronizando',
-                    'Atualizando dados do Apple Health...',
+                    'health_syncing'.tr,
+                    'health_sync_msg'.tr,
                     backgroundColor: Colors.blue,
                     colorText: Colors.white,
                     duration: const Duration(seconds: 2),
@@ -238,16 +239,16 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
                   print('✅ [HealthHistory] Recarregamento concluído. Total de dados: ${_dailyData.length}');
                   
                   Get.snackbar(
-                    'Sucesso',
-                    'Dados atualizados com sucesso!',
+                    'health_success'.tr,
+                    'health_updated'.tr,
                     backgroundColor: Colors.green,
                     colorText: Colors.white,
                     duration: const Duration(seconds: 2),
                   );
                 } catch (e) {
                   Get.snackbar(
-                    'Erro',
-                    'Erro ao sincronizar dados: $e',
+                    'health_error'.tr,
+                    '${'health_error_sync'.tr}: $e',
                     backgroundColor: Colors.red,
                     colorText: Colors.white,
                   );
@@ -268,17 +269,17 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
           ),
         ),
         child: _isLoading
-            ? const Center(
+            ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(
+                    const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
-                      'Carregando dados...',
-                      style: TextStyle(
+                      'health_loading'.tr,
+                      style: const TextStyle(
                         color: Color(0xFF64748B),
                         fontSize: 16,
                       ),
@@ -294,7 +295,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
                         const Icon(Icons.error_outline, size: 64, color: Colors.red),
                         const SizedBox(height: 16),
                         Text(
-                          'Erro: $_error',
+                          '${'health_error'.tr}: $_error',
                           style: const TextStyle(color: Colors.red),
                           textAlign: TextAlign.center,
                         ),
@@ -335,15 +336,15 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
           child: Row(
             children: [
               Expanded(
-                child: _buildFilterChip('Frequência Cardíaca', 'heartRate', Icons.favorite),
+                child: _buildFilterChip('health_heart_rate'.tr, 'heartRate', Icons.favorite),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _buildFilterChip('Passos', 'steps', Icons.directions_walk),
+                child: _buildFilterChip('health_steps'.tr, 'steps', Icons.directions_walk),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _buildFilterChip('Sono', 'sleep', Icons.bedtime),
+                child: _buildFilterChip('health_sleep'.tr, 'sleep', Icons.bedtime),
               ),
             ],
           ),
@@ -368,9 +369,9 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Período',
-                        style: TextStyle(
+                      Text(
+                        'health_period'.tr,
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF64748B),
                         ),
@@ -379,7 +380,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
                       Text(
                         _selectedDateFrom != null && _selectedDateTo != null
                             ? '${DateFormat('dd/MM/yyyy').format(_selectedDateFrom!)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateTo!)}'
-                            : 'Selecione um período',
+                            : 'health_select_period'.tr,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -485,7 +486,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      DateFormat('EEEE, dd/MM/yyyy', 'pt_BR').format(date),
+                      '${AppDateFormat.weekdayLong(date)}, ${DateFormat('dd/MM/yyyy').format(date)}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -494,7 +495,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Média diária',
+                      'health_daily_avg'.tr,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],
@@ -516,7 +517,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
                   ),
                   if (count > 1)
                     Text(
-                      '$count registros',
+                      'health_records_count'.trParams({'count': '$count'}),
                       style: TextStyle(
                         fontSize: 11,
                         color: Colors.grey[600],
@@ -564,7 +565,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Erro ao carregar dados',
+            'health_error_load'.tr,
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -573,7 +574,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            _error ?? 'Erro desconhecido',
+            _error ?? 'health_unknown_error'.tr,
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
@@ -587,7 +588,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
               backgroundColor: const Color(0xFF00324A),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Tentar novamente'),
+            child: Text('health_try_again'.tr),
           ),
         ],
       ),
@@ -605,9 +606,9 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
             color: Colors.grey[300],
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Nenhum dado encontrado',
-            style: TextStyle(
+          Text(
+            'health_no_data'.tr,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Color(0xFF1E293B),
@@ -615,7 +616,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Não há registros de ${_getDataTypeName(_selectedDataType).toLowerCase()} no período selecionado',
+            'health_no_data_period'.trParams({'type': _getDataTypeName(_selectedDataType).toLowerCase()}),
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
@@ -630,11 +631,11 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
   String _getDataTypeName(String type) {
     switch (type) {
       case 'heartRate':
-        return 'Frequência Cardíaca';
+        return 'health_heart_rate'.tr;
       case 'steps':
-        return 'Passos';
+        return 'health_steps'.tr;
       case 'sleep':
-        return 'Sono';
+        return 'health_sleep'.tr;
       default:
         return type;
     }
@@ -671,9 +672,9 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
       case 'heartRate':
         return 'bpm';
       case 'steps':
-        return 'passos';
+        return 'health_unit_steps'.tr;
       case 'sleep':
-        return 'h';
+        return 'health_unit_h'.tr;
       default:
         return '';
     }

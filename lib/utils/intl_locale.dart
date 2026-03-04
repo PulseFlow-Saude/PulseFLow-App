@@ -54,9 +54,31 @@ class AppDateFormat {
   static String monthYear(DateTime d) =>
       DateFormat.yMMMM(_localeString()).format(d);
 
+  /// Mês curto + ano para caber no layout (ex: "Feb 2025" / "Fev 2025")
+  static String monthYearShort(DateTime d) =>
+      DateFormat.yMMM(_localeString()).format(d);
+
   /// Nome curto do mês no idioma do app (ex: "Feb" / "Fev")
   static String monthShort(int month) =>
       DateFormat.MMM(_localeString()).format(DateTime(2000, month, 1));
+
+  /// Nome longo do mês no idioma do app (ex: "February" / "fevereiro")
+  static String monthLong(DateTime d) =>
+      DateFormat.MMMM(_localeString()).format(d);
+
+  /// Nome do dia da semana no idioma do app (ex: "Monday" / "segunda-feira")
+  static String weekdayLong(DateTime d) =>
+      DateFormat.EEEE(_localeString()).format(d);
+
+  /// Abreviação do dia da semana (ex: "Mon" / "Seg"). weekday: 1 = segunda, 7 = domingo.
+  static String weekdayShort(int weekday) {
+    final d = DateTime(2024, 1, 1 + (weekday - 1));
+    return DateFormat('EEE', _localeString()).format(d);
+  }
+
+  /// Data com dia da semana no locale (ex: "22/02/2025 - segunda-feira" / "02/22/2025 - Monday")
+  static String shortDateWithWeekday(DateTime d) =>
+      '${DateFormat.yMd(_localeString()).format(d)} - ${weekdayLong(d)}';
 }
 
 /// Números no locale do app (separador decimal, etc.)

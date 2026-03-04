@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'reset_password_controller.dart';
+import '../../widgets/language_icon_button.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -106,53 +107,32 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
         : (size.width * 0.35).clamp(80.0, 140.0);
     final spacing = isSmallHeight ? 4.0 : size.height * 0.015;
 
-    return Center(
-      child: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Image.asset(
-                          'assets/images/pulseflow2.png',
-              width: logoSize,
-              height: logoSize,
-                          fit: BoxFit.contain,
-                        ),
-            SizedBox(height: spacing),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
-              child: Text(
-                          'Redefinir Senha',
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                          style: TextStyle(
-                  fontSize: (size.width * 0.05).clamp(18.0, 28.0),
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                  letterSpacing: 0.5,
+    return Stack(
+      children: [
+        Center(
+          child: SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/pulseflow2.png',
+                  width: logoSize,
+                  height: logoSize,
+                  fit: BoxFit.contain,
                 ),
-                overflow: TextOverflow.visible,
-                          ),
-                        ),
-            SizedBox(height: spacing * 0.5),
-                        Padding(
-              padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
-                          child: Text(
-                            'Digite o código recebido e sua nova senha',
-                            textAlign: TextAlign.center,
-                maxLines: 2,
-                            style: TextStyle(
-                  fontSize: (size.width * 0.035).clamp(12.0, 16.0),
-                              color: Colors.white.withValues(alpha: 0.9),
-                  letterSpacing: 0.3,
-                            ),
-                overflow: TextOverflow.visible,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                SizedBox(height: spacing),
+              ],
+            ),
+          ),
+        ),
+        const Positioned(
+          top: 8,
+          right: 8,
+          child: LanguageIconButton(),
+        ),
+      ],
     );
   }
 
@@ -222,20 +202,31 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
-                              children: [
+      children: [
         Text(
-                                    'Nova Senha',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
+          'reset_logo_title'.tr,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+            letterSpacing: 0.2,
+          ),
+        ),
+        SizedBox(height: isSmallHeight ? 6 : 10),
+        Text(
+          'reset_header_title'.tr,
+          textAlign: TextAlign.center,
+          style: TextStyle(
             fontSize: isSmallHeight ? 22 : 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF00324A),
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF00324A),
             letterSpacing: 0.5,
           ),
         ),
         SizedBox(height: isSmallHeight ? 4 : 8),
         Text(
-          'Digite o código e defina sua nova senha',
+          'reset_header_subtitle'.tr,
           textAlign: TextAlign.center,
           maxLines: 2,
           style: TextStyle(
@@ -266,9 +257,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           fontWeight: FontWeight.w500,
         ),
         decoration: InputDecoration(
-          labelText: 'Código de Verificação',
+          labelText: 'reset_code_label'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
-          hintText: 'Digite o código de 6 dígitos',
+          hintText: 'reset_code_hint'.tr,
           prefixIcon: Icon(Icons.security, color: const Color(0xFF00324A)),
           filled: true,
           fillColor: Colors.grey[50],
@@ -298,15 +289,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           ),
           counterText: '',
         ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Por favor, digite o código';
-                                        }
-                                        if (value.length != 6) {
-                                          return 'O código deve ter 6 dígitos';
-                                        }
-                                        return null;
-                                      },
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'reset_code_required'.tr;
+          }
+          if (value.length != 6) {
+            return 'reset_code_digits'.tr;
+          }
+          return null;
+        },
       ),
     );
   }
@@ -328,9 +319,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           fontWeight: FontWeight.w500,
         ),
         decoration: InputDecoration(
-          labelText: 'Nova Senha',
+          labelText: 'reset_new_password'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
-          hintText: 'Digite sua nova senha',
+          hintText: 'reset_new_password_hint'.tr,
           prefixIcon: Icon(Icons.lock_outlined, color: const Color(0xFF00324A)),
           suffixIcon: IconButton(
             icon: Icon(
@@ -370,10 +361,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Por favor, digite a nova senha';
+            return 'reset_new_password_required'.tr;
           }
           if (value.length < 6) {
-            return 'A senha deve ter pelo menos 6 caracteres';
+            return 'reset_new_password_min'.tr;
           }
           return null;
         },
@@ -398,9 +389,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           fontWeight: FontWeight.w500,
         ),
         decoration: InputDecoration(
-          labelText: 'Confirmar Nova Senha',
+          labelText: 'reset_confirm_label'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
-          hintText: 'Confirme sua nova senha',
+          hintText: 'reset_confirm_hint'.tr,
           prefixIcon: Icon(Icons.lock_outlined, color: const Color(0xFF00324A)),
           suffixIcon: IconButton(
             icon: Icon(
@@ -440,10 +431,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Por favor, confirme a nova senha';
+            return 'reset_confirm_required'.tr;
           }
           if (value != Get.find<ResetPasswordController>().newPasswordController.text) {
-            return 'As senhas não coincidem';
+            return 'reset_passwords_match'.tr;
           }
           return null;
         },
@@ -497,7 +488,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
                   Icon(Icons.lock_reset, color: Colors.white, size: isSmallHeight ? 18 : 20),
                   SizedBox(width: 8),
                   Text(
-                    'Redefinir Senha',
+                    'reset_btn'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: isSmallHeight ? 14 : 16,
@@ -537,8 +528,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
             : Icon(Icons.refresh, color: const Color(0xFF00324A), size: isSmallHeight ? 18 : 20),
         label: Text(
           Get.find<ResetPasswordController>().isResending.value
-              ? 'Reenviando...'
-              : 'Reenviar código',
+              ? 'reset_resending'.tr
+              : 'reset_resend_code'.tr,
           style: TextStyle(
             color: const Color(0xFF00324A),
             fontSize: isSmallHeight ? 14 : 16,
@@ -568,7 +559,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
             Icon(Icons.arrow_back, color: const Color(0xFF00324A), size: isSmallHeight ? 18 : 20),
             SizedBox(width: 8),
             Text(
-              'Voltar',
+              'reset_back'.tr,
               style: TextStyle(
                 color: const Color(0xFF00324A),
                 fontSize: isSmallHeight ? 14 : 16,

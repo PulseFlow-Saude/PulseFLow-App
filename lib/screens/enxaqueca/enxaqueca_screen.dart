@@ -17,6 +17,7 @@ String formatarData(DateTime d) {
 }
 
 String formatarMesAno(DateTime d) => AppDateFormat.monthYear(d);
+String formatarMesAnoShort(DateTime d) => AppDateFormat.monthYearShort(d);
 
 String formatarMes(int mes) => AppDateFormat.monthShort(mes);
 
@@ -487,7 +488,7 @@ class _GraficoEnxaqueca extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = registros.toList()..sort((a, b) => a.data.compareTo(b.data));
-    final mes = formatarMesAno(mesSelecionado);
+    final mes = formatarMesAnoShort(mesSelecionado);
 
     return Card(
       color: const Color(0xFFFFFFFF),
@@ -506,7 +507,11 @@ class _GraficoEnxaqueca extends StatelessWidget {
                     children: [
                       Text('enxaqueca_evolution'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 4),
-                      Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14)),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
                     ],
                   ),
                 ),
