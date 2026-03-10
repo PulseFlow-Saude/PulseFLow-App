@@ -86,7 +86,8 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-        bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.profile),
+        // bottomNavigationBar removido - tela tem sidebar
+        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.profile),
       ),
     );
   }
@@ -269,7 +270,7 @@ class ProfileScreen extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Sua Identidade',
+                  'profile_identity'.tr,
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF00324A),
                     fontWeight: FontWeight.bold,
@@ -282,7 +283,7 @@ class ProfileScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     foregroundColor: const Color(0xFF00324A),
                   ),
-                  child: Text(isEditing ? 'Cancelar' : 'Editar'),
+                  child: Text(isEditing ? 'profile_cancel'.tr : 'profile_edit'.tr),
                 ),
               ],
             ),
@@ -303,7 +304,7 @@ class ProfileScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        greeting,
+                        greeting.tr,
                         style: AppTheme.bodyLarge.copyWith(
                           color: const Color(0xFF0F172A),
                           fontWeight: FontWeight.w500,
@@ -327,7 +328,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Center(
               child: Text(
-                'membro desde : $createdAt',
+                '${'profile_member_since'.tr} : $createdAt',
                 style: AppTheme.bodySmall.copyWith(
                   color: const Color(0xFF475569),
                   fontWeight: FontWeight.w600,
@@ -377,7 +378,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Dados Pessoais',
+                  'profile_personal_data'.tr,
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF00324A),
                     fontWeight: FontWeight.bold,
@@ -387,14 +388,14 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _buildFieldTile(
-              label: 'Nome Completo',
+              label: 'profile_full_name'.tr,
               controller: controller.nameController,
               isEditing: isEditing,
               isRequired: true,
             ),
             const SizedBox(height: 16),
             _buildFieldTile(
-              label: 'Email',
+              label: 'profile_email'.tr,
               controller: controller.emailController,
               keyboardType: TextInputType.emailAddress,
               isEditing: isEditing,
@@ -404,13 +405,13 @@ class ProfileScreen extends StatelessWidget {
             _buildFieldRow(
               children: [
                 _buildFieldTile(
-                  label: 'Telefone',
+                  label: 'profile_phone'.tr,
                   controller: controller.phoneController,
                   keyboardType: TextInputType.phone,
                   isEditing: isEditing,
                 ),
                 _buildFieldTile(
-                  label: 'Data de Nascimento',
+                  label: 'profile_birth_date'.tr,
                   controller: controller.birthDateController,
                   isEditing: isEditing,
                   readOnly: true,
@@ -422,13 +423,13 @@ class ProfileScreen extends StatelessWidget {
             _buildFieldRow(
               children: [
                 _buildFieldTile(
-                  label: 'CPF',
+                  label: 'profile_cpf'.tr,
                   controller: controller.cpfController,
                   keyboardType: TextInputType.number,
                   isEditing: false,
                 ),
                 _buildFieldTile(
-                  label: 'RG',
+                  label: 'profile_rg'.tr,
                   controller: controller.rgController,
                   isEditing: isEditing,
                 ),
@@ -475,7 +476,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'Dados de Saúde',
+                'profile_health_data'.tr,
                 style: AppTheme.titleMedium.copyWith(
                   color: const Color(0xFF00324A),
                   fontWeight: FontWeight.bold,
@@ -488,8 +489,8 @@ class ProfileScreen extends StatelessWidget {
           
           // Apple Health
           _buildHealthServiceCard(
-            title: 'Apple Health',
-            subtitle: 'Sincronize seus dados de saúde',
+            title: 'profile_apple_health'.tr,
+            subtitle: 'profile_apple_health_sub'.tr,
             icon: Icons.health_and_safety,
             color: const Color(0xFF059669),
             isConnected: controller.healthDataAccessGranted,
@@ -502,8 +503,8 @@ class ProfileScreen extends StatelessWidget {
           
           // Samsung Health
           _buildHealthServiceCard(
-            title: 'Samsung Health',
-            subtitle: 'Em breve - Sincronização com Samsung Health',
+            title: 'profile_samsung_health'.tr,
+            subtitle: 'profile_samsung_health_sub'.tr,
             icon: Icons.health_and_safety,
             color: const Color(0xFF1E40AF),
             isConnected: false,
@@ -601,7 +602,7 @@ class ProfileScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  isConnected ? 'Desconectar' : 'Conectar',
+                  isConnected ? 'profile_disconnect'.tr : 'profile_connect'.tr,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -629,7 +630,7 @@ class ProfileScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Sincronização de Dados',
+            'profile_sync_title'.tr,
             style: AppTheme.bodyLarge.copyWith(
               color: const Color(0xFF059669),
               fontWeight: FontWeight.w600,
@@ -639,7 +640,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 8),
           
           Text(
-            'Sincronize seus dados de saúde do Apple Health',
+            'profile_sync_sub'.tr,
             style: AppTheme.bodySmall.copyWith(
               color: const Color(0xFF64748B),
             ),
@@ -670,8 +671,8 @@ class ProfileScreen extends StatelessWidget {
                     : const Icon(Icons.sync, size: 20),
                 label: Text(
                   isLoading
-                      ? 'Sincronizando...'
-                      : 'Sincronizar Dados',
+                      ? 'profile_syncing'.tr
+                      : 'profile_sync_data'.tr,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -729,7 +730,7 @@ class ProfileScreen extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     final trimmedValue = controller.text.trim();
-    final displayValue = trimmedValue.isEmpty ? 'Não informado' : trimmedValue;
+    final displayValue = trimmedValue.isEmpty ? 'profile_not_informed'.tr : trimmedValue;
 
     if (isEditing) {
       return Column(
@@ -802,25 +803,25 @@ class ProfileScreen extends StatelessWidget {
   }
 
   String _displayValue(String? value) {
-    if (value == null) return 'Não informado';
+    if (value == null) return 'profile_not_informed'.tr;
     final trimmed = value.trim();
-    return trimmed.isEmpty ? 'Não informado' : trimmed;
+    return trimmed.isEmpty ? 'profile_not_informed'.tr : trimmed;
   }
 
   String _extractFirstName(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Nome não informado';
+    if (value == null || value.trim().isEmpty) return 'profile_name_not_informed'.tr;
     final parts = value.trim().split(' ');
     return parts.first;
   }
 
   String _extractLastName(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Último nome não informado';
+    if (value == null || value.trim().isEmpty) return 'profile_lastname_not_informed'.tr;
     final parts = value.trim().split(' ');
-    return parts.length > 1 ? parts.last : 'Último nome não informado';
+    return parts.length > 1 ? parts.last : 'profile_lastname_not_informed'.tr;
   }
 
   String _formatDateDisplay(DateTime? date) {
-    if (date == null) return 'Não informado';
+    if (date == null) return 'profile_not_informed'.tr;
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
     final year = date.year.toString();
@@ -828,21 +829,18 @@ class ProfileScreen extends StatelessWidget {
   }
 
   String _combineNames(String firstName, String lastName, String fullName) {
-    if (fullName != 'Não informado') {
-      return fullName;
-    }
-    if (firstName.contains('não informado') && lastName.contains('não informado')) {
-      return 'Nome não informado';
-    }
+    final notInformed = 'profile_not_informed'.tr;
+    final nameNotInformed = 'profile_name_not_informed'.tr;
+    final lastnameNotInformed = 'profile_lastname_not_informed'.tr;
+    if (fullName != notInformed) return fullName;
+    if (firstName == nameNotInformed && lastName == lastnameNotInformed) return nameNotInformed;
     final buffer = StringBuffer();
-    if (!firstName.contains('não informado')) {
-      buffer.write(firstName);
-    }
-    if (!lastName.contains('não informado')) {
+    if (firstName != nameNotInformed) buffer.write(firstName);
+    if (lastName != lastnameNotInformed) {
       if (buffer.isNotEmpty) buffer.write(' ');
       buffer.write(lastName);
     }
-    return buffer.isEmpty ? 'Nome não informado' : buffer.toString();
+    return buffer.isEmpty ? nameNotInformed : buffer.toString();
   }
 
   Widget _buildAvatar({
@@ -894,9 +892,11 @@ class ProfileScreen extends StatelessWidget {
       content = buildInitials();
     } else if (photo.startsWith('http')) {
       content = buildImage(NetworkImage(photo));
-    } else if (photo.startsWith('data:image')) {
+    } else if (photo.startsWith('data:image') || _isBase64Photo(photo)) {
       try {
-        final bytes = base64Decode(photo.split(',').last);
+        final bytes = photo.startsWith('data:image')
+            ? base64Decode(photo.split(',').last)
+            : base64Decode(photo);
         content = ClipOval(
           child: Image.memory(
             bytes,
@@ -925,8 +925,13 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  bool _isBase64Photo(String photo) {
+    return photo.startsWith('data:image/') ||
+        (!photo.startsWith('http') && !photo.startsWith('/') && photo.length > 100);
+  }
+
   String _initialsFromName(String name) {
-    if (name.trim().isEmpty || name == 'Não informado') return 'PF';
+    if (name.trim().isEmpty || name == 'profile_not_informed'.tr) return 'PF';
     final parts = name.trim().split(' ');
     if (parts.length == 1) {
       return parts.first.substring(0, 1).toUpperCase();
@@ -980,7 +985,7 @@ class ProfileScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             child: Center(
               child: controller.isSaving
-                  ? const Row(
+                  ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(
@@ -993,7 +998,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         SizedBox(width: 12),
                         Text(
-                          'Salvando...',
+                          'profile_saving'.tr,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -1002,7 +1007,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ],
                     )
-                  : const Row(
+                  : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
@@ -1012,7 +1017,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          'Salvar Alterações',
+                          'profile_save_changes'.tr,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -1050,16 +1055,16 @@ class ProfileScreen extends StatelessWidget {
                 size: 24,
               ),
             ),
-            title: const Text(
-              'Histórico de Acessos',
+            title: Text(
+              'profile_access_history'.tr,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF212121),
               ),
             ),
-            subtitle: const Text(
-              'Veja quem acessou seu prontuário',
+            subtitle: Text(
+              'profile_access_history_sub'.tr,
               style: TextStyle(
                 fontSize: 13,
                 color: Color(0xFF757575),
@@ -1090,7 +1095,7 @@ class ProfileScreen extends StatelessWidget {
           Get.offAllNamed(Routes.LOGIN);
         },
         borderRadius: BorderRadius.circular(8),
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1098,7 +1103,7 @@ class ProfileScreen extends StatelessWidget {
               Icon(Icons.logout, color: Colors.red, size: 18),
               SizedBox(width: 8),
               Text(
-                'Sair',
+                'profile_logout'.tr,
                 style: TextStyle(
                   color: Colors.red,
                   fontSize: 16,
@@ -1137,7 +1142,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Selecionar Foto',
+              'profile_select_photo'.tr,
               style: AppTheme.titleLarge.copyWith(
                 color: const Color(0xFF1E293B),
                 fontWeight: FontWeight.bold,
@@ -1149,7 +1154,7 @@ class ProfileScreen extends StatelessWidget {
                 Expanded(
                   child: _buildPhotoOption(
                     icon: Icons.camera_alt,
-                    label: 'Câmera',
+                    label: 'profile_camera'.tr,
                     onTap: () {
                       Navigator.pop(context);
                       controller.takePhotoWithCamera();
@@ -1160,7 +1165,7 @@ class ProfileScreen extends StatelessWidget {
                 Expanded(
                   child: _buildPhotoOption(
                     icon: Icons.photo_library,
-                    label: 'Galeria',
+                    label: 'profile_gallery'.tr,
                     onTap: () {
                       Navigator.pop(context);
                       controller.selectPhotoFromGallery();

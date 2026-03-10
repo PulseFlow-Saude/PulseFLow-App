@@ -135,6 +135,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
 
   String _getIntensidadeLabelKey(int intensidade) {
     switch (intensidade) {
+<<<<<<< Updated upstream
       case 0: return 'pain_no';
       case 1: case 2: return 'pain_mild';
       case 3: case 4: return 'pain_moderate';
@@ -143,6 +144,28 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
       case 9: return 'pain_very_severe';
       case 10: return 'pain_unbearable';
       default: return 'pain_no';
+=======
+      case 0:
+        return 'crise_pain_none'.tr;
+      case 1:
+      case 2:
+        return 'crise_pain_mild'.tr;
+      case 3:
+      case 4:
+        return 'crise_pain_moderate'.tr;
+      case 5:
+      case 6:
+        return 'crise_pain_moderate_intense'.tr;
+      case 7:
+      case 8:
+        return 'crise_pain_intense'.tr;
+      case 9:
+        return 'crise_pain_very_intense'.tr;
+      case 10:
+        return 'crise_pain_unbearable'.tr;
+      default:
+        return 'crise_pain_none'.tr;
+>>>>>>> Stashed changes
     }
   }
 
@@ -195,7 +218,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
     } catch (e) {
       Get.snackbar(
         'common_error'.tr,
+<<<<<<< Updated upstream
         '${'gastrite_error_save'.tr}: $e',
+=======
+        'crise_save_error'.trParams({'e': e.toString()}),
+>>>>>>> Stashed changes
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -266,7 +293,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
+<<<<<<< Updated upstream
                                     _isEditing ? 'gastrite_title_edit'.tr : 'gastrite_title_new'.tr,
+=======
+                                    _isEditing ? 'crise_form_edit'.tr : 'crise_new_full'.tr,
+>>>>>>> Stashed changes
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
@@ -275,7 +306,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
+<<<<<<< Updated upstream
                                     'gastrite_subtitle_short'.tr,
+=======
+                                    'crise_form_section'.tr,
+>>>>>>> Stashed changes
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: const Color(0xFF00324A).withOpacity(0.7),
@@ -293,7 +328,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         
                         // Data da Crise
                         _buildModernTextField(
+<<<<<<< Updated upstream
                           label: 'gastrite_label_data'.tr,
+=======
+                          label: 'crise_date_label'.tr,
+>>>>>>> Stashed changes
                           value: '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
                           icon: Icons.calendar_today,
                           onTap: _selectDate,
@@ -307,8 +346,13 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         // Sintomas
                         _buildModernTextFormField(
                           controller: _sintomasController,
+<<<<<<< Updated upstream
                           label: 'gastrite_label_sintomas'.tr,
                           hint: 'gastrite_hint_sintomas'.tr,
+=======
+                          label: 'crise_symptoms_label'.tr,
+                          hint: 'crise_symptoms_hint'.tr,
+>>>>>>> Stashed changes
                           icon: Icons.health_and_safety,
                           isRequired: true,
                           maxLines: 3,
@@ -318,8 +362,13 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         // Alimentos Ingeridos
                         _buildModernTextFormField(
                           controller: _alimentosController,
+<<<<<<< Updated upstream
                           label: 'gastrite_label_alimentos'.tr,
                           hint: 'gastrite_hint_alimentos'.tr,
+=======
+                          label: 'crise_food_label'.tr,
+                          hint: 'crise_food_hint'.tr,
+>>>>>>> Stashed changes
                           icon: Icons.restaurant,
                           isRequired: true,
                           maxLines: 2,
@@ -329,8 +378,13 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         // Medicação
                         _buildModernTextFormField(
                           controller: _medicacaoController,
+<<<<<<< Updated upstream
                           label: 'gastrite_label_medicacao'.tr,
                           hint: 'gastrite_hint_medicacao'.tr,
+=======
+                          label: 'crise_med_label'.tr,
+                          hint: 'crise_med_hint'.tr,
+>>>>>>> Stashed changes
                           icon: Icons.medication,
                           isRequired: true,
                         ),
@@ -343,8 +397,13 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         // Observações Adicionais
                         _buildModernTextFormField(
                           controller: _observacoesController,
+<<<<<<< Updated upstream
                           label: 'gastrite_label_observacoes'.tr,
                           hint: 'gastrite_hint_observacoes'.tr,
+=======
+                          label: 'crise_notes_label'.tr,
+                          hint: 'crise_notes_hint'.tr,
+>>>>>>> Stashed changes
                           icon: Icons.note_alt,
                           maxLines: 4,
                         ),
@@ -360,7 +419,8 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
+      // bottomNavigationBar removido - tela tem sidebar
+      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
     ));
   }
 
@@ -391,7 +451,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+<<<<<<< Updated upstream
                   _isEditing ? 'gastrite_title_edit'.tr : 'gastrite_title'.tr,
+=======
+                  _isEditing ? 'crise_form_edit'.tr : 'crise_form_title'.tr,
+>>>>>>> Stashed changes
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -399,7 +463,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                   ),
                 ),
                 Text(
+<<<<<<< Updated upstream
                   'gastrite_subtitle'.tr,
+=======
+                  'crise_form_sub'.tr,
+>>>>>>> Stashed changes
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
@@ -433,7 +501,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
               ),
             ),
             child: Text(
+<<<<<<< Updated upstream
               'gastrite_clear'.tr,
+=======
+              'common_clear'.tr,
+>>>>>>> Stashed changes
               style: TextStyle(
                 fontWeight: FontWeight.w600,
               ),
@@ -463,7 +535,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                     ),
                   )
                 : Text(
+<<<<<<< Updated upstream
                     _isEditing ? 'gastrite_update'.tr : 'gastrite_save'.tr,
+=======
+                    _isEditing ? 'common_update'.tr : 'common_save'.tr,
+>>>>>>> Stashed changes
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                     ),
@@ -523,7 +599,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
+<<<<<<< Updated upstream
                         'gastrite_success'.tr,
+=======
+                        'crise_success'.tr,
+>>>>>>> Stashed changes
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
@@ -541,8 +621,13 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                     children: [
                       Text(
                         _isEditing
+<<<<<<< Updated upstream
                             ? 'gastrite_success_updated'.tr
                             : 'gastrite_success_saved'.tr,
+=======
+                            ? 'crise_updated_msg'.tr
+                            : 'crise_success_msg'.tr,
+>>>>>>> Stashed changes
                         style: const TextStyle(
                           fontSize: 16,
                           color: Color(0xFF374151),
@@ -606,7 +691,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
+<<<<<<< Updated upstream
           'gastrite_alivio_title'.tr,
+=======
+          'crise_relief_label'.tr,
+>>>>>>> Stashed changes
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -633,7 +722,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
+<<<<<<< Updated upstream
                       'gastrite_alivio_question'.tr,
+=======
+                      'crise_relief_question'.tr,
+>>>>>>> Stashed changes
                       style: const TextStyle(
                         color: Color(0xFF1E293B),
                         fontWeight: FontWeight.w600,
@@ -647,7 +740,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
+<<<<<<< Updated upstream
                     'common_no'.tr,
+=======
+                    'menst_no'.tr,
+>>>>>>> Stashed changes
                     style: TextStyle(
                       color: _alivioMedicacao ? const Color(0xFF64748B) : const Color(0xFF1E293B),
                       fontWeight: FontWeight.w600,
@@ -665,7 +762,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                   ),
                   const SizedBox(width: 16),
                   Text(
+<<<<<<< Updated upstream
                     'common_yes'.tr,
+=======
+                    'menst_yes'.tr,
+>>>>>>> Stashed changes
                     style: TextStyle(
                       color: _alivioMedicacao ? const Color(0xFF1E293B) : const Color(0xFF64748B),
                       fontWeight: FontWeight.w600,
@@ -734,7 +835,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
+<<<<<<< Updated upstream
           'gastrite_intensidade'.tr,
+=======
+          'evt_pain_intensity_label'.tr,
+>>>>>>> Stashed changes
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -837,7 +942,11 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
           maxLines: maxLines,
           validator: (value) {
             if (isRequired && (value == null || value.trim().isEmpty)) {
+<<<<<<< Updated upstream
               return 'common_field_required'.tr;
+=======
+            return 'common_required'.tr;
+>>>>>>> Stashed changes
             }
             return null;
           },

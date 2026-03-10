@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../../models/patient.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import '../institutional/settings_controller.dart';
 import '../../utils/controller_mixin.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -355,7 +356,11 @@ class RegistrationController extends GetxController with SafeControllerMixin {
             const Duration(days: 365 * 18)), // Começa com 18 anos atrás
         firstDate: DateTime(1900),
         lastDate: DateTime.now(),
+<<<<<<< Updated upstream
         locale: Get.locale ?? const Locale('pt', 'BR'),
+=======
+        locale: Get.find<SettingsController>().effectiveLocale,
+>>>>>>> Stashed changes
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
@@ -500,7 +505,11 @@ class RegistrationController extends GetxController with SafeControllerMixin {
               if (profilePhoto.value != null)
                 ListTile(
                   leading: const Icon(Icons.delete, color: Colors.red),
+<<<<<<< Updated upstream
                   title: Text('reg_photo_remove_btn'.tr),
+=======
+                  title: Text('reg_remove_photo'.tr),
+>>>>>>> Stashed changes
                   onTap: () {
                     Navigator.pop(context);
                     removeProfilePhoto();

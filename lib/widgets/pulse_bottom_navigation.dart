@@ -103,17 +103,17 @@ class PulseBottomNavigation extends StatelessWidget {
   String _labelFor(PulseNavItem item) {
     switch (item) {
       case PulseNavItem.home:
-        return 'Início';
+        return 'menu_home'.tr;
       case PulseNavItem.history:
-        return 'Históricos';
+        return 'menu_history'.tr;
       case PulseNavItem.menu:
-        return 'Registro';
+        return 'menu_records'.tr;
       case PulseNavItem.appointments:
-        return 'Consultas';
+        return 'menu_appointments'.tr;
       case PulseNavItem.pulseKey:
-        return 'Pulse Key';
+        return 'menu_pulse_key'.tr;
       case PulseNavItem.profile:
-        return 'Perfil';
+        return 'menu_profile'.tr;
     }
   }
 }

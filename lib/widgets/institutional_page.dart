@@ -24,10 +24,12 @@ class InstitutionalPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Scaffold(
       backgroundColor: AppTheme.primaryBlue,
       drawer: const PulseSideMenu(),
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             Padding(
@@ -75,7 +77,7 @@ class InstitutionalPage extends StatelessWidget {
                   ),
                 ),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: _buildContent(),

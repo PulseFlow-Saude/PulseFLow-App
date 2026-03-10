@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:bcrypt/bcrypt.dart';
 import 'package:crypto/crypto.dart';
 
 class EncryptionService {
@@ -30,17 +31,15 @@ class EncryptionService {
   }
 
   // Verifica se a senha fornecida corresponde à senha criptografada
-  // A senha armazenada deve estar no formato: "salt:hash"
+  // Suporta: "salt:hash" (SHA-256), bcrypt ($2a$/$2b$), e hash antigo sem salt
   Future<bool> verifyPassword(String password, String storedPassword) async {
     try {
-      // Verifica se a senha armazenada tem o formato correto
-      if (!storedPassword.contains(':')) {
-        // Se não tem formato salt:hash, assume que é uma senha antiga sem salt
-        // Para compatibilidade, faz hash simples da senha fornecida
-        final bytes = utf8.encode(password);
-        final hash = sha256.convert(bytes);
-        return hash.toString() == storedPassword;
+      // Senhas bcrypt (usadas pelo backend)
+      if (storedPassword.startsWith(r'$2a$') || storedPassword.startsWith(r'$2b$')) {
+        return BCrypt.checkpw(password, storedPassword);
       }
+      // Formato salt:hash (SHA-256 com salt)
+      if (storedPassword.contains(':')) {
       
       // Extrai o salt e hash da senha armazenada
       final parts = storedPassword.split(':');
@@ -56,6 +55,11 @@ class EncryptionService {
       final hash = sha256.convert(bytes);
       
       return hash.toString() == storedHash;
+      }
+      // Senha antiga sem salt (SHA-256 simples)
+      final bytes = utf8.encode(password);
+      final hash = sha256.convert(bytes);
+      return hash.toString() == storedPassword;
     } catch (e) {
       return false;
     }

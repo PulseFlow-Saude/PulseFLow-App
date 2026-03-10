@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/specialty_translations.dart';
 import 'appointment_scheduler_controller.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
@@ -71,7 +72,7 @@ class _AppointmentSpecialtyScreenState extends State<AppointmentSpecialtyScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Escolha a especialidade',
+                        'appt_choose_specialty'.tr,
                         style: AppTheme.titleLarge.copyWith(
                           color: const Color(0xFF1E293B),
                           fontWeight: FontWeight.bold,
@@ -82,7 +83,7 @@ class _AppointmentSpecialtyScreenState extends State<AppointmentSpecialtyScreen>
                         controller: controller.specialtySearchController,
                         onChanged: controller.updateSpecialtySearch,
                         decoration: InputDecoration(
-                          hintText: 'Pesquise por nome ou descrição',
+                          hintText: 'appt_search_name_desc'.tr,
                           prefixIcon: const Icon(Icons.search_rounded),
                           filled: true,
                           fillColor: Colors.grey[100],
@@ -101,13 +102,13 @@ class _AppointmentSpecialtyScreenState extends State<AppointmentSpecialtyScreen>
                         _EmptyState(
                           icon: Icons.search_off_rounded,
                           message: controller.specialtyQuery.value.isEmpty
-                              ? 'Nenhuma especialidade cadastrada.'
-                              : 'Não encontramos especialidades que contenham "${controller.specialtyQuery.value}".',
+                              ? 'appt_no_specialty_registered'.tr
+                              : '${'appt_no_specialty_match'.tr} "${controller.specialtyQuery.value}".',
                         )
                       else
                         ...controller.filteredSpecialties.map(
                           (specialty) => _SpecialtyCard(
-                            specialtyName: specialty.name,
+                            specialtyName: SpecialtyTranslations.translate(specialty.name),
                             description: specialty.description,
                             color: const Color(0xFF00324A),
                             onTap: () {
@@ -124,7 +125,8 @@ class _AppointmentSpecialtyScreenState extends State<AppointmentSpecialtyScreen>
           ),
         ],
       ),
-      bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
+      // bottomNavigationBar removido - tela tem sidebar
+      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
     ));
   }
 }
@@ -152,8 +154,8 @@ class _Header extends StatelessWidget {
         children: [
           const PulseDrawerButton(iconSize: 22),
           const SizedBox(height: 12),
-          const Text(
-            'Marcar consulta',
+          Text(
+            'appt_book'.tr,
             style: TextStyle(
               color: Colors.white,
               fontSize: 22,
@@ -161,8 +163,8 @@ class _Header extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Comece escolhendo a especialidade desejada.',
+          Text(
+            'appt_book_sub'.tr,
             style: TextStyle(color: Colors.white70, fontSize: 14),
           ),
         ],
@@ -317,7 +319,7 @@ class _ErrorState extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
             icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Tentar novamente'),
+            label: Text('common_try_again'.tr),
           ),
         ],
       ),

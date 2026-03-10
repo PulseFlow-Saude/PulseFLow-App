@@ -94,8 +94,8 @@ class ProfileController extends GetxController {
           await _loadHealthData();
           
           Get.snackbar(
-            'Sucesso',
-            'Acesso aos dados de saúde do Apple Health concedido!',
+            'profile_success'.tr,
+            'profile_success_health'.tr,
             backgroundColor: Colors.green,
             colorText: Colors.white,
             duration: const Duration(seconds: 3),
@@ -149,7 +149,7 @@ class ProfileController extends GetxController {
   Future<void> _loadPatientData() async {
     try {
       _isLoading.value = true;
-      
+      await _authService.refreshCurrentUser();
       final currentUser = _authService.currentUser;
       if (currentUser != null) {
         _patient.value = currentUser;
@@ -158,8 +158,8 @@ class ProfileController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Não foi possível carregar os dados do paciente',
+        'auth_error'.tr,
+        'profile_error_load'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -216,8 +216,8 @@ class ProfileController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Não foi possível selecionar a foto',
+        'auth_error'.tr,
+        'profile_error_photo'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -240,8 +240,8 @@ class ProfileController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Não foi possível tirar a foto',
+        'auth_error'.tr,
+        'profile_error_camera'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -253,8 +253,8 @@ class ProfileController extends GetxController {
     final currentPatient = _patient.value;
     if (currentPatient == null) {
       Get.snackbar(
-        'Erro',
-        'Usuário não encontrado',
+        'auth_error'.tr,
+        'profile_error_user'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -300,15 +300,15 @@ class ProfileController extends GetxController {
       _updatePhotoInBackground(currentPatient.id!, base64Photo);
 
       Get.snackbar(
-        'Sucesso',
-        'Foto atualizada com sucesso!',
+        'profile_success'.tr,
+        'profile_success_photo'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Erro ao processar a foto',
+        'auth_error'.tr,
+        'profile_error_process_photo'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -343,8 +343,8 @@ class ProfileController extends GetxController {
     final currentPatient = _patient.value;
     if (currentPatient == null) {
       Get.snackbar(
-        'Erro',
-        'Usuário não encontrado',
+        'auth_error'.tr,
+        'profile_error_user'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -355,8 +355,8 @@ class ProfileController extends GetxController {
     // Validações básicas
     if (nameController.text.trim().isEmpty) {
       Get.snackbar(
-        'Erro',
-        'Nome é obrigatório',
+        'auth_error'.tr,
+        'profile_error_name'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -366,8 +366,8 @@ class ProfileController extends GetxController {
 
     if (emailController.text.trim().isEmpty) {
       Get.snackbar(
-        'Erro',
-        'Email é obrigatório',
+        'auth_error'.tr,
+        'profile_error_email'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -421,8 +421,8 @@ class ProfileController extends GetxController {
     }
 
     Get.snackbar(
-      'Sucesso',
-      'Dados atualizados com sucesso!',
+      'profile_success'.tr,
+      'profile_success_updated'.tr,
       backgroundColor: Colors.green,
       colorText: Colors.white,
     );
@@ -467,23 +467,23 @@ class ProfileController extends GetxController {
         await _loadHealthData();
         
         Get.snackbar(
-          'Sucesso',
-          'Acesso aos dados de saúde concedido!',
+          'profile_success'.tr,
+          'profile_success_health_granted'.tr,
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
       } else {
         Get.snackbar(
-          'Permissão Negada',
-          'É necessário conceder permissão para acessar os dados de saúde',
+          'profile_permission_denied'.tr,
+          'profile_permission_health'.tr,
           backgroundColor: Colors.orange,
           colorText: Colors.white,
         );
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Não foi possível solicitar acesso aos dados de saúde',
+        'auth_error'.tr,
+        'profile_error_health_request'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -578,8 +578,8 @@ class ProfileController extends GetxController {
   // Conecta ao Samsung Health (placeholder)
   Future<void> connectToSamsungHealth() async {
     Get.snackbar(
-      'Em breve',
-      'Integração com Samsung Health será implementada em breve',
+      'profile_coming_soon'.tr,
+      'profile_samsung_coming'.tr,
       backgroundColor: Colors.blue,
       colorText: Colors.white,
     );
@@ -598,15 +598,15 @@ class ProfileController extends GetxController {
         _dailySteps.value = 0;
         
         Get.snackbar(
-          'Desconectado',
-          'Permissões do Apple Health foram revogadas',
+          'profile_disconnected'.tr,
+          'profile_permissions_revoked'.tr,
           backgroundColor: Colors.orange,
           colorText: Colors.white,
         );
       } else {
         Get.snackbar(
-          'Aviso',
-          'Para desconectar, revogue as permissões nas Configurações do iPhone',
+          'profile_warning'.tr,
+          'profile_revoke_hint'.tr,
           backgroundColor: Colors.blue,
           colorText: Colors.white,
         );
@@ -621,8 +621,8 @@ class ProfileController extends GetxController {
     try {
       if (_patient.value == null) {
         Get.snackbar(
-          'Erro',
-          'Usuário não encontrado',
+          'auth_error'.tr,
+          'profile_error_user'.tr,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -635,8 +635,8 @@ class ProfileController extends GetxController {
       final hasPermissions = await _healthService.hasPermissions();
       if (!hasPermissions) {
         Get.snackbar(
-          'Permissão Necessária',
-          'É necessário conceder permissão para sincronizar dados',
+          'profile_permission_needed'.tr,
+          'profile_permission_required'.tr,
           backgroundColor: Colors.orange,
           colorText: Colors.white,
         );
@@ -650,16 +650,16 @@ class ProfileController extends GetxController {
       await _loadHealthData();
       
       Get.snackbar(
-        'Sucesso',
-        'Dados de saúde sincronizados!',
+        'profile_success'.tr,
+        'profile_sync_success'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
       
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Erro ao sincronizar dados de saúde: $e',
+        'auth_error'.tr,
+        '${'profile_error_sync'.tr}: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -674,8 +674,8 @@ class ProfileController extends GetxController {
     try {
       if (_patient.value == null) {
         Get.snackbar(
-          'Erro',
-          'Usuário não encontrado',
+          'auth_error'.tr,
+          'profile_error_user'.tr,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -685,8 +685,8 @@ class ProfileController extends GetxController {
       _isRequestingHealthPermissions.value = true;
       
       Get.snackbar(
-        'Teste',
-        'Iniciando teste de integração...',
+        'profile_test'.tr,
+        'profile_test_start'.tr,
         backgroundColor: Colors.blue,
         colorText: Colors.white,
       );
@@ -695,16 +695,16 @@ class ProfileController extends GetxController {
       await _healthDataTestService.runAllTests(_patient.value!.id!);
       
       Get.snackbar(
-        'Sucesso',
-        'Teste de integração concluído! Verifique os logs.',
+        'profile_success'.tr,
+        'profile_test_success'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
       
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Falha no teste: $e',
+        'auth_error'.tr,
+        '${'profile_test_error'.tr}: $e',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -716,8 +716,8 @@ class ProfileController extends GetxController {
   // Desconecta do Samsung Health (placeholder)
   Future<void> disconnectFromSamsungHealth() async {
     Get.snackbar(
-      'Em breve',
-      'Integração com Samsung Health será implementada em breve',
+      'profile_coming_soon'.tr,
+      'profile_samsung_coming'.tr,
       backgroundColor: Colors.blue,
       colorText: Colors.white,
     );

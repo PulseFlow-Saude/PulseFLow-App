@@ -41,7 +41,11 @@ class MenuScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+<<<<<<< Updated upstream
                       _buildSectionHeader('menu_section_health'.tr),
+=======
+                      _buildSectionHeader('menu_section_records'.tr),
+>>>>>>> Stashed changes
                       const SizedBox(height: 16),
                       _buildHealthRecordsList(pacienteController),
                       const SizedBox(height: 32),
@@ -52,7 +56,8 @@ class MenuScreen extends StatelessWidget {
             ),
           ],
         ),
-        bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
+        // bottomNavigationBar removido - tela tem sidebar
+        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
       ),
     );
   }
@@ -104,7 +109,11 @@ class MenuScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             'menu_main'.tr,
+<<<<<<< Updated upstream
             style: TextStyle(
+=======
+            style: const TextStyle(
+>>>>>>> Stashed changes
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -225,8 +234,13 @@ class MenuScreen extends StatelessWidget {
     final cards = [
       _RecordCardData(
         icon: Icons.attach_file,
+<<<<<<< Updated upstream
         title: 'menu_exams'.tr,
         subtitle: 'menu_exams_sub'.tr,
+=======
+        title: 'menu_exames'.tr,
+        subtitle: 'menu_exames_sub'.tr,
+>>>>>>> Stashed changes
         onTap: () {
           HapticFeedback.lightImpact();
           Get.toNamed(Routes.EXAME_UPLOAD);
@@ -234,8 +248,13 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         icon: Icons.psychology,
+<<<<<<< Updated upstream
         title: 'menu_migraine'.tr,
         subtitle: 'menu_migraine_sub'.tr,
+=======
+        title: 'menu_enxaqueca'.tr,
+        subtitle: 'menu_enxaqueca_sub'.tr,
+>>>>>>> Stashed changes
         onTap: () {
           HapticFeedback.lightImpact();
           Get.to(() => EnxaquecaScreen(
@@ -256,8 +275,13 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         customIcon: const BpMenuIcon(size: 40, color: Colors.white),
+<<<<<<< Updated upstream
         title: 'menu_bp'.tr,
         subtitle: 'menu_bp_sub'.tr,
+=======
+        title: 'menu_pressao'.tr,
+        subtitle: 'menu_pressao_sub'.tr,
+>>>>>>> Stashed changes
         onTap: () {
           HapticFeedback.lightImpact();
           Get.toNamed(Routes.PRESSAO);
@@ -274,8 +298,13 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         icon: Icons.event_note,
+<<<<<<< Updated upstream
         title: 'menu_events'.tr,
         subtitle: 'menu_events_sub'.tr,
+=======
+        title: 'menu_eventos'.tr,
+        subtitle: 'menu_eventos_sub'.tr,
+>>>>>>> Stashed changes
         onTap: () {
           HapticFeedback.lightImpact();
           Get.toNamed(Routes.EVENTO_CLINICO_FORM);
@@ -292,8 +321,13 @@ class MenuScreen extends StatelessWidget {
       ),
       _RecordCardData(
         icon: Icons.favorite,
+<<<<<<< Updated upstream
         title: 'menu_menstrual'.tr,
         subtitle: 'menu_menstrual_sub'.tr,
+=======
+        title: 'menu_ciclo'.tr,
+        subtitle: 'menu_ciclo_sub'.tr,
+>>>>>>> Stashed changes
         onTap: () {
           HapticFeedback.lightImpact();
           Get.toNamed(Routes.MENSTRUACAO_FORM);

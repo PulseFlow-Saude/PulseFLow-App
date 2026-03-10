@@ -96,37 +96,47 @@ class Patient {
     };
   }
 
+  static String? _parseProfilePhoto(Map<String, dynamic> json) {
+    final raw = json['profilePhoto'] ?? json['fotoPerfil'] ?? json['foto'];
+    if (raw == null) return null;
+    if (raw is String) return raw.isEmpty ? null : raw;
+    return raw.toString();
+  }
+
   factory Patient.fromJson(Map<String, dynamic> json) {
+    final birthDateStr = json['birthDate'] ?? json['dataNascimento'];
+    final createdAtStr = json['createdAt'];
+    final updatedAtStr = json['updatedAt'];
     return Patient(
       id: json['_id']?.toString(),
-      name: json['name'],
-      email: json['email'],
-      password: json['password'],
-      cpf: json['cpf'],
-      rg: json['rg'],
-      phone: json['phone'],
+      name: json['name'] ?? json['nome'] ?? '',
+      email: json['email'] ?? '',
+      password: json['password'] ?? json['senha'] ?? '',
+      cpf: json['cpf'] ?? '',
+      rg: json['rg'] ?? '',
+      phone: json['phone'] ?? json['telefone'] ?? '',
       secondaryPhone: json['secondaryPhone'],
-      birthDate: DateTime.parse(json['birthDate']),
-      gender: json['gender'],
-      maritalStatus: json['maritalStatus'],
-      nationality: json['nationality'],
-      address: json['address'],
-      height: json['height'] != null ? (json['height'] as num).toDouble() : null, // Ler altura do JSON
-      weight: json['weight'] != null ? (json['weight'] as num).toDouble() : null, // Ler peso do JSON
-      profession: json['profession'], // Ler profissão do JSON
+      birthDate: birthDateStr != null ? DateTime.tryParse(birthDateStr.toString()) ?? DateTime.now() : DateTime.now(),
+      gender: json['gender'] ?? json['genero'] ?? '',
+      maritalStatus: json['maritalStatus'] ?? '',
+      nationality: json['nationality'] ?? json['nacionalidade'] ?? '',
+      address: json['address'] ?? '',
+      height: json['height'] != null ? (json['height'] as num).toDouble() : (json['altura'] != null ? double.tryParse(json['altura'].toString()) : null),
+      weight: json['weight'] != null ? (json['weight'] as num).toDouble() : (json['peso'] != null ? double.tryParse(json['peso'].toString()) : null),
+      profession: json['profession'] ?? json['profissao'],
       acceptedTerms: json['acceptedTerms'] ?? false,
-      profilePhoto: json['profilePhoto'], // Ler foto de perfil do JSON
-      emergencyContact: json['emergencyContact'], // Ler contato de emergência do JSON
-      emergencyPhone: json['emergencyPhone'], // Ler telefone de emergência do JSON
-      fcmToken: json['fcmToken'], // Ler token FCM do JSON
+      profilePhoto: _parseProfilePhoto(json),
+      emergencyContact: json['emergencyContact'],
+      emergencyPhone: json['emergencyPhone'],
+      fcmToken: json['fcmToken'],
       isAdmin: json['isAdmin'] ?? false,
       twoFactorCode: json['twoFactorCode'],
-      twoFactorExpires: json['twoFactorExpires'] != null ? DateTime.parse(json['twoFactorExpires']) : null,
+      twoFactorExpires: json['twoFactorExpires'] != null ? DateTime.tryParse(json['twoFactorExpires'].toString()) : null,
       passwordResetCode: json['passwordResetCode'],
-      passwordResetExpires: json['passwordResetExpires'] != null ? DateTime.parse(json['passwordResetExpires']) : null,
+      passwordResetExpires: json['passwordResetExpires'] != null ? DateTime.tryParse(json['passwordResetExpires'].toString()) : null,
       passwordResetRequired: json['passwordResetRequired'] ?? false,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: createdAtStr != null ? DateTime.tryParse(createdAtStr.toString()) ?? DateTime.now() : DateTime.now(),
+      updatedAt: updatedAtStr != null ? DateTime.tryParse(updatedAtStr.toString()) ?? DateTime.now() : DateTime.now(),
     );
   }
 } 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import '../config/app_config.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,6 +72,7 @@ class NotificationService extends GetxService {
 
   /// Inicializar Firebase Messaging
   Future<void> _initializeFirebaseMessaging() async {
+    if (!AppConfig.useFirebase) return;
     try {
       _firebaseMessaging = FirebaseMessaging.instance;
       _firebaseAvailable = true;
@@ -136,23 +138,32 @@ class NotificationService extends GetxService {
     required String specialty,
     String? requestId,
   }) async {
+    final specialtyPart = specialty.isNotEmpty ? ' ($specialty)' : '';
+    final bodyMsg = 'notif_access_body'.trParams({'name': doctorName, 'specialty': specialtyPart});
+    final bodyFull = 'notif_access_body_full'.trParams({'name': doctorName, 'specialty': specialtyPart});
+    final contentTitle = '🩺 ${'notif_access_title'.tr}';
+    final viewRequest = 'notif_view_request'.tr;
+
     final notificationDetails = NotificationBuilders.createDoctorAccessNotification(
       doctorName: doctorName,
       specialty: specialty,
+      contentTitle: contentTitle,
+      bodyFull: bodyFull,
+      viewRequestLabel: viewRequest,
     );
 
     await _localNotifications.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      '🩺 SOLICITAÇÃO DE ACESSO',
-      'Dr(a). $doctorName ${specialty.isNotEmpty ? "($specialty)" : ""} solicitou acesso ao seu prontuário',
+      '🩺 ${'notif_access_title_upper'.tr}',
+      bodyMsg,
       notificationDetails,
       payload: 'doctor_access_request|$doctorName|$specialty',
     );
 
     await NotificationStorage.addNotification(
       id: requestId ?? 'doctor_access_${DateTime.now().millisecondsSinceEpoch}',
-      title: 'Solicitação de acesso',
-      message: 'Dr(a). $doctorName ${specialty.isNotEmpty ? "($specialty)" : ""} solicitou acesso ao seu prontuário',
+      title: 'notif_access_title'.tr,
+      message: bodyMsg,
       type: 'pulse_key',
       link: 'pulse_key',
     );
@@ -227,6 +238,11 @@ class NotificationService extends GetxService {
 
   /// Cancelar lembretes de consultas
   Future<void> cancelAppointmentReminders() async {}
+
+  /// Re-registra os canais com base no locale atual (chamar ao mudar idioma)
+  Future<void> reregisterChannelsForCurrentLocale() async {
+    await NotificationChannels.registerAllChannels(_localNotifications);
+  }
 
 
   // ==================== FIREBASE ====================

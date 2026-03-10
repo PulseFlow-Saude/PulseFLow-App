@@ -97,7 +97,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
       if (currentUser == null || currentUser.id == null) {
         if (mounted) {
           Get.snackbar(
-            'Aviso',
+            'pk_warning'.tr,
             'Usuário não autenticado. O código está disponível mas não será sincronizado.',
             backgroundColor: Colors.orange,
             colorText: Colors.white,
@@ -161,7 +161,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
         
         // Mostrar aviso (não erro) já que o código ainda funciona
         Get.snackbar(
-          'Aviso de Sincronização',
+          'pk_sync_warning'.tr,
           errorMessage,
           backgroundColor: Colors.orange,
           colorText: Colors.white,
@@ -181,8 +181,8 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
   void _copyCode() {
     Clipboard.setData(ClipboardData(text: _currentCode));
     Get.snackbar(
-      'Código copiado!',
-      'O código foi copiado para a área de transferência',
+      'pk_copied'.tr,
+      'pk_copied_msg'.tr,
       backgroundColor: Colors.green,
       colorText: Colors.white,
       snackPosition: SnackPosition.BOTTOM,
@@ -258,8 +258,8 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           });
           
           Get.snackbar(
-            'Médico desconectado',
-            'O médico foi desconectado com sucesso',
+            'pk_disconnected'.tr,
+            'pk_disconnected_msg'.tr,
             backgroundColor: Colors.green,
             colorText: Colors.white,
             snackPosition: SnackPosition.BOTTOM,
@@ -267,8 +267,8 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           );
         } else {
           Get.snackbar(
-            'Erro',
-            'Não foi possível desconectar o médico',
+            'common_error'.tr,
+            'pk_disconnect_error'.tr,
             backgroundColor: Colors.red,
             colorText: Colors.white,
             snackPosition: SnackPosition.BOTTOM,
@@ -285,8 +285,8 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           _isDesconectando = false;
         });
         Get.snackbar(
-          'Erro',
-          'Erro ao desconectar médico',
+          'common_error'.tr,
+          'pk_disconnect_error_msg'.tr,
           backgroundColor: Colors.red,
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
@@ -402,7 +402,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           Expanded(
             child: Center(
               child: Text(
-                'Pulse Key',
+                'pk_title'.tr,
                 style: AppTheme.headlineSmall.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -496,7 +496,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
                   ),
                   SizedBox(width: isSmallScreen ? 6 : 8),
                   Text(
-                    'Copiar',
+                    'pk_copy'.tr,
                     style: AppTheme.bodyMedium.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -536,7 +536,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           ),
           const SizedBox(width: 8),
           Text(
-            'Expira em: ${_formatTime(_timeRemaining)}',
+            '${'pk_expires'.tr} ${_formatTime(_timeRemaining)}',
             style: AppTheme.titleMedium.copyWith(
               color: _timeRemaining < 30 ? Colors.red : Colors.orange,
               fontWeight: FontWeight.w600,
@@ -570,7 +570,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
               ),
               SizedBox(width: isSmallScreen ? 6 : 8),
               Text(
-                'Informações',
+                'pk_info'.tr,
                 style: AppTheme.titleMedium.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -584,8 +584,8 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           
           _buildInfoItemSimple(
             Icons.timer,
-            'Válido por 2 minutos',
-            'Código expira automaticamente',
+            'pk_valid_2min'.tr,
+            'pk_code_expires'.tr,
             isSmallScreen,
           ),
           
@@ -593,8 +593,8 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           
           _buildInfoItemSimple(
             Icons.security,
-            'Acesso seguro',
-            'Logs de acesso registrados',
+            'pk_secure_access'.tr,
+            'pk_logs_registered'.tr,
             isSmallScreen,
           ),
         ],
@@ -660,7 +660,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
               ),
               SizedBox(width: isSmallScreen ? 6 : 8),
               Text(
-                'Como usar',
+                'pk_how_to_use'.tr,
                 style: AppTheme.titleMedium.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -674,7 +674,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           
           _buildInstructionStep(
             '1',
-            'Compartilhe o código com seu médico',
+            'pk_step1'.tr,
             isSmallScreen,
           ),
           
@@ -682,7 +682,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           
           _buildInstructionStep(
             '2',
-            'Médico insere o código na plataforma',
+            'pk_step2'.tr,
             isSmallScreen,
           ),
           
@@ -690,7 +690,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           
           _buildInstructionStep(
             '3',
-            'Acesso temporário aos seus dados',
+            'pk_step3'.tr,
             isSmallScreen,
           ),
         ],
@@ -769,7 +769,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           SizedBox(height: isSmallScreen ? 20 : 24),
           
           Text(
-            'Médico Conectado',
+            'pk_doctor_connected'.tr,
             style: AppTheme.headlineSmall.copyWith(
               color: Colors.green,
               fontWeight: FontWeight.bold,
@@ -911,7 +911,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
               ),
               SizedBox(width: isSmallScreen ? 10 : 12),
               Text(
-                'Sobre a Conexão',
+                'pk_about_connection'.tr,
                 style: AppTheme.titleMedium.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -925,8 +925,8 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           
           _buildInfoItem(
             Icons.security,
-            'Conexão Segura',
-            'Seu médico está visualizando seus dados de forma segura através do código de acesso',
+            'pk_secure_connection'.tr,
+            'pk_secure_connection_desc'.tr,
             isSmallScreen,
           ),
           
@@ -934,8 +934,8 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           
           _buildInfoItem(
             Icons.visibility,
-            'Acesso Temporário',
-            'O médico pode visualizar seus dados enquanto estiver conectado',
+            'pk_temp_access'.tr,
+            'pk_temp_access_desc'.tr,
             isSmallScreen,
           ),
           
@@ -943,8 +943,8 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           
           _buildInfoItem(
             Icons.block,
-            'Você tem controle',
-            'Você pode desconectar o médico a qualquer momento usando o botão abaixo',
+            'pk_you_control'.tr,
+            'pk_you_control_desc'.tr,
             isSmallScreen,
           ),
           
@@ -994,7 +994,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
                         ),
                         SizedBox(width: isSmallScreen ? 10 : 12),
                         Text(
-                          'Desconectar Médico',
+                          'pk_disconnect'.tr,
                           style: TextStyle(
                             fontSize: isSmallScreen ? 16 : 18,
                             fontWeight: FontWeight.bold,

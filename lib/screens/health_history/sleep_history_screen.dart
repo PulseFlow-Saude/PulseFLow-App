@@ -8,6 +8,7 @@ import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../services/health_data_service.dart';
 import '../../theme/app_theme.dart';
+import '../institutional/settings_controller.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../../widgets/pulse_drawer_button.dart';
@@ -48,11 +49,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     try {
       final currentUser = _authService.currentUser;
       if (currentUser?.id == null) {
-        throw 'Usuário não autenticado';
+        throw 'common_user_not_auth'.tr;
       }
 
       if (_selectedDateFrom == null || _selectedDateTo == null) {
-        throw 'Selecione um período';
+        throw 'common_select_period'.tr;
       }
 
       // Busca dados diretamente da coleção 'insonias'
@@ -123,7 +124,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       initialDateRange: _selectedDateFrom != null && _selectedDateTo != null
           ? DateTimeRange(start: _selectedDateFrom!, end: _selectedDateTo!)
           : null,
+<<<<<<< Updated upstream
       locale: Get.locale ?? const Locale('pt', 'BR'),
+=======
+      locale: Get.find<SettingsController>().effectiveLocale,
+>>>>>>> Stashed changes
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -181,7 +186,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             ),
           ],
         ),
-        bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
+        // bottomNavigationBar removido - tela tem sidebar
+        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
       ),
     );
   }
@@ -290,8 +296,13 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
+<<<<<<< Updated upstream
                           'health_period'.tr,
                           style: const TextStyle(
+=======
+                          'common_period'.tr,
+                          style: TextStyle(
+>>>>>>> Stashed changes
                             fontSize: 12,
                             color: Color(0xFF64748B),
                           ),
@@ -300,7 +311,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                         Text(
                           _selectedDateFrom != null && _selectedDateTo != null
                               ? '${DateFormat('dd/MM/yyyy').format(_selectedDateFrom!)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateTo!)}'
+<<<<<<< Updated upstream
                               : 'health_select_period'.tr,
+=======
+                              : 'common_select_period'.tr,
+>>>>>>> Stashed changes
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -401,7 +416,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               const Icon(Icons.analytics, color: Colors.blue, size: 20),
               const SizedBox(width: 8),
               Text(
+<<<<<<< Updated upstream
                 'health_stats_period'.tr,
+=======
+                'common_period_stats'.tr,
+>>>>>>> Stashed changes
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -747,7 +766,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+<<<<<<< Updated upstream
                       '${AppDateFormat.weekdayLong(date)}, ${DateFormat('dd/MM/yyyy').format(date)}',
+=======
+                      DateFormat('EEEE, dd/MM/yyyy', Get.find<SettingsController>().effectiveLocale.toString()).format(date),
+>>>>>>> Stashed changes
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -827,7 +850,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           ),
           const SizedBox(height: 16),
           Text(
+<<<<<<< Updated upstream
             'health_error_load'.tr,
+=======
+            'common_error_load'.tr,
+>>>>>>> Stashed changes
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -836,7 +863,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           ),
           const SizedBox(height: 8),
           Text(
+<<<<<<< Updated upstream
             _error ?? 'health_unknown_error'.tr,
+=======
+            _error ?? 'common_unknown_error'.tr,
+>>>>>>> Stashed changes
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
@@ -850,7 +881,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               backgroundColor: const Color(0xFF00324A),
               foregroundColor: Colors.white,
             ),
+<<<<<<< Updated upstream
             child: Text('health_try_again'.tr),
+=======
+            child: Text('common_try_again'.tr),
+>>>>>>> Stashed changes
           ),
         ],
       ),
@@ -869,7 +904,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           ),
           const SizedBox(height: 16),
           Text(
+<<<<<<< Updated upstream
             'health_no_data'.tr,
+=======
+            'common_no_data'.tr,
+>>>>>>> Stashed changes
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -878,7 +917,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           ),
           const SizedBox(height: 8),
           Text(
+<<<<<<< Updated upstream
             'health_no_sleep'.tr,
+=======
+            'common_no_records_sleep'.tr,
+>>>>>>> Stashed changes
             style: TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),

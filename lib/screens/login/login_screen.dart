@@ -166,7 +166,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
+<<<<<<< Updated upstream
           'login_welcome'.tr,
+=======
+          'auth_welcome'.tr,
+>>>>>>> Stashed changes
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 28,
@@ -177,7 +181,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         ),
         const SizedBox(height: 8),
         Text(
+<<<<<<< Updated upstream
           'login_subtitle'.tr,
+=======
+          'auth_enter_to_continue'.tr,
+>>>>>>> Stashed changes
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,
@@ -200,7 +208,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         keyboardType: TextInputType.emailAddress,
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
+<<<<<<< Updated upstream
           labelText: 'login_email'.tr,
+=======
+          labelText: 'auth_email'.tr,
+>>>>>>> Stashed changes
           labelStyle: TextStyle(color: Colors.grey[600]),
           prefixIcon: Icon(Icons.email_outlined, color: const Color(0xFF00324A)),
           filled: true,
@@ -229,10 +241,17 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
+<<<<<<< Updated upstream
             return 'login_email_required'.tr;
           }
           if (!GetUtils.isEmail(value)) {
             return 'login_email_invalid'.tr;
+=======
+            return 'auth_email_required'.tr;
+          }
+          if (!GetUtils.isEmail(value)) {
+            return 'auth_email_invalid'.tr;
+>>>>>>> Stashed changes
           }
           return null;
         },
@@ -251,7 +270,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         obscureText: Get.find<LoginController>().obscurePassword.value,
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
+<<<<<<< Updated upstream
           labelText: 'login_password'.tr,
+=======
+          labelText: 'auth_password'.tr,
+>>>>>>> Stashed changes
           labelStyle: TextStyle(color: Colors.grey[600]),
           prefixIcon: Icon(Icons.lock_outlined, color: const Color(0xFF00324A)),
           suffixIcon: IconButton(
@@ -289,10 +312,17 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
+<<<<<<< Updated upstream
             return 'login_password_required'.tr;
           }
           if (value.length < 6) {
             return 'login_password_min'.tr;
+=======
+            return 'auth_password_required'.tr;
+          }
+          if (value.length < 6) {
+            return 'auth_password_min'.tr;
+>>>>>>> Stashed changes
           }
           return null;
         },
@@ -319,7 +349,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               activeColor: const Color(0xFF00324A),
             )),
             Text(
+<<<<<<< Updated upstream
               'login_remember'.tr,
+=======
+              'auth_remember_me'.tr,
+>>>>>>> Stashed changes
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -336,7 +370,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: Text(
+<<<<<<< Updated upstream
             'login_forgot'.tr,
+=======
+            'auth_forgot_password'.tr,
+>>>>>>> Stashed changes
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -397,7 +435,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   Icon(Icons.login, color: Colors.white, size: 20),
                   SizedBox(width: 8),
                   Text(
-                    'Entrar',
+                    'auth_login'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -418,7 +456,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text(
+<<<<<<< Updated upstream
             'login_or'.tr,
+=======
+            'auth_or'.tr,
+>>>>>>> Stashed changes
             style: TextStyle(color: Colors.grey[600], fontSize: 14),
           ),
         ),
@@ -438,7 +480,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Text(
+<<<<<<< Updated upstream
           'login_register'.tr,
+=======
+          'auth_create_account'.tr,
+>>>>>>> Stashed changes
           style: TextStyle(
             color: const Color(0xFF00324A),
             fontSize: 16,

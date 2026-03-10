@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../models/patient.dart';
 import '../config/app_config.dart';
@@ -12,6 +13,7 @@ import 'package:mongo_dart/mongo_dart.dart' show ObjectId;
 import 'dart:math';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
+import 'email_translations_helper.dart';
 
 
 class AuthService extends GetxController {
@@ -40,10 +42,11 @@ class AuthService extends GetxController {
     try {
       final token = await _storage.read(key: 'auth_token');
       if (token != null && !JwtDecoder.isExpired(token)) {
-        final patientId = JwtDecoder.decode(token)['sub'];
+        final payload = JwtDecoder.decode(token);
+        final patientId = payload['sub'] ?? payload['id']?.toString();
         final patient = await getPatientById(patientId);
         if (patient != null) {
-          _token.value = token; // Definir o token no reativo
+          _token.value = token;
           _currentUser.value = patient;
           _isAuthenticated.value = true;
         } else {
@@ -161,7 +164,7 @@ class AuthService extends GetxController {
     }
   }
 
-  // Envia código 2FA por e-mail
+  // Envia código 2FA por e-mail (traduzido conforme idioma do usuário/dispositivo)
   Future<void> send2FACodeEmail(String email, String code) async {
     try {
       final user = AppConfig.emailUser;
@@ -171,42 +174,43 @@ class AuthService extends GetxController {
         throw 'Configurações de email não encontradas. Verifique o arquivo .env';
       }
       
+      final t = EmailTranslationsHelper.getEmailTranslationsSync();
       final smtpServer = _getSmtpServer(user, pass);
       final message = Message()
-        ..from = Address(user, 'PulseFlow Saúde')
+        ..from = Address(user, t['email_from_name']!)
         ..recipients.add(email)
-        ..subject = 'Código de verificação 2FA - PulseFlow'
+        ..subject = t['email_2fa_subject']!
         ..html = '''
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #1CB5E0 0%, #000046 100%); padding: 30px; border-radius: 15px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 24px;">Verificação em Duas Etapas</h1>
-              <p style="color: white; margin: 10px 0 0 0; opacity: 0.9;">PulseFlow Saúde</p>
+              <h1 style="color: white; margin: 0; font-size: 24px;">${t['email_2fa_heading']}</h1>
+              <p style="color: white; margin: 10px 0 0 0; opacity: 0.9;">${t['email_2fa_subheading']}</p>
             </div>
             
             <div style="background: white; padding: 30px; border-radius: 0 0 15px 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-              <h2 style="color: #333; margin: 0 0 20px 0;">Olá!</h2>
+              <h2 style="color: #333; margin: 0 0 20px 0;">${t['email_2fa_hello']}</h2>
               <p style="color: #666; line-height: 1.6; margin: 0 0 20px 0;">
-                Você solicitou acesso ao seu perfil no PulseFlow Saúde. Para continuar, use o código de verificação abaixo:
+                ${t['email_2fa_body']}
               </p>
               
               <div style="background: #f8f9fa; border: 2px dashed #1CB5E0; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center;">
                 <h3 style="color: #1CB5E0; margin: 0; font-size: 32px; letter-spacing: 8px; font-weight: bold;">$code</h3>
-                <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">Código de 6 dígitos</p>
+                <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">${t['email_2fa_code_label']}</p>
               </div>
               
               <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;">
                 <p style="color: #856404; margin: 0; font-size: 14px;">
-                  ⏰ <strong>Importante:</strong> Este código expira em 5 minutos por segurança.
+                  ⏰ <strong>${t['email_2fa_important']}</strong>
                 </p>
               </div>
               
               <p style="color: #666; line-height: 1.6; margin: 20px 0 0 0; font-size: 14px;">
-                Se você não solicitou este código, ignore este e-mail ou entre em contato conosco.
+                ${t['email_2fa_ignore']}
               </p>
               
               <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
               <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
-                PulseFlow Saúde - Cuidando da sua saúde com tecnologia
+                ${t['email_2fa_footer']}
               </p>
             </div>
           </div>
@@ -218,11 +222,60 @@ class AuthService extends GetxController {
     }
   }
 
+  // Login via API do backend (MongoDB via .env)
+  Future<Patient> _loginViaApi(String email, String password) async {
+    final baseUrl = AppConfig.apiBaseUrl;
+    if (baseUrl.isEmpty) throw 'API não configurada (apiBaseUrl)';
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/paciente-auth/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'senha': password}),
+    ).timeout(const Duration(seconds: 15));
+
+    if (response.statusCode != 200) {
+      final body = jsonDecode(response.body);
+      throw body['message'] ?? 'Erro ao fazer login';
+    }
+
+    final data = jsonDecode(response.body);
+    final token = data['token'];
+    if (token == null) throw 'Token não retornado pela API';
+
+    await _storage.write(key: 'auth_token', value: token);
+
+    final patient = await _fetchPatientFromApi(token);
+    if (patient == null) throw 'Não foi possível carregar os dados do usuário';
+
+    _token.value = token;
+    _currentUser.value = patient;
+    _isAuthenticated.value = true;
+    return patient;
+  }
+
+  Future<Patient?> _fetchPatientFromApi(String token) async {
+    final baseUrl = AppConfig.apiBaseUrl;
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/paciente-auth/me'),
+      headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode != 200) return null;
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    return Patient.fromJson(json);
+  }
+
   // Login com 2FA 
   // Retorna o ID do paciente:
   // - Para usuários admin: retorna o ID diretamente (bypass 2FA)
   // - Para usuários normais: retorna o ID após gerar e enviar código 2FA
+  // - Quando useApiForAuth: usa a API do backend (sem 2FA)
   Future<String> loginWith2FA(String email, String password) async {
+    if (AppConfig.useApiForAuth) {
+      final patient = await _loginViaApi(email, password);
+      return patient.id!;
+    }
+
     try {
       final patient = await _databaseService.getPatientByEmail(email);
       if (patient == null) {
@@ -306,8 +359,62 @@ class AuthService extends GetxController {
     return patient;
   }
 
+  /// Recarrega o usuário atual do banco/API (útil para obter foto de perfil atualizada)
+  Future<void> refreshCurrentUser() async {
+    final id = _currentUser.value?.id;
+    if (id == null) return;
+    final patient = await getPatientById(id, forceRefresh: true);
+    if (patient != null) {
+      // Se profilePhoto não veio no paciente, buscar diretamente (campo profilePhoto no MongoDB)
+      var profilePhoto = patient.profilePhoto;
+      if (profilePhoto == null || profilePhoto.isEmpty) {
+        profilePhoto = await _databaseService.getPatientProfilePhoto(id);
+      }
+      _currentUser.value = (profilePhoto != null && profilePhoto.isNotEmpty)
+          ? Patient(
+              id: patient.id,
+              name: patient.name,
+              email: patient.email,
+              password: patient.password,
+              cpf: patient.cpf,
+              rg: patient.rg,
+              phone: patient.phone,
+              secondaryPhone: patient.secondaryPhone,
+              birthDate: patient.birthDate,
+              gender: patient.gender,
+              maritalStatus: patient.maritalStatus,
+              nationality: patient.nationality,
+              address: patient.address,
+              height: patient.height,
+              weight: patient.weight,
+              profession: patient.profession,
+              acceptedTerms: patient.acceptedTerms,
+              profilePhoto: profilePhoto,
+              emergencyContact: patient.emergencyContact,
+              emergencyPhone: patient.emergencyPhone,
+              fcmToken: patient.fcmToken,
+              isAdmin: patient.isAdmin,
+              twoFactorCode: patient.twoFactorCode,
+              twoFactorExpires: patient.twoFactorExpires,
+              passwordResetCode: patient.passwordResetCode,
+              passwordResetExpires: patient.passwordResetExpires,
+              passwordResetRequired: patient.passwordResetRequired,
+              createdAt: patient.createdAt,
+              updatedAt: patient.updatedAt,
+            )
+          : patient;
+    }
+  }
+
   // Busca paciente por ID
-  Future<Patient?> getPatientById(String patientId) async {
+  Future<Patient?> getPatientById(String patientId, {bool forceRefresh = false}) async {
+    if (AppConfig.useApiForAuth) {
+      if (!forceRefresh && _currentUser.value != null && _currentUser.value!.id == patientId) {
+        return _currentUser.value;
+      }
+      if (_token.value.isNotEmpty) return await _fetchPatientFromApi(_token.value);
+      return null;
+    }
     try {
       return await _databaseService.getPatientById(ObjectId.parse(patientId));
     } catch (e) {
@@ -596,6 +703,24 @@ class AuthService extends GetxController {
 
   // Verifica se o e-mail existe no sistema
   Future<Patient?> checkEmailExists(String email) async {
+    if (AppConfig.useApiForAuth) {
+      try {
+        final response = await http.get(
+          Uri.parse('${AppConfig.apiBaseUrl}/api/paciente-auth/check-email?email=${Uri.encodeComponent(email)}'),
+          headers: {'Content-Type': 'application/json'},
+        ).timeout(const Duration(seconds: 15));
+        if (response.statusCode == 200) return Patient(id: '', name: '', email: email, password: '', cpf: '', rg: '', phone: '', birthDate: DateTime.now(), gender: '', maritalStatus: '', nationality: '', address: '', acceptedTerms: false);
+        if (response.statusCode == 404) return null;
+        try {
+          final body = jsonDecode(response.body);
+          throw body['message'] ?? 'Erro ao verificar e-mail';
+        } catch (_) {
+          throw 'Erro ao verificar e-mail';
+        }
+      } catch (e) {
+        rethrow;
+      }
+    }
     try {
       return await _databaseService.getPatientByEmail(email);
     } catch (e) {
@@ -605,20 +730,27 @@ class AuthService extends GetxController {
 
   // Envia código de redefinição de senha
   Future<void> sendPasswordResetCode(String email) async {
+    if (AppConfig.useApiForAuth) {
+      final response = await http.post(
+        Uri.parse('${AppConfig.apiBaseUrl}/api/paciente-auth/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      ).timeout(const Duration(seconds: 15));
+      if (response.statusCode != 200) {
+        final body = jsonDecode(response.body);
+        throw body['message'] ?? 'Erro ao enviar código';
+      }
+      return;
+    }
     try {
       final patient = await _databaseService.getPatientByEmail(email);
       if (patient == null) {
         throw 'E-mail não encontrado. Verifique se digitou corretamente, incluindo maiúsculas e minúsculas.';
       }
 
-      // Gerar código de redefinição
       final code = _generate2FACode();
       final expires = DateTime.now().add(const Duration(minutes: 10));
-      
-      // Salvar código no banco
       await _databaseService.setPasswordResetCode(patient.id!, code, expires);
-      
-      // Enviar e-mail
       await sendPasswordResetEmail(email, code);
     } catch (e) {
       rethrow;
@@ -627,25 +759,31 @@ class AuthService extends GetxController {
 
   // Redefine a senha do usuário
   Future<void> resetPassword(String email, String code, String newPassword) async {
+    if (AppConfig.useApiForAuth) {
+      final response = await http.post(
+        Uri.parse('${AppConfig.apiBaseUrl}/api/paciente-auth/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'code': code, 'senha': newPassword}),
+      ).timeout(const Duration(seconds: 15));
+      if (response.statusCode != 200) {
+        final body = jsonDecode(response.body);
+        throw body['message'] ?? 'Erro ao redefinir senha';
+      }
+      return;
+    }
     try {
       final patient = await _databaseService.getPatientByEmail(email);
       if (patient == null) {
         throw 'E-mail não encontrado. Verifique se digitou corretamente, incluindo maiúsculas e minúsculas.';
       }
 
-      // Validar código de redefinição
       final isValid = await _databaseService.validatePasswordResetCode(patient.id!, code);
       if (!isValid) {
         throw 'Código de redefinição inválido ou expirado';
       }
 
-      // Criptografar nova senha com o novo formato (salt:hash)
       final hashedPassword = await _encryptionService.hashPassword(newPassword);
-      
-      // Atualizar senha no banco e remover flag de redefinição necessária
       await _databaseService.updatePatientPassword(patient.id!, hashedPassword);
-      
-      // Remover a flag passwordResetRequired se existir
       await _databaseService.updatePatientField(
         patient.id!,
         'passwordResetRequired',
@@ -656,6 +794,7 @@ class AuthService extends GetxController {
     }
   }
 
+<<<<<<< Updated upstream
   /// Textos do e-mail de redefinição de senha por idioma (idioma do app).
   Map<String, String> _getPasswordResetEmailTexts(String languageCode) {
     final isEn = languageCode.toLowerCase().startsWith('en');
@@ -684,15 +823,19 @@ class AuthService extends GetxController {
   }
 
   // Envia e-mail de redefinição de senha no idioma selecionado no app
+=======
+  // Envia e-mail de redefinição de senha (traduzido conforme idioma do usuário/dispositivo)
+>>>>>>> Stashed changes
   Future<void> sendPasswordResetEmail(String email, String code) async {
     try {
       final user = AppConfig.emailUser;
       final pass = AppConfig.emailPass;
 
       if (user == null || pass == null || user.isEmpty || pass.isEmpty) {
-        return;
+        throw 'Configuração de email não encontrada. Verifique EMAIL_USER e EMAIL_PASS no .env';
       }
 
+<<<<<<< Updated upstream
       final languageCode = Get.locale?.languageCode ?? 'pt';
       final t = _getPasswordResetEmailTexts(languageCode);
 
@@ -701,6 +844,14 @@ class AuthService extends GetxController {
         ..from = Address(user, t['fromName']!)
         ..recipients.add(email)
         ..subject = t['subject']!
+=======
+      final t = EmailTranslationsHelper.getEmailTranslationsSync();
+      final smtpServer = _getSmtpServer(user, pass);
+      final message = Message()
+        ..from = Address(user, t['email_from_name']!)
+        ..recipients.add(email)
+        ..subject = t['email_reset_subject']!
+>>>>>>> Stashed changes
         ..html = '''
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa; padding: 20px;">
             <div style="background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
@@ -708,6 +859,7 @@ class AuthService extends GetxController {
                 <div style="background-color: #1CB5E0; width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
                   <span style="color: white; font-size: 24px;">🔐</span>
                 </div>
+<<<<<<< Updated upstream
                 <h1 style="color: #222B45; margin: 0; font-size: 24px;">${t['title']}</h1>
               </div>
               
@@ -717,6 +869,17 @@ class AuthService extends GetxController {
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
                 ${t['codeInstruction']}
+=======
+                <h1 style="color: #222B45; margin: 0; font-size: 24px;">${t['email_reset_heading']}</h1>
+              </div>
+              
+              <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+                ${t['email_reset_body']}
+              </p>
+              
+              <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
+                ${t['email_reset_code_usage']}
+>>>>>>> Stashed changes
               </p>
               
               <div style="background-color: #1CB5E0; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 30px;">
@@ -724,16 +887,28 @@ class AuthService extends GetxController {
               </div>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+<<<<<<< Updated upstream
                 <strong>${t['expiry']}</strong>
               </p>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
                 ${t['ignore']}
+=======
+                <strong>${t['email_reset_expiry']}</strong>
+              </p>
+              
+              <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+                ${t['email_reset_ignore']}
+>>>>>>> Stashed changes
               </p>
               
               <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
               <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+<<<<<<< Updated upstream
                 ${t['footer']}
+=======
+                ${t['email_reset_footer']}
+>>>>>>> Stashed changes
               </p>
             </div>
           </div>
@@ -791,7 +966,7 @@ class AuthService extends GetxController {
     }
   }
 
-  // Método para testar configuração de e-mail
+  // Método para testar configuração de e-mail (traduzido conforme idioma do usuário/dispositivo)
   Future<void> testEmailConfiguration() async {
     try {
       final user = AppConfig.emailUser;
@@ -801,12 +976,13 @@ class AuthService extends GetxController {
         return;
       }
       
+      final t = EmailTranslationsHelper.getEmailTranslationsSync();
       final smtpServer = _getSmtpServer(user, pass);
       final message = Message()
-        ..from = Address(user, 'PulseFlow Saúde - Teste')
+        ..from = Address(user, '${t['email_from_name']} - ${t['email_test_suffix']!}')
         ..recipients.add(user)
-        ..subject = 'Teste de Configuração - PulseFlow'
-        ..text = 'Este é um e-mail de teste para verificar se a configuração do Gmail está funcionando corretamente.';
+        ..subject = t['email_test_subject']!
+        ..text = t['email_test_body']!;
       
       await send(message, smtpServer);
     } catch (e) {

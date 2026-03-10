@@ -79,7 +79,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
             ),
           ],
         ),
-        bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
+        // bottomNavigationBar removido - tela tem sidebar
+        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
       ),
     );
   }
@@ -113,7 +114,11 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
           const SizedBox(height: 20),
           Text(
             'hist_title'.tr,
+<<<<<<< Updated upstream
             style: const TextStyle(
+=======
+            style: TextStyle(
+>>>>>>> Stashed changes
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -359,7 +364,11 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
     return Semantics(
       button: true,
       label: title,
+<<<<<<< Updated upstream
       hint: 'hist_tap_to_access'.trParams({'title': title}),
+=======
+      hint: '${'hist_tap_to_access'.tr} $title',
+>>>>>>> Stashed changes
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

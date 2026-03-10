@@ -54,8 +54,13 @@ class ResetPasswordController extends GetxController with SafeControllerMixin {
       await _authService.resetPassword(email!, code, newPassword);
       
       Get.snackbar(
+<<<<<<< Updated upstream
         'reset_success_title'.tr,
         'reset_success_msg'.tr,
+=======
+        'auth_reset_success'.tr,
+        'auth_reset_success_msg'.tr,
+>>>>>>> Stashed changes
         backgroundColor: Colors.green,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -67,7 +72,11 @@ class ResetPasswordController extends GetxController with SafeControllerMixin {
       
     } catch (e) {
       Get.snackbar(
+<<<<<<< Updated upstream
         'reset_error_title'.tr,
+=======
+        'auth_error'.tr,
+>>>>>>> Stashed changes
         e.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -88,8 +97,13 @@ class ResetPasswordController extends GetxController with SafeControllerMixin {
       await _authService.sendPasswordResetCode(email!);
       
       Get.snackbar(
+<<<<<<< Updated upstream
         'reset_resend_success_title'.tr,
         'reset_resend_success_msg'.tr,
+=======
+        'auth_code_resent'.tr,
+        'auth_code_resent_msg'.tr,
+>>>>>>> Stashed changes
         backgroundColor: Colors.green,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -98,7 +112,11 @@ class ResetPasswordController extends GetxController with SafeControllerMixin {
       
     } catch (e) {
       Get.snackbar(
+<<<<<<< Updated upstream
         'reset_error_title'.tr,
+=======
+        'auth_error'.tr,
+>>>>>>> Stashed changes
         e.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,

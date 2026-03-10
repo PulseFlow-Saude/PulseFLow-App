@@ -100,6 +100,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
 
   String _getIntensidadeLabelKey(int intensidade) {
     switch (intensidade) {
+<<<<<<< Updated upstream
       case 0: return 'pain_no';
       case 1: case 2: return 'pain_mild';
       case 3: case 4: return 'pain_moderate';
@@ -108,6 +109,28 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
       case 9: return 'pain_very_severe';
       case 10: return 'pain_unbearable';
       default: return 'pain_no';
+=======
+      case 0:
+        return 'evt_pain_none'.tr;
+      case 1:
+      case 2:
+        return 'evt_pain_light'.tr;
+      case 3:
+      case 4:
+        return 'evt_pain_moderate'.tr;
+      case 5:
+      case 6:
+        return 'evt_pain_mod_intense'.tr;
+      case 7:
+      case 8:
+        return 'evt_pain_intense'.tr;
+      case 9:
+        return 'evt_pain_very_intense'.tr;
+      case 10:
+        return 'evt_pain_unbearable'.tr;
+      default:
+        return 'evt_pain_none'.tr;
+>>>>>>> Stashed changes
     }
   }
 
@@ -169,14 +192,23 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                         // Campos principais
                         _buildTextField(
                           controller: _tituloController,
+<<<<<<< Updated upstream
                           label: 'evento_label_titulo'.tr,
                           hint: 'evento_hint_titulo'.tr,
+=======
+                          label: 'evt_title'.tr,
+                          hint: 'evt_title_hint'.tr,
+>>>>>>> Stashed changes
                           isRequired: true,
                         ),
                         const SizedBox(height: 12),
                         
                         _buildDropdownField(
+<<<<<<< Updated upstream
                           label: 'evento_label_tipo'.tr,
+=======
+                          label: 'evt_type_label'.tr,
+>>>>>>> Stashed changes
                           value: _selectedTipo,
                           items: _tipoKeys,
                           onChanged: (value) => setState(() => _selectedTipo = value),
@@ -192,23 +224,38 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                           
                           _buildTextField(
                             controller: _descricaoController,
+<<<<<<< Updated upstream
                             label: 'evento_label_descricao'.tr,
                             hint: 'evento_hint_descricao'.tr,
+=======
+                            label: 'evt_desc_label'.tr,
+                            hint: 'evt_desc_hint'.tr,
+>>>>>>> Stashed changes
                             maxLines: 3,
                           ),
                           const SizedBox(height: 12),
                           
                           _buildTextField(
                             controller: _medicacaoController,
+<<<<<<< Updated upstream
                             label: 'evento_label_medicacao'.tr,
                             hint: 'evento_hint_medicacao'.tr,
+=======
+                            label: 'evt_medication_label'.tr,
+                            hint: 'evt_medication_hint'.tr,
+>>>>>>> Stashed changes
                           ),
                           const SizedBox(height: 12),
                           
                           _buildTextField(
                             controller: _sintomasController,
+<<<<<<< Updated upstream
                             label: 'evento_label_sintomas'.tr,
                             hint: 'evento_hint_sintomas'.tr,
+=======
+                            label: 'evt_symptoms_label'.tr,
+                            hint: 'evt_symptoms_hint'.tr,
+>>>>>>> Stashed changes
                             maxLines: 2,
                           ),
                           const SizedBox(height: 20),
@@ -224,7 +271,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
+      // bottomNavigationBar removido - tela tem sidebar
+      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
     ));
   }
 
@@ -255,15 +303,24 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+<<<<<<< Updated upstream
                   'evento_title'.tr,
                   style: const TextStyle(
+=======
+                  'evt_form_title'.tr,
+                  style: TextStyle(
+>>>>>>> Stashed changes
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                     fontSize: 20,
                   ),
                 ),
                 Text(
+<<<<<<< Updated upstream
                   'evento_subtitle'.tr,
+=======
+                  'evt_form_sub'.tr,
+>>>>>>> Stashed changes
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
@@ -283,7 +340,11 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
+<<<<<<< Updated upstream
           'evento_intensidade_dor'.tr,
+=======
+          'evt_pain_intensity_label'.tr,
+>>>>>>> Stashed changes
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -385,7 +446,11 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
           maxLines: maxLines,
           validator: (value) {
             if (isRequired && (value == null || value.trim().isEmpty)) {
+<<<<<<< Updated upstream
               return 'common_field_required'.tr;
+=======
+              return 'common_required'.tr;
+>>>>>>> Stashed changes
             }
             return null;
           },
@@ -428,7 +493,11 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
     double? fontSize,
   }) {
     final double textSize = fontSize ?? 14.0;
+<<<<<<< Updated upstream
     final bool isTipoEvento = items.length <= 10 && items.every((e) => e.startsWith('evento_tipo_'));
+=======
+    final bool isTipoEvento = label == 'evt_type_label'.tr;
+>>>>>>> Stashed changes
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -462,7 +531,11 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
           isExpanded: true,
           validator: (value) {
             if (isRequired && value == null) {
+<<<<<<< Updated upstream
               return 'common_field_required'.tr;
+=======
+              return 'common_required'.tr;
+>>>>>>> Stashed changes
             }
             return null;
           },
@@ -518,8 +591,13 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
+<<<<<<< Updated upstream
           'evento_data'.tr,
           style: const TextStyle(
+=======
+          'evt_date'.tr,
+          style: TextStyle(
+>>>>>>> Stashed changes
             fontSize: 14,
                 fontWeight: FontWeight.w600,
             color: Color(0xFF00324A),
@@ -574,7 +652,11 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
             ),
             child: Text(
               'common_clear'.tr,
+<<<<<<< Updated upstream
               style: const TextStyle(
+=======
+              style: TextStyle(
+>>>>>>> Stashed changes
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -595,7 +677,11 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
             ),
             child: Text(
               'common_save'.tr,
+<<<<<<< Updated upstream
               style: const TextStyle(
+=======
+              style: TextStyle(
+>>>>>>> Stashed changes
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -692,8 +778,13 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
+<<<<<<< Updated upstream
                         'evento_saved_title'.tr,
                         style: const TextStyle(
+=======
+                        'evt_registered'.tr,
+                        style: TextStyle(
+>>>>>>> Stashed changes
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -709,7 +800,11 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                   child: Column(
                     children: [
                       Text(
+<<<<<<< Updated upstream
                         'evento_saved_message'.tr,
+=======
+                        'evt_registered_msg'.tr,
+>>>>>>> Stashed changes
                         style: TextStyle(
                           fontSize: 16,
                           color: const Color(0xFF64748B),
@@ -736,8 +831,13 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                             ),
                           ),
                           child: Text(
+<<<<<<< Updated upstream
                             'evento_continue'.tr,
                             style: const TextStyle(
+=======
+                            'common_continue'.tr,
+                            style: TextStyle(
+>>>>>>> Stashed changes
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                   ),
@@ -763,8 +863,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
     final pacienteId = widget.pacienteId ?? AuthService.instance.currentUser?.id;
     if (pacienteId == null || pacienteId.isEmpty) {
       Get.snackbar(
-        'Erro',
-        'Paciente não identificado. Faça login novamente.',
+        'common_error'.tr,
+        'evt_patient_error'.tr,
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade800,
         snackPosition: SnackPosition.TOP,
@@ -777,8 +877,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
       final currentUser = AuthService.instance.currentUser;
       if (currentUser?.id == null) {
         Get.snackbar(
-          'Erro',
-          'Usuário não autenticado. Por favor, faça login novamente.',
+          'common_error'.tr,
+          'evt_auth_error'.tr,
           backgroundColor: Colors.red.shade100,
           colorText: Colors.red.shade800,
           snackPosition: SnackPosition.TOP,
@@ -821,7 +921,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
       }
       
       Get.snackbar(
-        'Erro',
+        'common_error'.tr,
         errorMessage,
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade800,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../services/api_service.dart';
@@ -84,6 +86,14 @@ class HomeController extends GetxController {
     super.onInit();
     _loadPatientData();
     _initializeData();
+  }
+
+  /// Recarrega o usuário do banco/API para garantir foto de perfil atualizada
+  Future<void> _refreshUserFromSource() async {
+    try {
+      await _authService.refreshCurrentUser();
+      _currentPatient.value = _authService.currentUser;
+    } catch (_) {}
   }
   
   Future<void> _initializeData() async {
@@ -199,6 +209,12 @@ class HomeController extends GetxController {
   void _loadPatientData() {
     _currentPatient.value = _authService.currentUser;
   }
+
+  @override
+  void onReady() {
+    super.onReady();
+    _refreshUserFromSource();
+  }
   
   // Carrega dados disponíveis do paciente
   Future<void> _loadAvailableData() async {
@@ -248,8 +264,7 @@ class HomeController extends GetxController {
   Future<void> refreshPatientData() async {
     _isLoading.value = true;
     try {
-      // Recarrega os dados do usuário atual
-      await _authService.init();
+      await _authService.refreshCurrentUser();
       _currentPatient.value = _authService.currentUser;
       await _loadAvailableData();
       await loadNotificationsCount();
@@ -272,20 +287,35 @@ class HomeController extends GetxController {
     return buildGreetingMessage();
   }
   
-  // Obtém o nome do paciente
+  // Obtém o nome do paciente (sempre do auth para refletir atualizações)
   String getPatientName() {
-    return currentPatient?.name ?? 'Usuário';
+    return _authService.currentUser?.name ?? currentPatient?.name ?? 'Usuário';
   }
   
-  // Obtém a foto de perfil do paciente
+  // Obtém a foto de perfil do paciente (sempre do auth para refletir atualizações)
   String? getProfilePhoto() {
-    return currentPatient?.profilePhoto;
+    return _authService.currentUser?.profilePhoto ?? currentPatient?.profilePhoto;
   }
 
-  // Verifica se a foto é base64
+  // Verifica se a foto é base64 (com prefixo data:image ou base64 puro)
   bool isBase64Photo(String? photo) {
-    if (photo == null) return false;
-    return photo.startsWith('data:image/');
+    if (photo == null || photo.isEmpty) return false;
+    return photo.startsWith('data:image/') ||
+        (!photo.startsWith('http') && !photo.startsWith('/') && photo.length > 100);
+  }
+
+  // Extrai bytes da foto (base64 com prefixo ou base64 puro)
+  Uint8List? decodeProfilePhoto(String? photo) {
+    if (photo == null || photo.isEmpty) return null;
+    try {
+      if (photo.startsWith('data:image')) {
+        final base64Part = photo.contains(',') ? photo.split(',').last : photo;
+        return base64Decode(base64Part);
+      }
+      return base64Decode(photo);
+    } catch (_) {
+      return null;
+    }
   }
 
   // Atualiza lista de favoritos baseada nos dados disponíveis

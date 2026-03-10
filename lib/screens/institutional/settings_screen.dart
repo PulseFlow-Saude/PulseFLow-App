@@ -75,8 +75,18 @@ class SettingsScreen extends StatelessWidget {
                   label: 'inst_settings_language_label'.tr,
                   description: 'inst_settings_language_desc'.tr,
                   icon: Icons.language_outlined,
+<<<<<<< Updated upstream
                   currentCode: controller.language.value,
                   onTap: () => LanguageIconButton.showLanguageModal(context),
+=======
+                  value: controller.language.value,
+                  items: [
+                    DropdownMenuItem(value: 'system', child: Text('inst_settings_language_system'.tr)),
+                    DropdownMenuItem(value: 'pt_BR', child: Text('inst_settings_language_pt'.tr)),
+                    DropdownMenuItem(value: 'en_US', child: Text('inst_settings_language_en'.tr)),
+                  ],
+                  onChanged: controller.changeLanguage,
+>>>>>>> Stashed changes
                 )),
           ],
         ),
@@ -382,7 +392,7 @@ class _DropdownCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 DropdownButton<String>(
-                  value: value,
+                  value: items.any((i) => i.value == value) ? value : null,
                   items: items,
                   underline: const SizedBox.shrink(),
                   onChanged: (selected) {

@@ -39,9 +39,12 @@ class MigrationService extends GetxController {
       int skippedCount = 0;
       
       for (final patient in patients) {
-        final password = patient['password'] as String?;
+        final password = patient['password'] as String? ?? patient['senha'] as String?;
         
-        if (password != null && !password.contains(':')) {
+        // Não migrar senhas bcrypt (formato $2a$ ou $2b$) - usadas pelo backend
+        final isBcrypt = password != null && 
+            (password.startsWith(r'$2a$') || password.startsWith(r'$2b$'));
+        if (password != null && !password.contains(':') && !isBcrypt) {
           // Senha antiga sem salt - precisa migrar
           try {
             // Como não temos a senha em texto plano, vamos usar um hash temporário
@@ -94,10 +97,11 @@ class MigrationService extends GetxController {
       int resetRequiredCount = 0;
       
       for (final patient in allPatients) {
-        final password = patient['password'] as String?;
+        final password = patient['password'] as String? ?? patient['senha'] as String?;
         
         if (password != null) {
-          if (password.contains(':')) {
+          final isBcrypt = password.startsWith(r'$2a$') || password.startsWith(r'$2b$');
+          if (password.contains(':') || isBcrypt) {
             newPasswordCount++;
           } else {
             oldPasswordCount++;

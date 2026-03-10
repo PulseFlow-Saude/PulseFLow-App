@@ -183,15 +183,21 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
         onPressed: () => Get.toNamed(Routes.CRISE_GASTRITE_FORM),
         backgroundColor: const Color(0xFF00324A),
         icon: const Icon(Icons.add, color: Colors.white),
+<<<<<<< Updated upstream
         label: Text(
           'gastrite_new_crisis'.tr,
+=======
+          label: Text(
+          'crise_new'.tr,
+>>>>>>> Stashed changes
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
       ),
-      bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
+      // bottomNavigationBar removido - tela tem sidebar
+      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
     ));
   }
 
@@ -220,7 +226,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
+<<<<<<< Updated upstream
                   'gastrite_history_title'.tr,
+=======
+                  'crise_history_title'.tr,
+>>>>>>> Stashed changes
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -264,7 +274,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
               ),
               const SizedBox(width: 8),
               Text(
+<<<<<<< Updated upstream
                 'gastrite_filters'.tr,
+=======
+                'common_filters'.tr,
+>>>>>>> Stashed changes
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -281,7 +295,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
             children: [
               Expanded(
                 child: _buildFilterDropdown(
+<<<<<<< Updated upstream
                   hint: 'gastrite_filter_intensidade'.tr,
+=======
+                  hint: 'crise_intensity'.tr,
+>>>>>>> Stashed changes
                   icon: Icons.favorite_rounded,
                   value: _selectedIntensidade,
                   onTap: () {
@@ -293,7 +311,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: _buildFilterDropdown(
+<<<<<<< Updated upstream
                   hint: 'gastrite_filter_periodo'.tr,
+=======
+                  hint: 'crise_period'.tr,
+>>>>>>> Stashed changes
                   icon: Icons.date_range,
                   value: _selectedPeriodo,
                   onTap: () {
@@ -1034,7 +1056,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
+<<<<<<< Updated upstream
                   'gastrite_loading'.tr,
+=======
+                  'crise_loading'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w700,
@@ -1042,7 +1068,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
+<<<<<<< Updated upstream
                   'menstruacao_loading_sub'.tr,
+=======
+                  'menst_loading_sub'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                   ),
@@ -1105,7 +1135,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
+<<<<<<< Updated upstream
                   'gastrite_error_load'.tr,
+=======
+                  'crise_error_load'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.titleLarge.copyWith(
                     color: Colors.red.shade600,
                     fontWeight: FontWeight.w800,
@@ -1141,7 +1175,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   child: ElevatedButton.icon(
                     onPressed: _loadCrises,
                     icon: const Icon(Icons.refresh_rounded, size: 20),
+<<<<<<< Updated upstream
                     label: Text('evento_try_again'.tr),
+=======
+                    label: Text('common_try_again'.tr),
+>>>>>>> Stashed changes
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,
@@ -1210,7 +1248,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 32),
                 Text(
+<<<<<<< Updated upstream
                   'gastrite_empty_title'.tr,
+=======
+                  'crise_empty'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.titleLarge.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w800,
@@ -1218,7 +1260,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
+<<<<<<< Updated upstream
                   'gastrite_empty_subtitle'.tr,
+=======
+                  'crise_empty_sub'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                     height: 1.6,
@@ -1246,7 +1292,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   child: ElevatedButton.icon(
                     onPressed: () => Get.toNamed(Routes.CRISE_GASTRITE_FORM),
                     icon: const Icon(Icons.add_rounded, size: 22),
+<<<<<<< Updated upstream
                     label: Text('gastrite_register_first'.tr),
+=======
+                    label: Text('crise_register_first'.tr),
+>>>>>>> Stashed changes
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,
@@ -1334,7 +1384,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
           ),
           const SizedBox(height: 8),
           Text(
+<<<<<<< Updated upstream
             'gastrite_ajuste_filtros'.tr,
+=======
+            'crise_no_results'.tr,
+>>>>>>> Stashed changes
             style: AppTheme.bodySmall.copyWith(
               color: const Color(0xFF64748B),
             ),
@@ -1441,7 +1495,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 
                 // Título
                 Text(
+<<<<<<< Updated upstream
                   'gastrite_title'.tr,
+=======
+                  'crise_title'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.titleLarge.copyWith(
                     color: const Color(0xFF0F172A),
                     fontWeight: FontWeight.w800,
@@ -1485,7 +1543,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
+<<<<<<< Updated upstream
                                   'gastrite_sintomas_label'.tr,
+=======
+                                  'evt_symptoms_label'.tr,
+>>>>>>> Stashed changes
                                   style: AppTheme.bodySmall.copyWith(
                                     color: const Color(0xFF64748B),
                                     fontWeight: FontWeight.w500,
@@ -1528,7 +1590,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
+<<<<<<< Updated upstream
                                   'gastrite_medicacao_label'.tr,
+=======
+                                  'evt_medication'.tr,
+>>>>>>> Stashed changes
                                   style: AppTheme.bodySmall.copyWith(
                                     color: const Color(0xFF64748B),
                                     fontWeight: FontWeight.w500,
@@ -1576,7 +1642,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                             ),
                             const SizedBox(width: 8),
                             Text(
+<<<<<<< Updated upstream
                               'gastrite_observacoes_label'.tr,
+=======
+                              'crise_notes_label'.tr,
+>>>>>>> Stashed changes
                               style: AppTheme.bodySmall.copyWith(
                                 color: const Color(0xFF64748B),
                                 fontWeight: FontWeight.w600,
@@ -1624,7 +1694,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
+<<<<<<< Updated upstream
                             'gastrite_ver_detalhes'.tr,
+=======
+                            'common_view_details'.tr,
+>>>>>>> Stashed changes
                             style: AppTheme.bodySmall.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -1674,9 +1748,15 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     final dateOnly = DateTime(date.year, date.month, date.day);
 
     if (dateOnly == today) {
+<<<<<<< Updated upstream
       return 'intl_today'.tr;
     } else if (dateOnly == yesterday) {
       return 'intl_yesterday'.tr;
+=======
+      return 'common_today'.tr;
+    } else if (dateOnly == yesterday) {
+      return 'common_yesterday'.tr;
+>>>>>>> Stashed changes
     } else {
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     }
@@ -1738,7 +1818,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
+<<<<<<< Updated upstream
                         'gastrite_detalhes_crise'.tr,
+=======
+                        'crise_details'.tr,
+>>>>>>> Stashed changes
                         style: TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 22,
@@ -1776,12 +1860,21 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 children: [
                   // Informações básicas
                   _buildDetailSection(
+<<<<<<< Updated upstream
                     title: 'gastrite_info_registro'.tr,
                     icon: Icons.info_rounded,
                     children: [
                       _buildDetailRow('gastrite_label_data'.tr, '${crise.data.day.toString().padLeft(2, '0')}/${crise.data.month.toString().padLeft(2, '0')}/${crise.data.year} ${'intl_at'.tr} ${_formatTime(crise.data)}'),
                       _buildDetailRow('gastrite_intensidade'.tr, '${_getIntensidadeLabelKey(crise.intensidadeDor).tr} (${crise.intensidadeDor}/10)'),
                       _buildDetailRow('gastrite_title'.tr, 'gastrite_title'.tr),
+=======
+                    title: 'crise_reg_info'.tr,
+                    icon: Icons.info_rounded,
+                    children: [
+                      _buildDetailRow('crise_date'.tr, '${crise.data.day.toString().padLeft(2, '0')}/${crise.data.month.toString().padLeft(2, '0')}/${crise.data.year} às ${_formatTime(crise.data)}'),
+                      _buildDetailRow('crise_pain_intensity'.tr, '${_getIntensidadeLabel(crise.intensidadeDor)} (${crise.intensidadeDor}/10)'),
+                      _buildDetailRow('crise_reg_type'.tr, 'crise_title'.tr),
+>>>>>>> Stashed changes
                     ],
                   ),
                   
@@ -1792,8 +1885,13 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     title: '',
                     icon: Icons.description_rounded,
                     children: [
+<<<<<<< Updated upstream
                       Text(
                         'gastrite_sintomas_label'.tr + ':',
+=======
+                        Text(
+                        'evt_symptoms'.tr,
+>>>>>>> Stashed changes
                         style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 15,
@@ -1811,8 +1909,13 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
+<<<<<<< Updated upstream
                       Text(
                         'gastrite_label_alimentos'.tr + ':',
+=======
+                        Text(
+                        'crise_food_ingested'.tr,
+>>>>>>> Stashed changes
                         style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 15,
@@ -1835,7 +1938,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   if (crise.medicacao.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _buildDetailSection(
+<<<<<<< Updated upstream
                       title: 'evento_medicacao_title'.tr,
+=======
+                      title: 'evt_medication'.tr,
+>>>>>>> Stashed changes
                       icon: Icons.medication_rounded,
                       children: [
                         Text(
@@ -1860,7 +1967,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                             ),
                             const SizedBox(width: 8),
                             Text(
+<<<<<<< Updated upstream
                               '${'gastrite_alivio_title'.tr}: ${crise.alivioMedicacao ? 'common_yes'.tr : 'common_no'.tr}',
+=======
+                              'crise_relief_after'.trParams({'value': crise.alivioMedicacao ? 'menst_yes'.tr : 'menst_no'.tr}),
+>>>>>>> Stashed changes
                               style: TextStyle(
                                 color: crise.alivioMedicacao ? Colors.green : Colors.red,
                                 fontSize: 15,
@@ -1877,7 +1988,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   if (crise.observacoes.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _buildDetailSection(
+<<<<<<< Updated upstream
                       title: 'gastrite_observacoes_label'.tr,
+=======
+                      title: 'crise_notes_label'.tr,
+>>>>>>> Stashed changes
                       icon: Icons.note_alt_rounded,
                       children: [
                         Text(
@@ -1916,7 +2031,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     child: OutlinedButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close_rounded),
+<<<<<<< Updated upstream
                       label: Text('evento_fechar'.tr),
+=======
+                      label: Text('common_close'.tr),
+>>>>>>> Stashed changes
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF64748B),
                         side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1938,7 +2057,11 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         );
                       },
                       icon: const Icon(Icons.edit_rounded),
+<<<<<<< Updated upstream
                       label: Text('menstruacao_editar'.tr),
+=======
+                      label: Text('menst_edit'.tr),
+>>>>>>> Stashed changes
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E3A8A),
                         foregroundColor: Colors.white,

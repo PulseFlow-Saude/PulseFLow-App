@@ -55,7 +55,11 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+<<<<<<< Updated upstream
                       'menstruacao_calendar_title'.tr,
+=======
+                      'menst_calendar_title'.tr,
+>>>>>>> Stashed changes
                       style: AppTheme.titleMedium.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -63,7 +67,11 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                     ),
                     const SizedBox(height: 2),
                     Text(
+<<<<<<< Updated upstream
                       'menstruacao_calendar_subtitle'.tr,
+=======
+                      'menst_calendar_sub'.tr,
+>>>>>>> Stashed changes
                       style: AppTheme.bodySmall.copyWith(
                         color: Colors.white.withOpacity(0.9),
                       ),
@@ -226,10 +234,10 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                 return _buildDayMarker(day, menstruacao);
               },
               dowBuilder: (context, day) {
-                final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                final keys = ['menst_dow_sun', 'menst_dow_mon', 'menst_dow_tue', 'menst_dow_wed', 'menst_dow_thu', 'menst_dow_fri', 'menst_dow_sat'];
                 return Center(
                   child: Text(
-                    weekdays[day.weekday % 7],
+                    keys[day.weekday % 7].tr,
                     style: AppTheme.bodySmall.copyWith(
                       color: const Color(0xFF00324A),
                       fontWeight: FontWeight.w600,
@@ -291,7 +299,11 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
           child: Column(
             children: [
               Text(
+<<<<<<< Updated upstream
                 'menstruacao_legenda'.tr,
+=======
+                'menst_legend'.tr,
+>>>>>>> Stashed changes
                 style: AppTheme.bodyMedium.copyWith(
                   color: const Color(0xFF00324A),
                   fontWeight: FontWeight.w600,
@@ -301,9 +313,15 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+<<<<<<< Updated upstream
                   _buildLegendItem('menstruacao_fluxo_leve'.tr, const Color(0xFF10B981)),
                   _buildLegendItem('menstruacao_fluxo_moderado'.tr, const Color(0xFFF59E0B)),
                   _buildLegendItem('menstruacao_fluxo_intenso'.tr, const Color(0xFFEF4444)),
+=======
+                  _buildLegendItem('menst_flow_light'.tr, const Color(0xFF10B981)),
+                  _buildLegendItem('menst_flow_moderate'.tr, const Color(0xFFF59E0B)),
+                  _buildLegendItem('menst_flow_heavy'.tr, const Color(0xFFEF4444)),
+>>>>>>> Stashed changes
                 ],
               ),
             ],

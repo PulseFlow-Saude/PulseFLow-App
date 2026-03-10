@@ -845,12 +845,36 @@ class DatabaseService {
         } else {
           patientData['_id'] = patientData['_id'].toString();
         }
+        // Garantir que profilePhoto seja preservado (pode vir como BSON)
+        if (result['profilePhoto'] != null && patientData['profilePhoto'] == null) {
+          final raw = result['profilePhoto'];
+          patientData['profilePhoto'] = raw is String ? raw : raw.toString();
+        }
         
         return Patient.fromJson(patientData);
       }
       return null;
     } catch (e, stack) {
       rethrow;
+    }
+  }
+
+  /// Busca apenas o campo profilePhoto do paciente (fallback quando findOne não retorna)
+  Future<String?> getPatientProfilePhoto(String patientId) async {
+    try {
+      await _ensureConnection();
+      final collection = _db!.collection(DatabaseConfig.patientsCollection);
+      final objectId = ObjectId.parse(patientId);
+      final result = await collection.findOne(
+        where.id(objectId).fields(['profilePhoto']),
+      );
+      if (result == null) return null;
+      final raw = result['profilePhoto'];
+      if (raw == null) return null;
+      if (raw is String) return raw.isEmpty ? null : raw;
+      return raw.toString();
+    } catch (_) {
+      return null;
     }
   }
 
@@ -869,6 +893,11 @@ class DatabaseService {
           patientData['_id'] = (patientData['_id'] as ObjectId).toHexString();
         } else {
           patientData['_id'] = patientData['_id'].toString();
+        }
+        // Garantir que profilePhoto seja preservado (pode vir como BSON)
+        if (result['profilePhoto'] != null && patientData['profilePhoto'] == null) {
+          final raw = result['profilePhoto'];
+          patientData['profilePhoto'] = raw is String ? raw : raw.toString();
         }
         
         return Patient.fromJson(patientData);

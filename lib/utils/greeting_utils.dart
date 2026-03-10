@@ -3,12 +3,14 @@ DateTime _nowInBrazil(DateTime reference) {
   return utc.subtract(const Duration(hours: 3));
 }
 
+/// Retorna a chave de tradução da saudação (ex: 'greeting_dawn').
+/// Use .tr no resultado para obter o texto traduzido.
 String buildGreetingMessage({DateTime? reference}) {
   final base = reference ?? DateTime.now();
   final brazilNow = _nowInBrazil(base);
   final hour = brazilNow.hour;
-  if (hour < 6) return 'Boa madrugada,';
-  if (hour < 12) return 'Bom dia,';
-  if (hour < 18) return 'Boa tarde,';
-  return 'Boa noite,';
+  if (hour < 6) return 'greeting_dawn';
+  if (hour < 12) return 'greeting_morning';
+  if (hour < 18) return 'greeting_afternoon';
+  return 'greeting_evening';
 }

@@ -84,15 +84,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         ],
       );
     } else {
+      final isSmallHeight = size.height < 700;
       return Column(
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
-            flex: 1,
+            flex: isSmallHeight ? 3 : 2,
             child: _buildLogoSection(size),
           ),
           Expanded(
-            flex: 4,
+            flex: isSmallHeight ? 5 : 4,
             child: _buildFormSection(size),
           ),
         ],
@@ -101,13 +102,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
   }
 
   Widget _buildLogoSection(Size size) {
-    final availableHeight = size.height * 0.3; // Altura aproximada disponível para o logo
     final isSmallHeight = size.height < 700;
     final logoSize = isSmallHeight
-        ? (size.width * 0.25).clamp(60.0, 100.0)
+        ? (size.width * 0.22).clamp(50.0, 90.0)
         : (size.width * 0.35).clamp(80.0, 140.0);
-    final spacing = isSmallHeight ? 4.0 : size.height * 0.015;
+    final spacing = isSmallHeight ? 6.0 : size.height * 0.015;
+    final fontSize = isSmallHeight
+        ? (size.width * 0.045).clamp(16.0, 22.0)
+        : (size.width * 0.05).clamp(18.0, 28.0);
 
+<<<<<<< Updated upstream
     return Stack(
       children: [
         Center(
@@ -125,6 +129,33 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                 ),
                 SizedBox(height: spacing),
               ],
+=======
+    return Align(
+      alignment: Alignment.topCenter,
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(size.width * 0.06, 16, size.width * 0.06, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/pulseflow2.png',
+              width: logoSize,
+              height: logoSize,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(height: spacing),
+            Text(
+              'auth_forgot_title'.tr,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+>>>>>>> Stashed changes
             ),
           ),
         ),
@@ -188,6 +219,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
+<<<<<<< Updated upstream
           'forgot_logo_title'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -200,6 +232,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         const SizedBox(height: 10),
         Text(
           'forgot_title'.tr,
+=======
+          'auth_recover_password'.tr,
+>>>>>>> Stashed changes
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 28,
@@ -210,7 +245,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         ),
         SizedBox(height: 8),
         Text(
+<<<<<<< Updated upstream
           'forgot_subtitle'.tr,
+=======
+          'auth_code_sent_email'.tr,
+>>>>>>> Stashed changes
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,
@@ -233,9 +272,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         keyboardType: TextInputType.emailAddress,
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
+<<<<<<< Updated upstream
           labelText: 'forgot_email'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
           hintText: 'forgot_email_hint'.tr,
+=======
+          labelText: 'auth_email'.tr,
+          labelStyle: TextStyle(color: Colors.grey[600]),
+          hintText: 'auth_email_hint'.tr,
+>>>>>>> Stashed changes
           prefixIcon: Icon(Icons.email_outlined, color: const Color(0xFF00324A)),
           filled: true,
           fillColor: Colors.grey[50],
@@ -263,10 +308,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
+<<<<<<< Updated upstream
             return 'forgot_email_required'.tr;
           }
           if (!GetUtils.isEmail(value)) {
             return 'forgot_email_invalid'.tr;
+=======
+            return 'auth_email_required'.tr;
+          }
+          if (!GetUtils.isEmail(value)) {
+            return 'auth_email_invalid'.tr;
+>>>>>>> Stashed changes
           }
           return null;
         },
@@ -318,7 +370,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                   Icon(Icons.send, color: Colors.white, size: 20),
                   SizedBox(width: 8),
                   Text(
+<<<<<<< Updated upstream
                     'forgot_send_code'.tr,
+=======
+                    'auth_send_code'.tr,
+>>>>>>> Stashed changes
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -348,7 +404,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             Icon(Icons.arrow_back, color: const Color(0xFF00324A), size: 20),
             SizedBox(width: 8),
             Text(
+<<<<<<< Updated upstream
               'forgot_back_login'.tr,
+=======
+              'auth_back_login'.tr,
+>>>>>>> Stashed changes
               style: TextStyle(
                 color: const Color(0xFF00324A),
                 fontSize: 16,

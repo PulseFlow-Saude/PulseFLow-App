@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'config/app_config.dart';
 import 'firebase_options.dart';
 import 'theme/app_theme.dart';
 import 'routes/app_pages.dart';
@@ -21,22 +23,25 @@ import 'services/app_translations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // Status bar com ícones brancos (hora, bateria) para fundos escuros
+  SystemChrome.setSystemUIOverlayStyle(AppTheme.blueSystemOverlayStyle);
+
   try {
     await dotenv.load(fileName: ".env");
   } catch (e) {
     // Usar configurações padrão se .env não estiver disponível
   }
   
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    
-    // Registrar o handler de mensagens em background
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  } catch (e) {
-    // Continuar com notificações locais apenas
+  if (AppConfig.useFirebase) {
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    } catch (e) {
+      // Continuar com notificações locais apenas
+    }
   }
   
   final dbService = Get.put(DatabaseService());
@@ -55,6 +60,7 @@ void main() async {
   Get.put(LoginController());
   Get.put(EnxaquecaService());
   Get.put(DiabetesService());
+<<<<<<< Updated upstream
   Get.put(SettingsController());
   await SettingsController.ensureLoaded();
 
@@ -63,18 +69,22 @@ void main() async {
          } catch (e) {
            // Erro ao inicializar NotificationService
          }
+=======
+  final settingsController = Get.put(SettingsController());
+  await settingsController.ensurePreferencesLoaded();
 
-  // Verifica se precisa migrar senhas antigas
+  // Carrega traduções e locale ANTES de runApp e de NotificationService
+  final translations = AppTranslations();
+  Get.clearTranslations();
+  Get.addTranslations(translations.keys);
+  Get.fallbackLocale = const Locale('pt', 'BR');
+  Get.locale = settingsController.effectiveLocale;
+>>>>>>> Stashed changes
+
   try {
-    final migrationService = Get.find<MigrationService>();
-    final status = await migrationService.checkMigrationStatus();
-    
-    if (status['needsMigration']) {
-      // Executa migração automaticamente
-      await migrationService.migrateAllPasswords();
-    }
+    Get.put(NotificationService());
   } catch (e) {
-    // Silenciosamente falha se não conseguir verificar migração
+    // Erro ao inicializar NotificationService
   }
 
   runApp(const MyApp());
@@ -167,12 +177,14 @@ class MyApp extends StatelessWidget {
           Locale('de', 'DE'),
           Locale('zh', 'CN'),
         ],
-        locale: Locale(
-          settings.language.value.split('_').first,
-          settings.language.value.split('_').length > 1
-              ? settings.language.value.split('_')[1]
-              : '',
-        ),
+        locale: settings.effectiveLocale,
+        localeResolutionCallback: (locale, supportedLocales) {
+          if (locale == null) return const Locale('pt', 'BR');
+          for (final supported in supportedLocales) {
+            if (supported.languageCode == locale.languageCode) return supported;
+          }
+          return const Locale('pt', 'BR');
+        },
       );
     });
   }

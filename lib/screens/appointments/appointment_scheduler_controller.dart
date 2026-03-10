@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../services/database_service.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
+import '../../utils/specialty_translations.dart';
 
 class SpecialtyInfo {
   final String id;
@@ -243,8 +244,8 @@ class AppointmentSchedulerController extends GetxController {
         final id = (raw['id'] ?? raw['_id'] ?? '').toString();
         if (id.isEmpty) continue;
 
-        final name = (raw['nome'] ?? 'Profissional de saúde').toString();
-        final specialtyName = (raw['areaAtuacao'] ?? 'Especialidade não informada').toString();
+        final name = (raw['nome'] ?? 'appt_health_professional'.tr).toString();
+        final specialtyName = (raw['areaAtuacao'] ?? 'appt_specialty_not_informed'.tr).toString();
         final specialtyId = _normalizeSpecialtyId(specialtyName);
 
         var specialty = specialtyMap[specialtyId];
@@ -260,7 +261,7 @@ class AppointmentSchedulerController extends GetxController {
           specialtyIndex++;
         }
 
-        final crm = (raw['crm'] ?? 'CRM não informado').toString();
+        final crm = (raw['crm'] ?? 'appt_crm_not_informed'.tr).toString();
         final experience = _buildDoctorExperience(raw);
         final weeklySlots = _generateWeeklySlots(doctorList.length);
 
@@ -281,7 +282,7 @@ class AppointmentSchedulerController extends GetxController {
       doctors.assignAll(doctorList);
       _hasLoaded = true;
     } catch (e, stack) {
-      loadError.value = 'Não foi possível carregar os médicos. Tente novamente mais tarde.';
+      loadError.value = 'appt_load_error'.tr;
       debugPrint('Erro ao carregar médicos: $e\n$stack');
     } finally {
       isLoading.value = false;
@@ -304,7 +305,7 @@ class AppointmentSchedulerController extends GetxController {
   }
 
   String _buildSpecialtyDescription(String name) {
-    return 'Atendimento especializado em $name.';
+    return 'appt_specialty_desc'.trParams({'name': SpecialtyTranslations.translate(name)});
   }
 
   String _buildDoctorExperience(Map<String, dynamic> data) {
@@ -317,16 +318,16 @@ class AppointmentSchedulerController extends GetxController {
     final detalhes = <String>[];
     final local = [consultorio, cidade, estado].where((part) => part.isNotEmpty).join(', ');
     if (local.isNotEmpty) {
-      detalhes.add('Consultório em $local');
+      detalhes.add('appt_office_at'.trParams({'local': local}));
     }
 
     final contato = telefoneConsultorio.isNotEmpty ? telefoneConsultorio : telefonePessoal;
     if (contato.isNotEmpty) {
-      detalhes.add('Contato: $contato');
+      detalhes.add('appt_contact'.trParams({'contact': contato}));
     }
 
     if (detalhes.isEmpty) {
-      return 'Toque para visualizar a agenda disponível.';
+      return 'appt_tap_schedule'.tr;
     }
 
     return detalhes.join(' • ');
@@ -343,6 +344,7 @@ class AppointmentSchedulerController extends GetxController {
     return specialties
         .where((s) =>
             s.name.toLowerCase().contains(query) ||
+            SpecialtyTranslations.translate(s.name).toLowerCase().contains(query) ||
             s.description.toLowerCase().contains(query))
         .toList();
   }
@@ -425,9 +427,9 @@ class AppointmentSchedulerController extends GetxController {
           final medicoId = agendamento['medicoId']?.toString() ?? 
                           agendamento['medicoId']?['_id']?.toString() ?? '';
           final medicoNome = agendamento['medicoId']?['nome']?.toString() ?? 
-                            'Médico não informado';
+                            'appt_doctor_not_informed'.tr;
           final areaAtuacao = agendamento['medicoId']?['areaAtuacao']?.toString() ?? 
-                             'Especialidade não informada';
+                             'appt_specialty_not_informed'.tr;
           
           DateTime startTime;
           int duracao;
@@ -765,8 +767,8 @@ class AppointmentSchedulerController extends GetxController {
 
     if (doctor == null || slot == null || specialty == null) {
       Get.snackbar(
-        'Informações incompletas',
-        'Selecione especialidade, médico, data e horário disponíveis.',
+        'appt_incomplete_info'.tr,
+        'appt_incomplete_info_msg'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.orange.shade100,
         colorText: const Color(0xFF1E293B),
@@ -780,8 +782,8 @@ class AppointmentSchedulerController extends GetxController {
       
       if (patient == null || patient.id == null) {
         Get.snackbar(
-          'Erro',
-          'Não foi possível identificar o paciente. Faça login novamente.',
+          'appt_error'.tr,
+          'appt_error_patient'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red.shade100,
           colorText: const Color(0xFF1E293B),
@@ -805,8 +807,8 @@ class AppointmentSchedulerController extends GetxController {
       
       if (startTime.isBefore(DateTime.now())) {
         Get.snackbar(
-          'Data inválida',
-          'A data e horário da consulta deve ser futura.',
+          'appt_invalid_date'.tr,
+          'appt_date_must_be_future'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.orange.shade100,
           colorText: const Color(0xFF1E293B),
@@ -816,8 +818,8 @@ class AppointmentSchedulerController extends GetxController {
 
       if (!_isSlotAvailable(doctor.id, selectedDate.value, slot)) {
         Get.snackbar(
-          'Horário indisponível',
-          'Este horário já foi reservado. Por favor, escolha outro horário.',
+          'appt_slot_unavailable'.tr,
+          'appt_slot_unavailable_msg'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.orange.shade100,
           colorText: const Color(0xFF1E293B),
@@ -838,7 +840,7 @@ class AppointmentSchedulerController extends GetxController {
         horaInicio: horaInicio,
         horaFim: horaFim,
         tipoConsulta: 'presencial',
-        motivoConsulta: 'Consulta agendada pelo paciente',
+        motivoConsulta: 'appt_booked_by_patient'.tr,
         duracao: duracaoConsulta,
       );
 
@@ -868,8 +870,8 @@ class AppointmentSchedulerController extends GetxController {
       await _carregarAgendamentosPaciente();
 
       Get.snackbar(
-        'Consulta agendada',
-        'Seu horário com ${doctor.name} foi reservado com sucesso.',
+        'appt_booked_success'.tr,
+        'appt_booked_success_msg'.trParams({'name': doctor.name}),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green.shade100,
         colorText: const Color(0xFF1E293B),
@@ -885,17 +887,17 @@ class AppointmentSchedulerController extends GetxController {
       if (errorMessage.toLowerCase().contains('já existe') || 
           errorMessage.toLowerCase().contains('horário') ||
           errorMessage.toLowerCase().contains('conflito')) {
-        errorMessage = 'Este horário já foi reservado. Por favor, escolha outro horário.';
+        errorMessage = 'appt_slot_unavailable_msg'.tr;
       } else if (errorMessage.toLowerCase().contains('token') || 
                  errorMessage.toLowerCase().contains('sessão')) {
-        errorMessage = 'Sua sessão expirou. Por favor, faça login novamente.';
+        errorMessage = 'appt_session_expired'.tr;
       } else if (errorMessage.toLowerCase().contains('data') && 
                  errorMessage.toLowerCase().contains('futura')) {
-        errorMessage = 'A data e horário da consulta deve ser futura.';
+        errorMessage = 'appt_date_must_be_future'.tr;
       }
       
       Get.snackbar(
-        'Erro ao agendar',
+        'appt_error_booking'.tr,
         errorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100,
@@ -932,8 +934,8 @@ class AppointmentSchedulerController extends GetxController {
       await _carregarAgendamentosPaciente();
 
       Get.snackbar(
-        'Consulta cancelada',
-        'Seu agendamento foi cancelado com sucesso.',
+        'appt_cancelled_success'.tr,
+        'appt_cancelled_success_msg'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green.shade100,
         colorText: const Color(0xFF1E293B),
@@ -948,13 +950,13 @@ class AppointmentSchedulerController extends GetxController {
       
       if (errorMessage.toLowerCase().contains('token') || 
           errorMessage.toLowerCase().contains('sessão')) {
-        errorMessage = 'Sua sessão expirou. Por favor, faça login novamente.';
+        errorMessage = 'appt_session_expired'.tr;
       } else if (errorMessage.toLowerCase().contains('não encontrado')) {
-        errorMessage = 'Agendamento não encontrado. Pode já ter sido cancelado.';
+        errorMessage = 'appt_not_found'.tr;
       }
       
       Get.snackbar(
-        'Erro ao cancelar',
+        'appt_error_cancel'.tr,
         errorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100,

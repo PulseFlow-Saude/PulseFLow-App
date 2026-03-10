@@ -128,7 +128,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
               ],
       ),
-      bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
+      // bottomNavigationBar removido - tela tem sidebar
+      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
     ));
   }
 
@@ -157,8 +158,13 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
+<<<<<<< Updated upstream
                   'mrec_title'.tr,
                   style: const TextStyle(
+=======
+                  'med_history_title'.tr,
+                  style: TextStyle(
+>>>>>>> Stashed changes
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -201,8 +207,13 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
               ),
               const SizedBox(width: 8),
               Text(
+<<<<<<< Updated upstream
                 'mrec_filters'.tr,
                 style: const TextStyle(
+=======
+                'common_filters'.tr,
+                style: TextStyle(
+>>>>>>> Stashed changes
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -218,7 +229,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
             children: [
               Expanded(
                 child: _buildEnhancedDropdown(
+<<<<<<< Updated upstream
                   hint: 'mrec_especialidade'.tr,
+=======
+                  hint: 'med_specialty'.tr,
+>>>>>>> Stashed changes
                   icon: Icons.category_outlined,
                   value: _selectedEspecialidade,
                   onTap: () {
@@ -230,7 +245,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
               const SizedBox(width: 8),
               Expanded(
                 child: _buildEnhancedDropdown(
+<<<<<<< Updated upstream
                   hint: 'mrec_medico'.tr,
+=======
+                  hint: 'med_doctor'.tr,
+>>>>>>> Stashed changes
                   icon: Icons.person_search,
                   value: _selectedMedico,
                   onTap: () {
@@ -932,7 +951,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 24),
                 Text(
+<<<<<<< Updated upstream
                   'mrec_loading'.tr,
+=======
+                  'med_loading'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w700,
@@ -940,7 +963,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 8),
                 Text(
+<<<<<<< Updated upstream
                   'mrec_loading_subtitle'.tr,
+=======
+                  'menst_loading_sub'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                   ),
@@ -1003,7 +1030,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 32),
                 Text(
+<<<<<<< Updated upstream
                   'mrec_empty_title'.tr,
+=======
+                  'med_empty'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.titleLarge.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w800,
@@ -1011,7 +1042,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 12),
                 Text(
+<<<<<<< Updated upstream
                   'mrec_empty_subtitle'.tr,
+=======
+                  'med_empty_sub'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                     height: 1.6,
@@ -1075,7 +1110,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 32),
                 Text(
+<<<<<<< Updated upstream
                   'mrec_no_results_title'.tr,
+=======
+                  'med_no_results'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.titleLarge.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w800,
@@ -1083,7 +1122,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 12),
                 Text(
+<<<<<<< Updated upstream
                   'mrec_no_results_subtitle'.tr,
+=======
+                  'med_no_results_sub'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                     height: 1.6,
@@ -1258,7 +1301,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
+<<<<<<< Updated upstream
                                   'mrec_medico_responsavel'.tr,
+=======
+                                  'med_responsible'.tr,
+>>>>>>> Stashed changes
                                   style: AppTheme.bodySmall.copyWith(
                                     color: const Color(0xFF64748B),
                                     fontWeight: FontWeight.w500,
@@ -1289,7 +1336,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 Row(
                   children: [
                     Text(
+<<<<<<< Updated upstream
                       'mrec_tap_details'.tr,
+=======
+                      'common_tap_details'.tr,
+>>>>>>> Stashed changes
                       style: AppTheme.bodySmall.copyWith(
                         color: const Color(0xFF64748B),
                         fontWeight: FontWeight.w500,
@@ -1305,8 +1356,13 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+<<<<<<< Updated upstream
                           Text(
                             'mrec_ver_detalhes'.tr,
+=======
+                            Text(
+                            'common_view_details'.tr,
+>>>>>>> Stashed changes
                             style: AppTheme.bodySmall.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -1624,6 +1680,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 children: [
                   // Informações básicas
                   _buildDetailSection(
+<<<<<<< Updated upstream
                     title: 'mrec_info_registro'.tr,
                     icon: Icons.info_rounded,
                     children: [
@@ -1631,6 +1688,15 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                       _buildDetailRow('mrec_data_atendimento_label'.tr, _formatDate(record.data)),
                       _buildDetailRow('mrec_medico_responsavel'.tr, record.medico),
                       _buildDetailRow('mrec_tipo_consulta'.tr, 'mrec_consulta_regular'.tr),
+=======
+                    title: 'med_reg_info'.tr,
+                    icon: Icons.info_rounded,
+                    children: [
+                      _buildDetailRow('med_specialty'.tr, record.categoria),
+                      _buildDetailRow('med_date_attendance'.tr, _formatDate(record.data)),
+                      _buildDetailRow('med_responsible'.tr, record.medico),
+                      _buildDetailRow('evt_consult_type'.tr, 'med_consult_regular'.tr),
+>>>>>>> Stashed changes
                     ],
                   ),
                   
@@ -1638,7 +1704,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   
                   // Descrição do registro
                   _buildDetailSection(
+<<<<<<< Updated upstream
                     title: 'mrec_registro_clinico'.tr,
+=======
+                    title: 'med_clinical_record'.tr,
+>>>>>>> Stashed changes
                     icon: Icons.description_rounded,
                     children: [
                       Text(
@@ -1675,7 +1745,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                     child: OutlinedButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close_rounded),
+<<<<<<< Updated upstream
                       label: Text('mrec_fechar'.tr),
+=======
+                      label: Text('common_close'.tr),
+>>>>>>> Stashed changes
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF64748B),
                         side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1694,7 +1768,11 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                         await _exportRecordToPdf(record);
                       },
                       icon: const Icon(Icons.picture_as_pdf_rounded),
+<<<<<<< Updated upstream
                       label: Text('mrec_exportar_pdf'.tr),
+=======
+                      label: Text('common_export_pdf'.tr),
+>>>>>>> Stashed changes
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E3A8A),
                         foregroundColor: Colors.white,

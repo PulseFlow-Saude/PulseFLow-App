@@ -6,6 +6,7 @@ import '../../utils/intl_locale.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../theme/app_theme.dart';
+import '../institutional/settings_controller.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../../widgets/pulse_drawer_button.dart';
@@ -199,7 +200,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
+<<<<<<< Updated upstream
                         'menstruacao_cycle_saved_title'.tr,
+=======
+                        'menst_registered'.tr,
+>>>>>>> Stashed changes
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -216,7 +221,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                   child: Column(
                     children: [
                       Text(
+<<<<<<< Updated upstream
                         'menstruacao_cycle_saved_msg'.tr,
+=======
+                        'menst_registered_msg'.tr,
+>>>>>>> Stashed changes
                         style: TextStyle(
                           fontSize: 16,
                           color: AppTheme.textSecondary,
@@ -244,7 +253,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                             ),
                           ),
                           child: Text(
+<<<<<<< Updated upstream
                             'menstruacao_ver_calendario'.tr,
+=======
+                            'menst_view_calendar'.tr,
+>>>>>>> Stashed changes
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -268,7 +281,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
       _formKey.currentState!.save();
 
       if (_dataFim.isBefore(_dataInicio)) {
+<<<<<<< Updated upstream
         Get.snackbar('common_error'.tr, 'menstruacao_error_data_fim'.tr,
+=======
+        Get.snackbar('common_error'.tr, 'menst_error_end_date'.tr,
+>>>>>>> Stashed changes
             backgroundColor: AppTheme.error, colorText: Colors.white);
         return;
       }
@@ -298,7 +315,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
         _showSuccessAlert();
         
       } catch (e) {
+<<<<<<< Updated upstream
         Get.snackbar('common_error'.tr, '${'menstruacao_error_falha_salvar'.tr}: $e',
+=======
+        Get.snackbar('common_error'.tr, '${'menst_error_save'.tr}: $e',
+>>>>>>> Stashed changes
             backgroundColor: AppTheme.error, colorText: Colors.white);
       } finally {
         setState(() {
@@ -363,7 +384,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+<<<<<<< Updated upstream
                   widget.menstruacao == null ? 'menstruacao_new_cycle'.tr : 'menstruacao_edit_cycle'.tr,
+=======
+                  widget.menstruacao == null ? 'menst_new_cycle'.tr : 'menst_edit_cycle'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.titleLarge.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.w700,
@@ -371,7 +396,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                   ),
                 ),
                 Text(
+<<<<<<< Updated upstream
                   'menstruacao_register_cycle'.tr,
+=======
+                  'menst_register_sub'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.bodyMedium.copyWith(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
@@ -463,7 +492,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                     Text(
+<<<<<<< Updated upstream
                             'menstruacao_selecione_periodo'.tr,
+=======
+                            'menst_select_period'.tr,
+>>>>>>> Stashed changes
                       style: AppTheme.titleLarge.copyWith(
                               color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w800,
@@ -472,7 +505,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                     ),
                           const SizedBox(height: 4),
                     Text(
+<<<<<<< Updated upstream
                             'menstruacao_toque_datas'.tr,
+=======
+                            'menst_tap_dates'.tr,
+>>>>>>> Stashed changes
                       style: AppTheme.bodyMedium.copyWith(
                               color: AppTheme.textSecondary,
                               fontSize: 14,
@@ -533,10 +570,17 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                       Expanded(
                         child: Text(
                           _selectedStartDate == null 
+<<<<<<< Updated upstream
                               ? 'menstruacao_toque_inicio'.tr
                               : _selectedEndDate == null
                                   ? 'menstruacao_toque_fim'.tr
                                   : 'menstruacao_periodo_ok'.tr,
+=======
+                              ? 'menst_tap_start'.tr
+                              : _selectedEndDate == null
+                                  ? 'menst_tap_end'.tr
+                                  : 'menst_period_success'.tr,
+>>>>>>> Stashed changes
                           style: AppTheme.bodyLarge.copyWith(
                             color: _selectedStartDate != null && _selectedEndDate != null
                                 ? AppTheme.success
@@ -569,7 +613,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
+<<<<<<< Updated upstream
                         _buildModernDateIndicator('menstruacao_inicio'.tr, _selectedStartDate!),
+=======
+                        _buildModernDateIndicator('menst_start'.tr, _selectedStartDate!),
+>>>>>>> Stashed changes
                           Container(
                             width: 1,
                           height: 50,
@@ -585,7 +633,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                             ),
                           ),
                         ),
+<<<<<<< Updated upstream
                         _buildModernDateIndicator('menstruacao_fim'.tr, _selectedEndDate),
+=======
+                        _buildModernDateIndicator('menst_end'.tr, _selectedEndDate),
+>>>>>>> Stashed changes
                         ],
                       ),
                     ),
@@ -657,7 +709,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                         Text(
+<<<<<<< Updated upstream
                               'menstruacao_periodo_selecionado'.tr,
+=======
+                              'menst_period_selected'.tr,
+>>>>>>> Stashed changes
                               style: AppTheme.titleMedium.copyWith(
                                 color: AppTheme.textPrimary,
                                 fontWeight: FontWeight.w700,
@@ -686,7 +742,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                         },
                         icon: Icon(Icons.edit_rounded, color: AppTheme.primaryBlue, size: 16),
                         label: Text(
+<<<<<<< Updated upstream
                           'menstruacao_alterar'.tr,
+=======
+                          'menst_change'.tr,
+>>>>>>> Stashed changes
                           style: AppTheme.bodyMedium.copyWith(
                             color: AppTheme.primaryBlue,
                             fontWeight: FontWeight.w600,
@@ -709,13 +769,21 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
+<<<<<<< Updated upstream
                         _buildProfessionalStatItem('menstruacao_duracao'.tr, '${_dataFim.difference(_dataInicio).inDays + 1} ${'menstruacao_dias'.tr}'),
+=======
+                        _buildProfessionalStatItem('menst_duration'.tr, '${_dataFim.difference(_dataInicio).inDays + 1} ${'menst_days'.tr}'),
+>>>>>>> Stashed changes
                         Container(
                           width: 1,
                           height: 40,
                           color: AppTheme.secondaryBlue.withOpacity(0.3),
                         ),
+<<<<<<< Updated upstream
                         _buildProfessionalStatItem('menstruacao_dias'.tr, '${_dataFim.difference(_dataInicio).inDays + 1}'),
+=======
+                        _buildProfessionalStatItem('menst_days'.tr, '${_dataFim.difference(_dataInicio).inDays + 1}'),
+>>>>>>> Stashed changes
                       ],
                     ),
                   ),
@@ -758,7 +826,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                           Text(
+<<<<<<< Updated upstream
                               'menstruacao_detalhes_diarios'.tr,
+=======
+                              'menst_daily_details'.tr,
+>>>>>>> Stashed changes
                               style: AppTheme.titleMedium.copyWith(
                                 color: AppTheme.textPrimary,
                                 fontWeight: FontWeight.w700,
@@ -766,7 +838,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                               ),
                             ),
                           Text(
+<<<<<<< Updated upstream
                               'menstruacao_toque_editar'.tr,
+=======
+                              'menst_tap_edit'.tr,
+>>>>>>> Stashed changes
                               style: AppTheme.bodySmall.copyWith(
                                 color: AppTheme.textSecondary,
                                 fontSize: 12,
@@ -782,7 +858,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
+<<<<<<< Updated upstream
                           'menstruacao_editar'.tr,
+=======
+                          'menst_edit'.tr,
+>>>>>>> Stashed changes
                           style: AppTheme.bodySmall.copyWith(
                             color: AppTheme.primaryBlue,
                             fontWeight: FontWeight.w600,
@@ -825,7 +905,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                           const SizedBox(width: 12),
                       Expanded(
                         child: Text(
+<<<<<<< Updated upstream
                           'menstruacao_editar_detalhes'.tr,
+=======
+                          'menst_edit_hint'.tr,
+>>>>>>> Stashed changes
                           style: AppTheme.bodySmall.copyWith(
                             color: const Color(0xFF6B7280),
                               fontWeight: FontWeight.w500,
@@ -876,7 +960,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
+<<<<<<< Updated upstream
                                 'menstruacao_registrar_completo'.tr,
+=======
+                                'menst_register_complete'.tr,
+>>>>>>> Stashed changes
                                 style: AppTheme.titleMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -953,7 +1041,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
         if (date != null) ...[
           const SizedBox(height: 2),
           Text(
+<<<<<<< Updated upstream
             AppDateFormat.monthShort(date.month),
+=======
+            DateFormat('MMM', Get.find<SettingsController>().effectiveLocale.toString()).format(date),
+>>>>>>> Stashed changes
             style: AppTheme.bodySmall.copyWith(
               color: AppTheme.primaryBlue,
               fontWeight: FontWeight.w600,
@@ -988,6 +1080,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+<<<<<<< Updated upstream
                     Obx(() => FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
@@ -1001,11 +1094,20 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+=======
+                    Text(
+                      _capitalizeFirst(DateFormat('MMMM yyyy', Get.find<SettingsController>().effectiveLocale.toString()).format(_currentMonth)),
+                      style: AppTheme.titleLarge.copyWith(
+                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 22,
+                        letterSpacing: -0.5,
+>>>>>>> Stashed changes
                       ),
                     )),
                     const SizedBox(height: 4),
                     Text(
-                      'Selecione o período do ciclo',
+                      'menst_select_period_hint'.tr,
                       style: AppTheme.bodySmall.copyWith(
                         color: AppTheme.textSecondary,
                         fontSize: 13,
@@ -1105,6 +1207,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
               width: 1.5,
             ),
           ),
+<<<<<<< Updated upstream
           child: Obx(() => Row(
             children: List.generate(7, (i) {
               final short = AppDateFormat.weekdayShort(i + 1);
@@ -1113,6 +1216,14 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                 child: Center(
                   child: Text(
                     char,
+=======
+          child: Row(
+            children: ['menst_dow_sun', 'menst_dow_mon', 'menst_dow_tue', 'menst_dow_wed', 'menst_dow_thu', 'menst_dow_fri', 'menst_dow_sat'].map((key) => 
+              Expanded(
+                child: Center(
+                  child: Text(
+                    key.tr,
+>>>>>>> Stashed changes
                     style: AppTheme.bodyMedium.copyWith(
                       color: AppTheme.textSecondary,
                       fontWeight: FontWeight.w700,
@@ -1295,7 +1406,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                     ),
                   ),
                   Text(
+<<<<<<< Updated upstream
                     AppDateFormat.monthShort(data.month),
+=======
+                    DateFormat('MMM', Get.find<SettingsController>().effectiveLocale.toString()).format(data),
+>>>>>>> Stashed changes
                     style: AppTheme.bodySmall.copyWith(
                       color: Colors.white.withOpacity(0.9),
                       fontWeight: FontWeight.w600,
@@ -1315,7 +1430,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                 children: [
                   // Dia da semana
                   Text(
+<<<<<<< Updated upstream
                     AppDateFormat.weekdayLong(data),
+=======
+                    DateFormat('EEEE', Get.find<SettingsController>().effectiveLocale.toString()).format(data),
+>>>>>>> Stashed changes
                     style: AppTheme.titleSmall.copyWith(
                       color: AppTheme.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -1328,18 +1447,30 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                   Row(
                     children: [
                       Expanded(
+<<<<<<< Updated upstream
                         child: _buildProfessionalSummaryItem('menstruacao_flujo'.tr, dia.fluxo.isEmpty ? 'menstruacao_nao_definido'.tr : dia.fluxo, _getFluxoColor(dia.fluxo)),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: _buildProfessionalSummaryItem('menstruacao_colica'.tr, dia.teveColica ? 'common_yes'.tr : 'common_no'.tr, 
+=======
+                        child: _buildProfessionalSummaryItem('menst_flow'.tr, dia.fluxo.isEmpty ? 'menst_not_defined'.tr : _translateFluxo(dia.fluxo), _getFluxoColor(dia.fluxo)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildProfessionalSummaryItem('menst_cramp'.tr, dia.teveColica ? 'menst_yes'.tr : 'menst_no'.tr, 
+>>>>>>> Stashed changes
                             dia.teveColica ? const Color(0xFFEF4444) : AppTheme.textSecondary),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   // Segunda linha: Humor ocupando toda a largura
+<<<<<<< Updated upstream
                   _buildProfessionalSummaryItem('menstruacao_humor'.tr, dia.humor.isEmpty ? 'menstruacao_nao_definido'.tr : dia.humor, AppTheme.textSecondary),
+=======
+                  _buildProfessionalSummaryItem('menst_mood'.tr, dia.humor.isEmpty ? 'menst_not_defined'.tr : _translateHumor(dia.humor), AppTheme.textSecondary),
+>>>>>>> Stashed changes
                 ],
               ),
             ),
@@ -1391,6 +1522,38 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
   }
 
 
+
+  String _translateFluxo(String fluxo) {
+    switch (fluxo) {
+      case 'Leve':
+        return 'menst_flow_light'.tr;
+      case 'Moderado':
+        return 'menst_flow_moderate'.tr;
+      case 'Intenso':
+        return 'menst_flow_heavy'.tr;
+      default:
+        return fluxo.isEmpty ? 'menst_not_defined'.tr : fluxo;
+    }
+  }
+
+  String _translateHumor(String humor) {
+    switch (humor.toLowerCase()) {
+      case 'feliz':
+        return 'menst_mood_happy'.tr;
+      case 'normal':
+        return 'menst_mood_normal'.tr;
+      case 'triste':
+        return 'menst_mood_sad'.tr;
+      case 'ansioso':
+        return 'menst_mood_anxious'.tr;
+      case 'raiva':
+        return 'menst_mood_angry'.tr;
+      case 'cansado':
+        return 'menst_mood_tired'.tr;
+      default:
+        return humor.isEmpty ? 'menst_not_defined'.tr : humor;
+    }
+  }
 
   Color _getFluxoColor(String fluxo) {
     switch (fluxo) {
@@ -1461,7 +1624,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
+<<<<<<< Updated upstream
                             '${data.day} ${AppDateFormat.monthShort(data.month)}',
+=======
+                            '${data.day} de ${DateFormat('MMMM', Get.find<SettingsController>().effectiveLocale.toString()).format(data)}',
+>>>>>>> Stashed changes
                             style: AppTheme.titleLarge.copyWith(
         color: Colors.white,
                               fontWeight: FontWeight.w700,
@@ -1469,7 +1636,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                             ),
                           ),
                           Text(
+<<<<<<< Updated upstream
                             AppDateFormat.weekdayLong(data),
+=======
+                            DateFormat('EEEE', Get.find<SettingsController>().effectiveLocale.toString()).format(data),
+>>>>>>> Stashed changes
                             style: AppTheme.bodyMedium.copyWith(
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 14,
@@ -1522,8 +1693,13 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                               ),
                               const SizedBox(width: 12),
               Expanded(
+<<<<<<< Updated upstream
                 child: Text(
                                   'menstruacao_configure_dia'.tr,
+=======
+                                child: Text(
+                                  'menst_configure_day'.tr,
+>>>>>>> Stashed changes
                                   style: AppTheme.bodyMedium.copyWith(
                                     color: AppTheme.textPrimary,
                                     fontWeight: FontWeight.w600,
@@ -1564,7 +1740,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
+<<<<<<< Updated upstream
                                     'menstruacao_flujo'.tr,
+=======
+                                    'menst_flow_menstrual'.tr,
+>>>>>>> Stashed changes
                     style: AppTheme.titleMedium.copyWith(
                                       color: AppTheme.textPrimary,
                       fontWeight: FontWeight.w700,
@@ -1611,7 +1791,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                   ),
                                   const SizedBox(width: 12),
                     Text(
+<<<<<<< Updated upstream
                                     'menstruacao_sintomas_humor'.tr,
+=======
+                                    'menst_symptoms_mood'.tr,
+>>>>>>> Stashed changes
                                     style: AppTheme.titleMedium.copyWith(
                                       color: AppTheme.textPrimary,
                                       fontWeight: FontWeight.w700,
@@ -1686,7 +1870,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                             size: 20,
                                           ),
                                           const SizedBox(width: 8),
-                                          Text('Detalhes do dia ${data.day} salvos!'),
+                                          Text('menst_saved_day'.trParams({'day': data.day.toString()})),
                                         ],
                                       ),
                                       backgroundColor: AppTheme.success,
@@ -1701,7 +1885,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                 },
                                 style: AppTheme.primaryButtonStyle,
                                 child: Text(
+<<<<<<< Updated upstream
                                   'common_save'.tr,
+=======
+                                  'menst_save'.tr,
+>>>>>>> Stashed changes
                                   style: AppTheme.bodyMedium.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -1754,16 +1942,20 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
 
   Widget _buildTempFluxoSection(String tempFluxo, Function(String) onChanged) {
     final fluxoOptions = [
-      {'value': 'Leve', 'color': const Color(0xFF10B981)},
-      {'value': 'Moderado', 'color': const Color(0xFFF59E0B)},
-      {'value': 'Intenso', 'color': const Color(0xFFEF4444)},
+      {'value': 'Leve', 'key': 'menst_flow_light', 'color': const Color(0xFF10B981)},
+      {'value': 'Moderado', 'key': 'menst_flow_moderate', 'color': const Color(0xFFF59E0B)},
+      {'value': 'Intenso', 'key': 'menst_flow_heavy', 'color': const Color(0xFFEF4444)},
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
+<<<<<<< Updated upstream
           'menstruacao_flujo'.tr,
+=======
+          'menst_flow'.tr,
+>>>>>>> Stashed changes
           style: AppTheme.bodyMedium.copyWith(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -1792,7 +1984,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                     ),
                   ),
                   child: Text(
-                        option['value'] as String,
+                        (option['key'] as String).tr,
                     textAlign: TextAlign.center,
                     style: AppTheme.bodyMedium.copyWith(
                           color: isSelected 
@@ -1816,7 +2008,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
+<<<<<<< Updated upstream
           'menstruacao_colica'.tr,
+=======
+          'menst_cramp'.tr,
+>>>>>>> Stashed changes
           style: AppTheme.bodyMedium.copyWith(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -1849,7 +2045,11 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
+<<<<<<< Updated upstream
                   tempTeveColica ? 'common_yes'.tr : 'common_no'.tr,
+=======
+                  tempTeveColica ? 'menst_yes'.tr : 'menst_no'.tr,
+>>>>>>> Stashed changes
                   style: AppTheme.bodyMedium.copyWith(
                     color: tempTeveColica ? const Color(0xFFEF4444) : const Color(0xFF6B7280),
                     fontWeight: FontWeight.w700,
@@ -1866,19 +2066,23 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
 
   Widget _buildTempHumorSection(String tempHumor, Function(String) onChanged) {
     final humorOptions = [
-      {'value': 'Feliz', 'emoji': '😊'},
-      {'value': 'Normal', 'emoji': '😐'},
-      {'value': 'Triste', 'emoji': '😢'},
-      {'value': 'Ansioso', 'emoji': '😰'},
-      {'value': 'Raiva', 'emoji': '😠'},
-      {'value': 'Cansado', 'emoji': '😴'},
+      {'value': 'Feliz', 'key': 'menst_mood_happy', 'emoji': '😊'},
+      {'value': 'Normal', 'key': 'menst_mood_normal', 'emoji': '😐'},
+      {'value': 'Triste', 'key': 'menst_mood_sad', 'emoji': '😢'},
+      {'value': 'Ansioso', 'key': 'menst_mood_anxious', 'emoji': '😰'},
+      {'value': 'Raiva', 'key': 'menst_mood_angry', 'emoji': '😠'},
+      {'value': 'Cansado', 'key': 'menst_mood_tired', 'emoji': '😴'},
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
+<<<<<<< Updated upstream
           'menstruacao_humor'.tr,
+=======
+          'menst_mood'.tr,
+>>>>>>> Stashed changes
           style: AppTheme.bodyMedium.copyWith(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -1895,7 +2099,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
           child: DropdownButton<String>(
             value: tempHumor.isEmpty ? null : tempHumor,
             hint: Text(
-              'Selecione o humor',
+              'menst_select_mood'.tr,
               style: AppTheme.bodySmall.copyWith(
                 color: const Color(0xFF9CA3AF),
                 fontWeight: FontWeight.w500,
@@ -1919,7 +2123,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      option['value'] as String,
+                      (option['key'] as String).tr,
                       style: AppTheme.bodyMedium.copyWith(
                         color: Colors.black,
                         fontWeight: FontWeight.w500,
