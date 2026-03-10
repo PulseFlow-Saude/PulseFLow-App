@@ -794,38 +794,7 @@ class AuthService extends GetxController {
     }
   }
 
-<<<<<<< Updated upstream
-  /// Textos do e-mail de redefinição de senha por idioma (idioma do app).
-  Map<String, String> _getPasswordResetEmailTexts(String languageCode) {
-    final isEn = languageCode.toLowerCase().startsWith('en');
-    if (isEn) {
-      return {
-        'fromName': 'PulseFlow Health',
-        'subject': 'Password Reset - PulseFlow Health',
-        'title': 'Password Reset',
-        'intro': 'Hello! You requested a password reset on PulseFlow Health.',
-        'codeInstruction': 'Use the code below to reset your password:',
-        'expiry': 'This code expires in 10 minutes.',
-        'ignore': 'If you did not request this reset, please ignore this email.',
-        'footer': 'PulseFlow Health - Caring for your health with technology',
-      };
-    }
-    return {
-      'fromName': 'PulseFlow Saúde',
-      'subject': 'Redefinição de Senha - PulseFlow Saúde',
-      'title': 'Redefinição de Senha',
-      'intro': 'Olá! Você solicitou a redefinição da sua senha no PulseFlow Saúde.',
-      'codeInstruction': 'Use o código abaixo para redefinir sua senha:',
-      'expiry': 'Este código expira em 10 minutos.',
-      'ignore': 'Se você não solicitou esta redefinição, ignore este e-mail.',
-      'footer': 'PulseFlow Saúde - Cuidando da sua saúde com tecnologia',
-    };
-  }
-
-  // Envia e-mail de redefinição de senha no idioma selecionado no app
-=======
   // Envia e-mail de redefinição de senha (traduzido conforme idioma do usuário/dispositivo)
->>>>>>> Stashed changes
   Future<void> sendPasswordResetEmail(String email, String code) async {
     try {
       final user = AppConfig.emailUser;
@@ -835,23 +804,12 @@ class AuthService extends GetxController {
         throw 'Configuração de email não encontrada. Verifique EMAIL_USER e EMAIL_PASS no .env';
       }
 
-<<<<<<< Updated upstream
-      final languageCode = Get.locale?.languageCode ?? 'pt';
-      final t = _getPasswordResetEmailTexts(languageCode);
-
-      final smtpServer = _getSmtpServer(user, pass);
-      final message = Message()
-        ..from = Address(user, t['fromName']!)
-        ..recipients.add(email)
-        ..subject = t['subject']!
-=======
       final t = EmailTranslationsHelper.getEmailTranslationsSync();
       final smtpServer = _getSmtpServer(user, pass);
       final message = Message()
         ..from = Address(user, t['email_from_name']!)
         ..recipients.add(email)
         ..subject = t['email_reset_subject']!
->>>>>>> Stashed changes
         ..html = '''
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa; padding: 20px;">
             <div style="background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
@@ -859,17 +817,6 @@ class AuthService extends GetxController {
                 <div style="background-color: #1CB5E0; width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
                   <span style="color: white; font-size: 24px;">🔐</span>
                 </div>
-<<<<<<< Updated upstream
-                <h1 style="color: #222B45; margin: 0; font-size: 24px;">${t['title']}</h1>
-              </div>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-                ${t['intro']}
-              </p>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
-                ${t['codeInstruction']}
-=======
                 <h1 style="color: #222B45; margin: 0; font-size: 24px;">${t['email_reset_heading']}</h1>
               </div>
               
@@ -879,7 +826,6 @@ class AuthService extends GetxController {
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
                 ${t['email_reset_code_usage']}
->>>>>>> Stashed changes
               </p>
               
               <div style="background-color: #1CB5E0; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 30px;">
@@ -887,28 +833,16 @@ class AuthService extends GetxController {
               </div>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-<<<<<<< Updated upstream
-                <strong>${t['expiry']}</strong>
-              </p>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-                ${t['ignore']}
-=======
                 <strong>${t['email_reset_expiry']}</strong>
               </p>
               
               <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
                 ${t['email_reset_ignore']}
->>>>>>> Stashed changes
               </p>
               
               <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
               <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
-<<<<<<< Updated upstream
-                ${t['footer']}
-=======
                 ${t['email_reset_footer']}
->>>>>>> Stashed changes
               </p>
             </div>
           </div>

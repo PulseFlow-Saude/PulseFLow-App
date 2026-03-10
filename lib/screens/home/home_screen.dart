@@ -10,7 +10,6 @@ import '../../utils/specialty_translations.dart';
 import 'home_controller.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
-import '../../widgets/language_icon_button.dart';
 import 'package:flutter/services.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -140,22 +139,6 @@ class HomeScreen extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.language_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                    tooltip: 'Idioma',
-                    onPressed: () => LanguageIconButton.showLanguageModal(context),
-                  ),
                   Obx(() => IconButton(
                     icon: Stack(
                       children: [

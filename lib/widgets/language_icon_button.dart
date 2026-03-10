@@ -14,14 +14,10 @@ class LanguageOption {
   final String name;
 }
 
-/// Lista de idiomas principais no seletor (com bandeira e nome).
+/// Lista de idiomas no seletor (apenas Português e Inglês).
 const List<LanguageOption> kLanguageOptions = [
   LanguageOption(localeCode: 'pt_BR', flag: '🇧🇷', name: 'Português'),
   LanguageOption(localeCode: 'en_US', flag: '🇺🇸', name: 'English'),
-  LanguageOption(localeCode: 'es_ES', flag: '🇪🇸', name: 'Español'),
-  LanguageOption(localeCode: 'fr_FR', flag: '🇫🇷', name: 'Français'),
-  LanguageOption(localeCode: 'de_DE', flag: '🇩🇪', name: 'Deutsch'),
-  LanguageOption(localeCode: 'zh_CN', flag: '🇨🇳', name: '中文 (Mandarim)'),
 ];
 
 /// Ícone para o canto superior (AppBar) que abre o seletor de idioma em grid.

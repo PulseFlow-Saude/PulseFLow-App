@@ -77,9 +77,6 @@ String _classificarDuracaoKey(int horas) {
   return 'enxaqueca_prolonged';
 }
 
-<<<<<<< Updated upstream
-String classificarDuracaoHoras(int horas) => _classificarDuracaoKey(horas).tr;
-=======
 String _intensidadeKey(String intensidade) {
   final valor = int.tryParse(intensidade) ?? 0;
   if (valor <= 0) return 'enx_pain_none';
@@ -97,7 +94,6 @@ String _duracaoKey(int horas) {
   if (horas <= 3) return 'enx_duration_moderate';
   return 'enx_duration_prolonged';
 }
->>>>>>> Stashed changes
 
 class EnxaquecaScreen extends StatelessWidget {
   final String pacienteId;
@@ -121,25 +117,8 @@ class EnxaquecaScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF00324A),
         elevation: 0,
-<<<<<<< Updated upstream
-        title: Text('enxaqueca_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-        leading: Obx(() => mostrarGrafico.value
-            ? const PulseDrawerButton(iconSize: 22)
-            : IconButton(
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
-                ),
-                onPressed: () => Get.back(),
-              )),
-=======
         title: Text('enx_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
         leading: const PulseDrawerButton(iconSize: 22),
->>>>>>> Stashed changes
         centerTitle: true,
       ),
       body: Container(
@@ -179,13 +158,8 @@ class EnxaquecaScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-<<<<<<< Updated upstream
-                              'enxaqueca_pain_intensity'.tr,
-                              style: TextStyle(
-=======
                               'enx_pain_intensity'.tr,
                               style: const TextStyle(
->>>>>>> Stashed changes
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF00324A),
@@ -250,13 +224,8 @@ class EnxaquecaScreen extends StatelessWidget {
                         TextField(
                           controller: duracaoController,
                           decoration: InputDecoration(
-<<<<<<< Updated upstream
-                            labelText: 'enxaqueca_duration'.tr,
-                            hintText: 'enxaqueca_duration_hint'.tr,
-=======
                             labelText: 'enx_duration_label'.tr,
                             hintText: 'enx_duration_hint'.tr,
->>>>>>> Stashed changes
                           ),
                           keyboardType: TextInputType.number,
                         ),
@@ -273,11 +242,7 @@ class EnxaquecaScreen extends StatelessWidget {
                                 initialDate: dataSelecionada.value ?? hoje,
                                 firstDate: DateTime(2000),
                                 lastDate: DateTime(hoje.year, hoje.month, hoje.day),
-<<<<<<< Updated upstream
-                                helpText: 'enxaqueca_date_episode'.tr,
-=======
                                 helpText: 'common_date_episode'.tr,
->>>>>>> Stashed changes
                                 cancelText: 'common_cancel'.tr,
                                 confirmText: 'common_confirm'.tr,
                                 builder: (context, child) {
@@ -333,11 +298,7 @@ class EnxaquecaScreen extends StatelessWidget {
                                 ),
                                 onPressed: () async {
                                   if (dataSelecionada.value == null) {
-<<<<<<< Updated upstream
-                                    Get.snackbar('common_date_required'.tr, 'enxaqueca_date_episode'.tr);
-=======
                                     Get.snackbar('common_data_required'.tr, 'common_date_episode'.tr);
->>>>>>> Stashed changes
                                     return;
                                   }
                                   await controller.adicionarRegistro(
@@ -350,11 +311,7 @@ class EnxaquecaScreen extends StatelessWidget {
                                   duracaoController.clear();
                                   intensidadeSelecionada.value = 0;
                                   dataSelecionada.value = null;
-<<<<<<< Updated upstream
-                                  Get.snackbar('common_success'.tr, 'enxaqueca_saved'.tr);
-=======
                                   Get.snackbar('common_success'.tr, 'enx_saved'.tr);
->>>>>>> Stashed changes
                                 },
                                 child: Text('common_register'.tr, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                               ),
@@ -442,15 +399,9 @@ class EnxaquecaScreen extends StatelessWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-<<<<<<< Updated upstream
-                                        Row(children: [const Icon(Icons.health_and_safety, color: Color(0xFF00324A), size: 16), const SizedBox(width: 8), Text('${'enxaqueca_intensity_label'.tr}: ${item.intensidade}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))]),
-                                        const SizedBox(height: 4),
-                                        Row(children: [const Icon(Icons.timer, color: Color(0xFF00324A), size: 14), const SizedBox(width: 6), Text('${'enxaqueca_duration_label'.tr}: ${item.duracao} h', style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))]),
-=======
                                         Row(children: [const Icon(Icons.health_and_safety, color: Color(0xFF00324A), size: 16), const SizedBox(width: 8), Text('${'enx_intensity'.tr} ${item.intensidade}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))]),
                                         const SizedBox(height: 4),
                                         Row(children: [const Icon(Icons.timer, color: Color(0xFF00324A), size: 14), const SizedBox(width: 6), Text('${'enx_duration'.tr} ${item.duracao} h', style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))]),
->>>>>>> Stashed changes
                                         const SizedBox(height: 4),
                                         Wrap(
                                           spacing: 8,
@@ -480,11 +431,7 @@ class EnxaquecaScreen extends StatelessWidget {
                               }
                             },
                             child: Text(
-<<<<<<< Updated upstream
-                              'enxaqueca_ref'.tr,
-=======
                               'enx_ref'.tr,
->>>>>>> Stashed changes
                               textAlign: TextAlign.center,
                               style: const TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
                             ),
@@ -521,11 +468,7 @@ Widget _buildChipIntensidade(String intensidade) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)),
-<<<<<<< Updated upstream
-    child: Text(classificarIntensidade(intensidade).tr, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600)),
-=======
     child: Text(_intensidadeKey(intensidade).tr, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600)),
->>>>>>> Stashed changes
   );
 }
 
@@ -534,11 +477,7 @@ Widget _buildChipDuracao(int horas) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     decoration: BoxDecoration(color: const Color(0xFF00324A).withOpacity(0.10), borderRadius: BorderRadius.circular(16)),
-<<<<<<< Updated upstream
-    child: Text(classificarDuracaoHoras(horas).tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12, fontWeight: FontWeight.w600)),
-=======
     child: Text(_duracaoKey(horas).tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12, fontWeight: FontWeight.w600)),
->>>>>>> Stashed changes
   );
 }
 
@@ -570,11 +509,7 @@ class _GraficoEnxaqueca extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-<<<<<<< Updated upstream
-                      Text('enxaqueca_evolution'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
-=======
                       Text('enx_evolution'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
->>>>>>> Stashed changes
                       const SizedBox(height: 4),
                       FittedBox(
                         fit: BoxFit.scaleDown,
@@ -691,11 +626,7 @@ class _GraficoEnxaqueca extends StatelessWidget {
                   onPressed: onPrevMonth,
                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
                   icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16),
-<<<<<<< Updated upstream
-                  label: Text('common_prev'.tr, style: const TextStyle(color: Colors.white, fontSize: 12)),
-=======
                   label: Text('common_previous'.tr, style: const TextStyle(color: Colors.white, fontSize: 12)),
->>>>>>> Stashed changes
                 ),
                 ElevatedButton.icon(
                   onPressed: onNextMonth,
@@ -727,15 +658,9 @@ class _MigraineAnalysisSection extends StatelessWidget {
           decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15))),
               child: Row(
                 children: [
-<<<<<<< Updated upstream
-                  Expanded(child: Column(children: [Text('diabetes_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMenorIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
-                  Expanded(child: Column(children: [Text('diabetes_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMediaIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
-                  Expanded(child: Column(children: [Text('diabetes_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMaiorIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
-=======
                   Expanded(child: Column(children: [Text('common_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMenorIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
                   Expanded(child: Column(children: [Text('common_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMediaIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
                   Expanded(child: Column(children: [Text('common_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMaiorIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
->>>>>>> Stashed changes
                 ],
               ),
             ),

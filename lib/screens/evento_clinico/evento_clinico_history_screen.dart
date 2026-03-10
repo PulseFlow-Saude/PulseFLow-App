@@ -116,16 +116,6 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
 
   String _getIntensidadeLabelKey(int intensidade) {
     switch (intensidade) {
-<<<<<<< Updated upstream
-      case 0: return 'pain_0_10';
-      case 1: case 2: return 'pain_1_2_10';
-      case 3: case 4: return 'pain_3_4_10';
-      case 5: case 6: return 'pain_5_6_10';
-      case 7: case 8: return 'pain_7_8_10';
-      case 9: return 'pain_9_10';
-      case 10: return 'pain_10_10';
-      default: return 'pain_0_10';
-=======
       case 0:
         return 'evt_pain_none'.tr;
       case 1:
@@ -146,7 +136,6 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
         return 'evt_pain_unbearable'.tr;
       default:
         return 'evt_pain_none'.tr;
->>>>>>> Stashed changes
     }
   }
 
@@ -206,11 +195,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
         backgroundColor: const Color(0xFF00324A),
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text(
-<<<<<<< Updated upstream
-          'evento_new_event'.tr,
-=======
           'evt_new_event'.tr,
->>>>>>> Stashed changes
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -247,11 +232,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-<<<<<<< Updated upstream
-                  'evento_history_title'.tr,
-=======
                   'evt_history_title'.tr,
->>>>>>> Stashed changes
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -315,11 +296,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                 child: Row(
                   children: [
                     Text(
-<<<<<<< Updated upstream
-                      'evento_filters'.tr,
-=======
                       'common_filters'.tr,
->>>>>>> Stashed changes
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -339,11 +316,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             children: [
               Expanded(
                 child: _buildEnhancedDropdown(
-<<<<<<< Updated upstream
-                  hint: 'evento_filter_especialidade'.tr,
-=======
                   hint: 'evt_specialty'.tr,
->>>>>>> Stashed changes
                   value: _selectedEspecialidade,
                   icon: Icons.medical_services_rounded,
                   onTap: () {
@@ -355,11 +328,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
               const SizedBox(width: 8),
               Expanded(
                 child: _buildEnhancedDropdown(
-<<<<<<< Updated upstream
-                  hint: 'evento_filter_tipo'.tr,
-=======
                   hint: 'evt_type'.tr,
->>>>>>> Stashed changes
                   value: _selectedTipo,
                   icon: Icons.event_note_rounded,
                   onTap: () {
@@ -371,11 +340,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
               const SizedBox(width: 8),
               Expanded(
                 child: _buildEnhancedDropdown(
-<<<<<<< Updated upstream
-                  hint: 'evento_filter_intensidade'.tr,
-=======
                   hint: 'evt_pain'.tr,
->>>>>>> Stashed changes
                   value: _selectedIntensidadeDor,
                   icon: Icons.favorite_rounded,
                   onTap: () {
@@ -512,13 +477,8 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
   void _showEspecialidadeFilter(List<String> especialidades) {
     if (especialidades.isEmpty) {
       Get.snackbar(
-<<<<<<< Updated upstream
-        'evento_filter_label'.tr,
-        'evento_no_especialidade'.tr,
-=======
         'common_filters'.tr,
         'evt_no_specialty'.tr,
->>>>>>> Stashed changes
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -574,11 +534,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                         children: [
                           Expanded(
                             child: Text(
-<<<<<<< Updated upstream
-                              'evento_filter_by_especialidade'.tr,
-=======
                               'evt_filter_specialty'.tr,
->>>>>>> Stashed changes
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -606,11 +562,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                       child: TextField(
                         controller: searchController,
                         decoration: InputDecoration(
-<<<<<<< Updated upstream
-                          hintText: 'evento_search_especialidade'.tr,
-=======
                           hintText: 'evt_search_specialty'.tr,
->>>>>>> Stashed changes
                           prefixIcon: const Icon(Icons.search_rounded),
                           filled: true,
                           fillColor: const Color(0xFFF1F5F9),
@@ -654,13 +606,8 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                               Expanded(
                                 child: Text(
                                   query.isEmpty
-<<<<<<< Updated upstream
-                                      ? 'evento_no_especialidade'.tr
-                                      : 'evento_no_especialidade'.tr,
-=======
                                       ? 'evt_no_specialty_avail'.tr
                                       : 'evt_no_specialty_found'.trParams({'query': query}),
->>>>>>> Stashed changes
                                   style: const TextStyle(
                                     fontSize: 13,
                                     color: Color(0xFF475569),
@@ -740,13 +687,8 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
   void _showTipoFilter(List<String> tipos) {
     if (tipos.isEmpty) {
       Get.snackbar(
-<<<<<<< Updated upstream
-        'evento_filter_label'.tr,
-        'evento_no_tipo'.tr,
-=======
         'common_filters'.tr,
         'evt_no_type'.tr,
->>>>>>> Stashed changes
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -789,11 +731,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                     children: [
                       Expanded(
                         child: Text(
-<<<<<<< Updated upstream
-                          'evento_filter_by_tipo'.tr,
-=======
                           'evt_filter_type'.tr,
->>>>>>> Stashed changes
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -871,13 +809,8 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
   void _showIntensidadeFilter(List<String> intensidades) {
     if (intensidades.isEmpty) {
       Get.snackbar(
-<<<<<<< Updated upstream
-        'evento_filter_label'.tr,
-        'evento_no_intensidade'.tr,
-=======
         'common_filters'.tr,
         'evt_no_pain'.tr,
->>>>>>> Stashed changes
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -920,11 +853,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                     children: [
                       Expanded(
                         child: Text(
-<<<<<<< Updated upstream
-                          'evento_filter_by_intensidade'.tr,
-=======
                           'evt_filter_pain'.tr,
->>>>>>> Stashed changes
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -1011,15 +940,6 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
 
   String _getIntensityFilterLabelKey(int intensidade) {
     switch (_getIntensityBucket(intensidade)) {
-<<<<<<< Updated upstream
-      case 0: return 'pain_0_10';
-      case 1: return 'pain_1_2_10';
-      case 2: return 'pain_3_4_10';
-      case 3: return 'pain_5_6_10';
-      case 4: return 'pain_7_8_10';
-      case 5: return 'pain_9_10';
-      default: return 'pain_10_10';
-=======
       case 0:
         return '${'evt_pain_none'.tr} (0/10)';
       case 1:
@@ -1034,7 +954,6 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
         return '${'evt_pain_very_intense'.tr} (9/10)';
       default:
         return '${'evt_pain_unbearable'.tr} (10/10)';
->>>>>>> Stashed changes
     }
   }
 
@@ -1056,11 +975,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
           ),
           const SizedBox(height: 24),
           Text(
-<<<<<<< Updated upstream
-            'evento_loading'.tr,
-=======
             'evt_loading'.tr,
->>>>>>> Stashed changes
             style: TextStyle(
               color: Color(0xFF64748B),
               fontSize: 16,
@@ -1105,11 +1020,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             ),
             const SizedBox(height: 24),
             Text(
-<<<<<<< Updated upstream
-              'evento_error_load'.tr,
-=======
               'evt_error_load'.tr,
->>>>>>> Stashed changes
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -1129,11 +1040,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             ElevatedButton.icon(
               onPressed: _loadEventos,
               icon: const Icon(Icons.refresh, color: Colors.white),
-<<<<<<< Updated upstream
-              label: Text('evento_try_again'.tr),
-=======
               label: Text('common_try_again'.tr),
->>>>>>> Stashed changes
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00324A),
                 foregroundColor: Colors.white,
@@ -1183,11 +1090,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             ),
             const SizedBox(height: 24),
             Text(
-<<<<<<< Updated upstream
-              'evento_empty_title'.tr,
-=======
               'evt_empty'.tr,
->>>>>>> Stashed changes
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -1196,11 +1099,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             ),
             const SizedBox(height: 12),
             Text(
-<<<<<<< Updated upstream
-              'evento_empty_subtitle'.tr,
-=======
               'evt_empty_sub'.tr,
->>>>>>> Stashed changes
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Color(0xFF64748B),
@@ -1214,11 +1113,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                 Get.toNamed('/evento-clinico-form');
               },
               icon: const Icon(Icons.add, color: Colors.white),
-<<<<<<< Updated upstream
-              label: Text('evento_register_first'.tr),
-=======
               label: Text('evt_register_first'.tr),
->>>>>>> Stashed changes
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF00324A),
                 foregroundColor: Colors.white,
@@ -1257,13 +1152,8 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
               Expanded(
                 child: Text(
                   _filteredEventos.length == 1
-<<<<<<< Updated upstream
-                      ? 'evento_events_found_one'.tr
-                      : 'evento_events_found_count'.trParams({'count': '${_filteredEventos.length}'}),
-=======
                       ? '${_filteredEventos.length} ${'common_record'.tr} ${'common_found'.tr}'
                       : '${_filteredEventos.length} ${'common_records'.tr} ${'common_found_plural'.tr}',
->>>>>>> Stashed changes
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -1474,11 +1364,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                 Row(
                   children: [
                     Text(
-<<<<<<< Updated upstream
-                      'evento_tap_details'.tr,
-=======
                       'common_tap_details'.tr,
->>>>>>> Stashed changes
                       style: TextStyle(
                         fontSize: 13,
                         color: Color(0xFF666666),
@@ -1504,13 +1390,8 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-<<<<<<< Updated upstream
-                          Text(
-                            'evento_ver_detalhes'.tr,
-=======
                             Text(
                             'common_view_details'.tr,
->>>>>>> Stashed changes
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -1622,11 +1503,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-<<<<<<< Updated upstream
-                        evento.titulo.isNotEmpty ? evento.titulo : 'evento_detalhes_titulo'.tr,
-=======
                         evento.titulo.isNotEmpty ? evento.titulo : 'evt_details'.tr,
->>>>>>> Stashed changes
                         style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 22,
@@ -1664,21 +1541,12 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                 children: [
                   // Informações básicas
                   _buildDetailSection(
-<<<<<<< Updated upstream
-                    title: 'evento_info_registro'.tr,
-                    icon: Icons.info_rounded,
-                    children: [
-                      _buildDetailRow('evento_especialidade'.tr, evento.especialidade),
-                      _buildDetailRow('evento_data_atendimento'.tr, _formatDate(evento.dataHora)),
-                      _buildDetailRow('evento_tipo_consulta'.tr, _displayTipoEvento(evento.tipoEvento)),
-=======
                     title: 'evt_reg_info'.tr,
                     icon: Icons.info_rounded,
                     children: [
                       _buildDetailRow('evt_specialty_label'.tr, SpecialtyTranslations.translate(evento.especialidade)),
                       _buildDetailRow('evt_date_attendance'.tr, _formatDate(evento.dataHora)),
-                      _buildDetailRow('evt_consult_type'.tr, evento.tipoEvento),
->>>>>>> Stashed changes
+                      _buildDetailRow('evt_consult_type'.tr, _displayTipoEvento(evento.tipoEvento)),
                     ],
                   ),
                   
@@ -1692,11 +1560,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                       children: [
                         if (evento.descricao.isNotEmpty) ...[
                           Text(
-<<<<<<< Updated upstream
-                            'evento_descricao_label'.tr,
-=======
                             'evt_desc'.tr,
->>>>>>> Stashed changes
                             style: const TextStyle(
                               color: Color(0xFF1F2937),
                               fontSize: 15,
@@ -1717,11 +1581,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                         ],
                         if (evento.sintomas.isNotEmpty) ...[
                           Text(
-<<<<<<< Updated upstream
-                            'evento_sintomas_label'.tr,
-=======
                             'evt_symptoms'.tr,
->>>>>>> Stashed changes
                             style: const TextStyle(
                               color: Color(0xFF1F2937),
                               fontSize: 15,
@@ -1742,11 +1602,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                         ],
                         if (int.tryParse(evento.intensidadeDor) != null && int.tryParse(evento.intensidadeDor)! > 0) ...[
                           Text(
-<<<<<<< Updated upstream
-                            'evento_intensidade_dor'.tr + ':',
-=======
                             'evt_pain_intensity'.tr,
->>>>>>> Stashed changes
                             style: const TextStyle(
                               color: Color(0xFF1F2937),
                               fontSize: 15,
@@ -1783,11 +1639,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                   if (evento.alivio.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _buildDetailSection(
-<<<<<<< Updated upstream
-                      title: 'evento_medicacao_title'.tr,
-=======
                       title: 'evt_medication'.tr,
->>>>>>> Stashed changes
                       icon: Icons.medication_rounded,
                       children: [
                         Text(
@@ -1827,11 +1679,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                     child: OutlinedButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close_rounded),
-<<<<<<< Updated upstream
-                      label: Text('evento_fechar'.tr),
-=======
                       label: Text('common_close'.tr),
->>>>>>> Stashed changes
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF64748B),
                         side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1850,11 +1698,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                         await _exportEventoToPdf(evento);
                       },
                       icon: const Icon(Icons.picture_as_pdf_rounded),
-<<<<<<< Updated upstream
-                      label: Text('evento_export_pdf'.tr),
-=======
                       label: Text('common_export_pdf'.tr),
->>>>>>> Stashed changes
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E3A8A),
                         foregroundColor: Colors.white,
@@ -2029,13 +1873,8 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                   pw.SizedBox(height: 12),
                   _pdfInfoRow('Título do evento', _fallbackValue(evento.titulo, fallback: 'Sem título informado')),
                   _pdfInfoRow('Paciente', patientName),
-<<<<<<< Updated upstream
-                  _pdfInfoRow('Especialidade', evento.especialidade),
-                  _pdfInfoRow('evento_tipo_consulta'.tr, _displayTipoEvento(evento.tipoEvento)),
-=======
                   _pdfInfoRow('Especialidade', SpecialtyTranslations.translate(evento.especialidade)),
-                  _pdfInfoRow('Tipo do evento', evento.tipoEvento),
->>>>>>> Stashed changes
+                  _pdfInfoRow('evt_consult_type'.tr, _displayTipoEvento(evento.tipoEvento)),
                   _pdfInfoRow('Data do atendimento', atendimentoEm),
                   if (int.tryParse(evento.intensidadeDor) != null && int.tryParse(evento.intensidadeDor)! > 0)
                     _pdfInfoRow(
@@ -2146,13 +1985,8 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
       await file.writeAsBytes(savedBytes, flush: true);
 
       Get.snackbar(
-<<<<<<< Updated upstream
-        'evento_pdf_exported'.tr,
-        'evento_file_saved_as'.trParams({'filename': filename}),
-=======
         'evt_pdf_exported'.tr,
         'evt_file_saved'.trParams({'filename': filename}),
->>>>>>> Stashed changes
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -2163,13 +1997,8 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
       final openResult = await OpenFilex.open(file.path);
       if (openResult.type != ResultType.done) {
         Get.snackbar(
-<<<<<<< Updated upstream
-          'evento_open_file'.tr,
-          'evento_could_not_open_pdf'.tr,
-=======
           'evt_open_file'.tr,
           'evt_cannot_open'.trParams({'path': file.path}),
->>>>>>> Stashed changes
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.orange.shade100,
           colorText: const Color(0xFF1E293B),

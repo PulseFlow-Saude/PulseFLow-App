@@ -29,25 +29,8 @@ class PressaoScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF00324A),
         elevation: 0,
-<<<<<<< Updated upstream
-        title: Text('pressao_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-        leading: Obx(() => mostrarGrafico.value
-            ? const PulseDrawerButton(iconSize: 22)
-            : IconButton(
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
-                ),
-                onPressed: () => Get.back(),
-              )),
-=======
         title: Text('press_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
         leading: const PulseDrawerButton(iconSize: 22),
->>>>>>> Stashed changes
         centerTitle: true,
       ),
       body: Container(
@@ -80,11 +63,7 @@ class PressaoScreen extends StatelessWidget {
                             const SizedBox(height: 16),
                             TextField(
                               controller: pressaoController,
-<<<<<<< Updated upstream
-                              decoration: InputDecoration(labelText: 'pressao_label'.tr, hintText: 'pressao_hint'.tr),
-=======
                               decoration: InputDecoration(labelText: 'press_label'.tr, hintText: 'press_hint'.tr),
->>>>>>> Stashed changes
                               keyboardType: TextInputType.text,
                             ),
                             const SizedBox(height: 16),
@@ -98,11 +77,7 @@ class PressaoScreen extends StatelessWidget {
                                     initialDate: dataSelecionada.value ?? hoje,
                                     firstDate: DateTime(2000),
                                     lastDate: DateTime(hoje.year, hoje.month, hoje.day),
-<<<<<<< Updated upstream
-                                    helpText: 'pressao_date_measure'.tr,
-=======
                                     helpText: 'common_date_measurement'.tr,
->>>>>>> Stashed changes
                                     cancelText: 'common_cancel'.tr,
                                     confirmText: 'common_confirm'.tr,
                                   );
@@ -125,31 +100,19 @@ class PressaoScreen extends StatelessWidget {
                                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                                     onPressed: () async {
                                       if (dataSelecionada.value == null) {
-<<<<<<< Updated upstream
-                                        Get.snackbar('common_date_required'.tr, 'pressao_date_measure'.tr);
-=======
                                         Get.snackbar('common_data_required'.tr, 'common_date_measurement'.tr);
->>>>>>> Stashed changes
                                         return;
                                       }
                                       final raw = pressaoController.text.trim();
                                       final match = RegExp(r'^(\d{2,3})\s*/\s*(\d{2,3})$').firstMatch(raw);
                                       if (match == null) {
-<<<<<<< Updated upstream
-                                        Get.snackbar('pressao_invalid_format'.tr, 'pressao_invalid_format'.tr);
-=======
                                         Get.snackbar('press_format_invalid'.tr, 'press_format_msg'.tr);
->>>>>>> Stashed changes
                                         return;
                                       }
                                       final sis = double.tryParse(match.group(1)!);
                                       final dia = double.tryParse(match.group(2)!);
                                       if (sis == null || dia == null) {
-<<<<<<< Updated upstream
-                                        Get.snackbar('pressao_invalid_values'.tr, 'pressao_invalid_values'.tr);
-=======
                                         Get.snackbar('press_values_invalid'.tr, 'press_values_msg'.tr);
->>>>>>> Stashed changes
                                         return;
                                       }
                                       await controller.adicionarRegistro(
@@ -160,11 +123,7 @@ class PressaoScreen extends StatelessWidget {
                                       );
                                       pressaoController.clear();
                                       dataSelecionada.value = null;
-<<<<<<< Updated upstream
-                                      Get.snackbar('common_success'.tr, 'pressao_saved'.tr);
-=======
                                       Get.snackbar('common_success'.tr, 'press_saved'.tr);
->>>>>>> Stashed changes
                                     },
                                     child: Text('common_register'.tr, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                                   ),
@@ -244,11 +203,7 @@ class PressaoScreen extends StatelessWidget {
                               }
                             },
                             child: Text(
-<<<<<<< Updated upstream
-                              'pressao_ref'.tr,
-=======
                               'press_ref'.tr,
->>>>>>> Stashed changes
                               textAlign: TextAlign.center,
                               style: const TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
                             ),
@@ -301,11 +256,7 @@ class PressaoScreen extends StatelessWidget {
     }
     final statusKey = status == 'Normal' ? 'press_status_normal' : status == 'Elevada' ? 'press_status_elevated' : status == 'Hipertensão estágio 1' ? 'press_status_ha1' : status == 'Hipertensão estágio 2' ? 'press_status_ha2' : 'press_status_undefined';
     return [
-<<<<<<< Updated upstream
-      Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)), child: Text(_pressaoStatusKey(status).tr, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600))),
-=======
       Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)), child: Text(statusKey.tr, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600))),
->>>>>>> Stashed changes
     ];
   }
 
@@ -340,11 +291,7 @@ class _GraficoPressao extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-<<<<<<< Updated upstream
-          Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('pressao_record_title'.tr, overflow: TextOverflow.ellipsis, maxLines: 1, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)), const SizedBox(height: 4), FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis))])), IconButton(onPressed: onClose, icon: const Icon(Icons.close, color: Color(0xFF00324A), size: 20))]),
-=======
           Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('press_chart_title'.tr, overflow: TextOverflow.ellipsis, maxLines: 1, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)), const SizedBox(height: 4), Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))])), IconButton(onPressed: onClose, icon: const Icon(Icons.close, color: Color(0xFF00324A), size: 20))]),
->>>>>>> Stashed changes
           const SizedBox(height: 20),
           if (data.isEmpty) ...[
             Padding(
@@ -408,11 +355,7 @@ class _GraficoPressao extends StatelessWidget {
           ],
           const SizedBox(height: 16),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-<<<<<<< Updated upstream
-            ElevatedButton.icon(onPressed: onPrevMonth, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16), label: Text('common_prev'.tr, style: const TextStyle(color: Colors.white, fontSize: 12))),
-=======
             ElevatedButton.icon(onPressed: onPrevMonth, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16), label: Text('common_previous'.tr, style: const TextStyle(color: Colors.white, fontSize: 12))),
->>>>>>> Stashed changes
             ElevatedButton.icon(onPressed: onNextMonth, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_right, color: Colors.white, size: 16), label: Text('common_next'.tr, style: const TextStyle(color: Colors.white, fontSize: 12))),
           ]),
         ]),
@@ -452,19 +395,11 @@ class _PressaoAnalysisSection extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15))),
         child: Row(children: [
-<<<<<<< Updated upstream
-          Expanded(child: Column(children: [Text('diabetes_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(menorPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
-          ,
-          Expanded(child: Column(children: [Text('diabetes_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(mediaPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
-          ,
-          Expanded(child: Column(children: [Text('diabetes_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(maiorPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
-=======
           Expanded(child: Column(children: [Text('common_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(menorPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
           ,
           Expanded(child: Column(children: [Text('common_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(mediaPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
           ,
           Expanded(child: Column(children: [Text('common_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(maiorPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
->>>>>>> Stashed changes
         ]),
       ),
     ]);

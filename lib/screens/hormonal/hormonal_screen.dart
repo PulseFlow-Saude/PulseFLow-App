@@ -35,25 +35,8 @@ class HormonalScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF00324A),
         elevation: 0,
-<<<<<<< Updated upstream
-        title: Text('hormonal_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-        leading: Obx(() => mostrarGrafico.value
-            ? const PulseDrawerButton(iconSize: 22)
-            : IconButton(
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
-                ),
-                onPressed: () => Get.back(),
-              )),
-=======
         title: Text('horm_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
         leading: const PulseDrawerButton(iconSize: 22),
->>>>>>> Stashed changes
         centerTitle: true,
       ),
       body: Container(
@@ -84,13 +67,8 @@ class HormonalScreen extends StatelessWidget {
                               child: DropdownMenu<String>(
                                 controller: hormonioCtrl,
                                 requestFocusOnTap: true,
-<<<<<<< Updated upstream
-                                label: Text('hormonal_hormone'.tr),
-                                hintText: 'hormonal_select_or_type'.tr,
-=======
                                 label: Text('horm_hormone_label'.tr),
                                 hintText: 'horm_select_hint'.tr,
->>>>>>> Stashed changes
                                 enableFilter: true,
                                 enableSearch: true,
                                 menuHeight: 300,
@@ -102,11 +80,7 @@ class HormonalScreen extends StatelessWidget {
                             const SizedBox(height: 12),
                             TextField(
                               controller: valorCtrl,
-<<<<<<< Updated upstream
-                              decoration: InputDecoration(labelText: 'hormonal_value'.tr, hintText: 'hormonal_value_hint'.tr),
-=======
                               decoration: InputDecoration(labelText: 'horm_value_label'.tr, hintText: 'horm_value_hint'.tr),
->>>>>>> Stashed changes
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             ),
                             const SizedBox(height: 12),
@@ -137,20 +111,12 @@ class HormonalScreen extends StatelessWidget {
                                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                                   onPressed: () async {
                                     if (dataSel.value == null) {
-<<<<<<< Updated upstream
-                                      Get.snackbar('common_date_required'.tr, 'hormonal_date_exam'.tr);
-=======
                                       Get.snackbar('common_data_required'.tr, 'horm_date_exam_msg'.tr);
->>>>>>> Stashed changes
                                       return;
                                     }
                                     final valor = double.tryParse(valorCtrl.text.replaceAll(',', '.'));
                                     if (valor == null) {
-<<<<<<< Updated upstream
-                                      Get.snackbar('hormonal_invalid_value'.tr, 'hormonal_invalid_value'.tr);
-=======
                                       Get.snackbar('horm_value_invalid'.tr, 'horm_value_invalid_msg'.tr);
->>>>>>> Stashed changes
                                       return;
                                     }
                                     await controller.adicionarRegistro(
@@ -162,11 +128,7 @@ class HormonalScreen extends StatelessWidget {
                                     hormonioCtrl.clear();
                                     valorCtrl.clear();
                                     dataSel.value = null;
-<<<<<<< Updated upstream
-                                    Get.snackbar('common_success'.tr, 'hormonal_saved'.tr);
-=======
                                     Get.snackbar('common_success'.tr, 'horm_saved'.tr);
->>>>>>> Stashed changes
                                   },
                                   child: Text('common_register'.tr, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                                 ),
@@ -331,11 +293,7 @@ class _HormonalSelectionBar extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-<<<<<<< Updated upstream
-            Text('hormonal_chart_title'.tr, style: const TextStyle(color: Color(0xFF00324A), fontWeight: FontWeight.w600)),
-=======
             Text('horm_in_chart'.tr, style: const TextStyle(color: Color(0xFF00324A), fontWeight: FontWeight.w600)),
->>>>>>> Stashed changes
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -359,15 +317,9 @@ class _HormonalSelectionBar extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Row(children: [
-<<<<<<< Updated upstream
-              TextButton(onPressed: () { c.hormoniosSelecionados.assignAll(disponiveis); c.applyFilters(); }, child: Text('hormonal_select_all'.tr)),
-              const SizedBox(width: 8),
-              TextButton(onPressed: () { c.hormoniosSelecionados.clear(); c.applyFilters(); }, child: Text('hormonal_clear_selection'.tr)),
-=======
               TextButton(onPressed: () { c.hormoniosSelecionados.assignAll(disponiveis); c.applyFilters(); }, child: Text('horm_select_all'.tr)),
               const SizedBox(width: 8),
               TextButton(onPressed: () { c.hormoniosSelecionados.clear(); c.applyFilters(); }, child: Text('horm_clear_selection'.tr)),
->>>>>>> Stashed changes
             ])
           ]),
         ),
@@ -384,17 +336,10 @@ Widget _buildFilters(BuildContext context) {
       Row(children: [
         Expanded(
           child: DropdownMenu<String>(
-<<<<<<< Updated upstream
-            label: Text('hormonal_search_hormone'.tr),
-            enableFilter: true,
-            enableSearch: true,
-            hintText: 'hormonal_type_or_select'.tr,
-=======
             label: Text('horm_search'.tr),
             enableFilter: true,
             enableSearch: true,
             hintText: 'horm_filter_hint'.tr,
->>>>>>> Stashed changes
             onSelected: (v) => c.filtroHormonio.value = (v ?? '').trim(),
             dropdownMenuEntries: c.hormoniosDisponiveis
                 .map((h) => DropdownMenuEntry<String>(value: h, label: h))
@@ -423,11 +368,7 @@ Widget _buildFilters(BuildContext context) {
               if (picked != null) c.filtroInicio.value = picked;
             },
             icon: const Icon(Icons.date_range),
-<<<<<<< Updated upstream
-            label: Obx(() => Text(c.filtroInicio.value == null ? 'hormonal_date_start'.tr : _fmtDate(c.filtroInicio.value!))),
-=======
             label: Obx(() => Text(c.filtroInicio.value == null ? 'horm_date_start'.tr : _fmtDate(c.filtroInicio.value!))),
->>>>>>> Stashed changes
           ),
         ),
         const SizedBox(width: 8),
@@ -439,11 +380,7 @@ Widget _buildFilters(BuildContext context) {
               if (picked != null) c.filtroFim.value = picked;
             },
             icon: const Icon(Icons.event),
-<<<<<<< Updated upstream
-            label: Obx(() => Text(c.filtroFim.value == null ? 'hormonal_date_end'.tr : _fmtDate(c.filtroFim.value!))),
-=======
             label: Obx(() => Text(c.filtroFim.value == null ? 'horm_date_end'.tr : _fmtDate(c.filtroFim.value!))),
->>>>>>> Stashed changes
           ),
         ),
       ]),

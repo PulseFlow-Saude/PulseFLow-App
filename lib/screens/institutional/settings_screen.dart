@@ -4,6 +4,10 @@ import '../../widgets/institutional_page.dart';
 import '../../widgets/language_icon_button.dart';
 import 'settings_controller.dart';
 
+void _showLanguagePicker(BuildContext context, SettingsController controller) {
+  LanguageIconButton.showLanguageModal(context);
+}
+
 class SettingsScreen extends StatelessWidget {
   SettingsScreen({super.key});
 
@@ -75,18 +79,8 @@ class SettingsScreen extends StatelessWidget {
                   label: 'inst_settings_language_label'.tr,
                   description: 'inst_settings_language_desc'.tr,
                   icon: Icons.language_outlined,
-<<<<<<< Updated upstream
                   currentCode: controller.language.value,
-                  onTap: () => LanguageIconButton.showLanguageModal(context),
-=======
-                  value: controller.language.value,
-                  items: [
-                    DropdownMenuItem(value: 'system', child: Text('inst_settings_language_system'.tr)),
-                    DropdownMenuItem(value: 'pt_BR', child: Text('inst_settings_language_pt'.tr)),
-                    DropdownMenuItem(value: 'en_US', child: Text('inst_settings_language_en'.tr)),
-                  ],
-                  onChanged: controller.changeLanguage,
->>>>>>> Stashed changes
+                  onTap: () => _showLanguagePicker(context, controller),
                 )),
           ],
         ),

@@ -83,25 +83,8 @@ class DiabetesScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF00324A),
         elevation: 0,
-<<<<<<< Updated upstream
-        title: Text('diabetes_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-        leading: Obx(() => mostrarGrafico.value
-            ? const PulseDrawerButton(iconSize: 22)
-            : IconButton(
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
-                ),
-                onPressed: () => Get.back(),
-              )),
-=======
         title: Text('diab_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
         leading: const PulseDrawerButton(iconSize: 22),
->>>>>>> Stashed changes
         centerTitle: true,
       ),
       body: Container(
@@ -139,13 +122,8 @@ class DiabetesScreen extends StatelessWidget {
                         TextField(
                           controller: glicemiaController,
                           decoration: InputDecoration(
-<<<<<<< Updated upstream
-                            labelText: 'diabetes_glucose'.tr,
-                            hintText: 'diabetes_glucose_hint'.tr,
-=======
                             labelText: 'diab_glucose_label'.tr,
                             hintText: 'diab_glucose_hint'.tr,
->>>>>>> Stashed changes
                           ),
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         ),
@@ -162,11 +140,7 @@ class DiabetesScreen extends StatelessWidget {
                                 initialDate: dataSelecionada.value ?? hoje,
                                 firstDate: DateTime(2000),
                                 lastDate: DateTime(hoje.year, hoje.month, hoje.day),
-<<<<<<< Updated upstream
-                                helpText: 'diabetes_date_measure'.tr,
-=======
                                 helpText: 'common_date_measurement'.tr,
->>>>>>> Stashed changes
                                 cancelText: 'common_cancel'.tr,
                                 confirmText: 'common_confirm'.tr,
                               );
@@ -208,20 +182,12 @@ class DiabetesScreen extends StatelessWidget {
                                 ),
                                 onPressed: () async {
                                   if (dataSelecionada.value == null) {
-<<<<<<< Updated upstream
-                                    Get.snackbar('common_date_required'.tr, 'diabetes_date_measure'.tr);
-=======
                                     Get.snackbar('common_data_required'.tr, 'common_date_measurement'.tr);
->>>>>>> Stashed changes
                                     return;
                                   }
                                   final glicemia = double.tryParse(glicemiaController.text.replaceAll(',', '.'));
                                   if (glicemia == null) {
-<<<<<<< Updated upstream
-                                    Get.snackbar('diabetes_invalid'.tr, 'diabetes_invalid'.tr);
-=======
                                     Get.snackbar('diab_glucose_invalid'.tr, 'diab_glucose_invalid_msg'.tr);
->>>>>>> Stashed changes
                                     return;
                                   }
 
@@ -234,11 +200,7 @@ class DiabetesScreen extends StatelessWidget {
 
                                   glicemiaController.clear();
                                   dataSelecionada.value = null;
-<<<<<<< Updated upstream
-                                    Get.snackbar('common_success'.tr, 'diabetes_saved'.tr);
-=======
                                     Get.snackbar('common_success'.tr, 'diab_glucose_saved'.tr);
->>>>>>> Stashed changes
                                 },
                                 child: Text('common_register'.tr, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                               ),
@@ -331,11 +293,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-<<<<<<< Updated upstream
-                        Text('diabetes_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
-=======
                         Text('common_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
->>>>>>> Stashed changes
                         Text(calcularMenorGlicemiaValor(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -343,11 +301,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-<<<<<<< Updated upstream
-                        Text('diabetes_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
-=======
                         Text('common_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
->>>>>>> Stashed changes
                         Text('${calcularMediaGlicemia(data)}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -355,11 +309,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-<<<<<<< Updated upstream
-                        Text('diabetes_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
-=======
                         Text('common_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
->>>>>>> Stashed changes
                         Text('${calcularMaiorGlicemia(data)}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -432,11 +382,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                               const Icon(Icons.event, color: Color(0xFF00324A), size: 14),
                                 const SizedBox(width: 6),
                                 Text(
-<<<<<<< Updated upstream
-                                  '${'common_date_label'.tr}: ${formatarData(item.data)}',
-=======
                                   '${'diab_date_label'.tr} ${formatarData(item.data)}',
->>>>>>> Stashed changes
                                 style: const TextStyle(color: Color(0xFF00324A), fontSize: 14),
                                 ),
                               ],
@@ -457,21 +403,14 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                         }(),
                         borderRadius: BorderRadius.circular(20),
                       ),
-<<<<<<< Updated upstream
-                      child: Obx(() {
-                        Get.find<SettingsController>().language.value;
-                        return Text(
-                        getStatusGlicemiaKey(item.glicemia).tr,
-=======
                       child: Text(
                         () {
-                          final s = getStatusGlicemia(item.glicemia);
-                          if (s == 'Baixa') return 'diab_status_low'.tr;
-                          if (s == 'Normal') return 'diab_status_normal'.tr;
-                          if (s == 'Elevada') return 'diab_status_elevated'.tr;
+                          final s = getStatusGlicemiaKey(item.glicemia);
+                          if (s == 'diabetes_low') return 'diab_status_low'.tr;
+                          if (s == 'diabetes_normal') return 'diab_status_normal'.tr;
+                          if (s == 'diabetes_elevada') return 'diab_status_elevated'.tr;
                           return 'diab_status_high'.tr;
                         }(),
->>>>>>> Stashed changes
                         style: TextStyle(
                           color: () {
                             final s = getStatusGlicemiaKey(item.glicemia);
@@ -483,8 +422,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
-                      );
-                      }),
+                      ),
                       ),
                     ],
                   ),
@@ -506,11 +444,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                 }
               },
               child: Text(
-<<<<<<< Updated upstream
-                'diabetes_ref'.tr,
-=======
                 'diab_ref'.tr,
->>>>>>> Stashed changes
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
               ),
@@ -553,11 +487,7 @@ class _GraficoDiabetes extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-<<<<<<< Updated upstream
-                      Text('diabetes_evolution'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
-=======
                       Text('diab_evolution'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
->>>>>>> Stashed changes
                       const SizedBox(height: 4),
                       FittedBox(
                         fit: BoxFit.scaleDown,
@@ -726,11 +656,7 @@ class _GraficoDiabetes extends StatelessWidget {
                   ),
 
                   icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16),
-<<<<<<< Updated upstream
-                  label: Text('common_prev'.tr, style: const TextStyle(color: Colors.white, fontSize: 12)),
-=======
                   label: Text('common_previous'.tr, style: const TextStyle(color: Colors.white, fontSize: 12)),
->>>>>>> Stashed changes
                 ),
 
                 ElevatedButton.icon(

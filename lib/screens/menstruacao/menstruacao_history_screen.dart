@@ -101,11 +101,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
         systemOverlayStyle: AppTheme.blueSystemOverlayStyle,
           elevation: 0,
         title: Text(
-<<<<<<< Updated upstream
-          'menstruacao_history_title'.tr,
-=======
           'menst_history_title'.tr,
->>>>>>> Stashed changes
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         leading: const PulseDrawerButton(iconSize: 22),
@@ -155,11 +151,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-<<<<<<< Updated upstream
-                            'menstruacao_cycles_registered'.tr,
-=======
                             'menst_cycles_registered'.tr,
->>>>>>> Stashed changes
                                 style: AppTheme.titleMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -167,11 +159,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                               ),
                           const SizedBox(height: 4),
                               Text(
-<<<<<<< Updated upstream
-                            'menstruacao_cycles_tracked'.trParams({'count': '${_menstruacoes.length}'}),
-=======
                             '${_menstruacoes.length} ${'menst_cycles_tracked'.tr}',
->>>>>>> Stashed changes
                             style: AppTheme.bodyMedium.copyWith(
                                   color: Colors.white.withOpacity(0.9),
                                 ),
@@ -256,11 +244,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
             child: const Icon(Icons.add_rounded, size: 20),
           ),
           label: Text(
-<<<<<<< Updated upstream
-            'menstruacao_new_cycle'.tr,
-=======
             'menst_new_cycle'.tr,
->>>>>>> Stashed changes
             style: AppTheme.titleMedium.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,
@@ -326,11 +310,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-<<<<<<< Updated upstream
-                  'menstruacao_loading'.tr,
-=======
                   'menst_loading'.tr,
->>>>>>> Stashed changes
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w700,
@@ -338,11 +318,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-<<<<<<< Updated upstream
-                  'menstruacao_loading_sub'.tr,
-=======
                   'menst_loading_sub'.tr,
->>>>>>> Stashed changes
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                   ),
@@ -1051,11 +1027,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                 children: [
                                   Expanded(
                                     child: Text(
-<<<<<<< Updated upstream
-                                      AppDateFormat.shortDateWithWeekday(data),
-=======
                                       DateFormat('dd/MM/yyyy - EEEE', Get.find<SettingsController>().effectiveLocale.toString()).format(data),
->>>>>>> Stashed changes
                                       style: const TextStyle(
                                         color: Color(0xFF1F2937),
                                         fontSize: 15,
@@ -1103,13 +1075,8 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                   Expanded(
                                     child: _buildDayDetailRow(
                                       icon: Icons.water_drop_rounded,
-<<<<<<< Updated upstream
-                                      title: 'menstruacao_fluxo'.tr,
-                                      value: dia.fluxo,
-=======
                                       title: 'menst_flow'.tr,
                                       value: _translateFluxo(dia.fluxo),
->>>>>>> Stashed changes
                                       valueColor: _getFluxoColor(dia.fluxo),
                                     ),
                                   ),
@@ -1117,13 +1084,8 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                   Expanded(
                                     child: _buildDayDetailRow(
                                       icon: Icons.health_and_safety_rounded,
-<<<<<<< Updated upstream
-                                      title: 'menstruacao_colica'.tr,
-                                      value: dia.teveColica ? 'common_yes'.tr : 'common_no'.tr,
-=======
                                       title: 'menst_cramp'.tr,
                                       value: dia.teveColica ? 'menst_yes'.tr : 'menst_no'.tr,
->>>>>>> Stashed changes
                                       valueColor: dia.teveColica ? const Color(0xFFEF4444) : const Color(0xFF10B981),
                                     ),
                                   ),
@@ -1132,13 +1094,8 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                               const SizedBox(height: 12),
                               _buildDayDetailRow(
                                 icon: Icons.mood_rounded,
-<<<<<<< Updated upstream
-                                title: 'menstruacao_humor'.tr,
-                                value: dia.humor,
-=======
                                 title: 'menst_mood'.tr,
                                 value: _translateHumor(dia.humor),
->>>>>>> Stashed changes
                                 valueColor: _getHumorColor(dia.humor),
                               ),
                               if (entry != menstruacao.diasPorData!.entries.last) ...[
@@ -1677,11 +1634,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                       ),
                       const SizedBox(height: 4),
                         Text(
-<<<<<<< Updated upstream
-                        AppDateFormat.shortDateWithWeekday(day),
-=======
                         DateFormat('dd/MM/yyyy - EEEE', Get.find<SettingsController>().effectiveLocale.toString()).format(day),
->>>>>>> Stashed changes
                         style: const TextStyle(
                           color: Color(0xFF1E3A8A),
                           fontSize: 15,
@@ -1713,15 +1666,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                     icon: Icons.water_drop_rounded,
                       children: [
                       if (dia != null) ...[
-<<<<<<< Updated upstream
-                        _buildDetailRow('menstruacao_fluxo'.tr, dia.fluxo),
-                        _buildDetailRow('menstruacao_colica'.tr, dia.teveColica ? 'common_yes'.tr : 'common_no'.tr),
-                        _buildDetailRow('menstruacao_humor'.tr, dia.humor),
-=======
                         _buildDetailRow('menst_flow'.tr, _translateFluxo(dia.fluxo)),
                         _buildDetailRow('menst_cramp'.tr, dia.teveColica ? 'menst_yes'.tr : 'menst_no'.tr),
                         _buildDetailRow('menst_mood'.tr, _translateHumor(dia.humor)),
->>>>>>> Stashed changes
                       ] else ...[
                         _buildDetailRow('menst_status'.tr, 'menst_no_specific_data'.tr),
                         const SizedBox(height: 16),

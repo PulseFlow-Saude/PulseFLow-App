@@ -356,11 +356,7 @@ class RegistrationController extends GetxController with SafeControllerMixin {
             const Duration(days: 365 * 18)), // Começa com 18 anos atrás
         firstDate: DateTime(1900),
         lastDate: DateTime.now(),
-<<<<<<< Updated upstream
-        locale: Get.locale ?? const Locale('pt', 'BR'),
-=======
         locale: Get.find<SettingsController>().effectiveLocale,
->>>>>>> Stashed changes
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
@@ -505,11 +501,7 @@ class RegistrationController extends GetxController with SafeControllerMixin {
               if (profilePhoto.value != null)
                 ListTile(
                   leading: const Icon(Icons.delete, color: Colors.red),
-<<<<<<< Updated upstream
-                  title: Text('reg_photo_remove_btn'.tr),
-=======
                   title: Text('reg_remove_photo'.tr),
->>>>>>> Stashed changes
                   onTap: () {
                     Navigator.pop(context);
                     removeProfilePhoto();

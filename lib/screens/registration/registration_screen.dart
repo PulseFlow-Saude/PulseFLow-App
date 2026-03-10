@@ -210,23 +210,14 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         SizedBox(height: size.height * 0.02),
         _buildSectionHeader(
           icon: Icons.person_outline,
-<<<<<<< Updated upstream
-          title: 'reg_section_account'.tr,
-          subtitle: 'reg_section_account_sub'.tr,
-=======
           title: 'reg_account_info'.tr,
           subtitle: 'reg_account_sub'.tr,
->>>>>>> Stashed changes
         ),
         SizedBox(height: size.height * 0.025),
         
         _buildTextField(
           controller: controller.nameController,
-<<<<<<< Updated upstream
-          label: 'reg_name'.tr,
-=======
           label: 'reg_full_name'.tr,
->>>>>>> Stashed changes
           icon: Icons.person_outline,
           validator: controller.validateName,
         ),
@@ -234,11 +225,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildTextField(
           controller: controller.emailController,
-<<<<<<< Updated upstream
-          label: 'reg_email'.tr,
-=======
           label: 'auth_email'.tr,
->>>>>>> Stashed changes
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           validator: controller.validateEmail,
@@ -247,11 +234,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildPasswordField(
           controller: controller.passwordController,
-<<<<<<< Updated upstream
-          label: 'reg_password'.tr,
-=======
           label: 'auth_password'.tr,
->>>>>>> Stashed changes
           validator: controller.validatePassword,
         ),
         SizedBox(height: size.height * 0.02),
@@ -268,23 +251,14 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
 
         _buildSectionHeader(
           icon: Icons.assignment_ind_outlined,
-<<<<<<< Updated upstream
-          title: 'reg_section_personal'.tr,
-          subtitle: 'reg_section_personal_sub'.tr,
-=======
           title: 'reg_personal_info'.tr,
           subtitle: 'reg_personal_sub'.tr,
->>>>>>> Stashed changes
         ),
         SizedBox(height: size.height * 0.025),
         
         _buildTextField(
           controller: controller.cpfController,
-<<<<<<< Updated upstream
-          label: 'reg_cpf'.tr,
-=======
           label: 'profile_cpf'.tr,
->>>>>>> Stashed changes
           icon: Icons.badge_outlined,
           keyboardType: TextInputType.number,
           inputFormatters: [controller.cpfMask],
@@ -294,11 +268,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildTextField(
           controller: controller.rgController,
-<<<<<<< Updated upstream
-          label: 'reg_rg'.tr,
-=======
           label: 'profile_rg'.tr,
->>>>>>> Stashed changes
           icon: Icons.credit_card_outlined,
           keyboardType: TextInputType.text,
           inputFormatters: [controller.rgMask],
@@ -308,11 +278,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildTextField(
           controller: controller.phoneController,
-<<<<<<< Updated upstream
-          label: 'reg_phone'.tr,
-=======
           label: 'profile_phone'.tr,
->>>>>>> Stashed changes
           icon: Icons.phone_iphone_outlined,
           keyboardType: TextInputType.phone,
           inputFormatters: [controller.phoneMask],
@@ -324,21 +290,13 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           controller: controller.nationalityController,
           label: 'reg_nationality'.tr,
           icon: Icons.flag_outlined,
-<<<<<<< Updated upstream
-          validator: (value) => controller.validateRequired(value, 'reg_nationality'),
-=======
           validator: (value) => controller.validateRequired(value, 'reg_nationality'.tr),
->>>>>>> Stashed changes
         ),
         SizedBox(height: size.height * 0.02),
         
         _buildTextField(
           controller: controller.birthDateController,
-<<<<<<< Updated upstream
-          label: 'reg_birth_date'.tr,
-=======
           label: 'profile_birth_date'.tr,
->>>>>>> Stashed changes
           icon: Icons.cake_outlined,
           readOnly: true,
           onTap: () => controller.selectDate(context),
@@ -352,11 +310,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           icon: Icons.transgender,
           items: controller.genders,
           onChanged: (String? newValue) { controller.gender.value = newValue; },
-<<<<<<< Updated upstream
-          validator: (v) => controller.validateDropdown(v, 'reg_gender'),
-=======
           validator: (v) => controller.validateDropdown(v, 'reg_gender'.tr),
->>>>>>> Stashed changes
         )),
         SizedBox(height: size.height * 0.02),
         
@@ -366,11 +320,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           icon: Icons.family_restroom_outlined,
           items: controller.maritalStatuses,
           onChanged: (String? newValue) { controller.maritalStatus.value = newValue; },
-<<<<<<< Updated upstream
-          validator: (v) => controller.validateDropdown(v, 'reg_marital_status'),
-=======
           validator: (v) => controller.validateDropdown(v, 'reg_marital_status'.tr),
->>>>>>> Stashed changes
         )),
         SizedBox(height: size.height * 0.02),
         
@@ -401,13 +351,8 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
 
         _buildSectionHeader(
           icon: Icons.home_outlined,
-<<<<<<< Updated upstream
-          title: 'reg_section_address'.tr,
-          subtitle: 'reg_section_address_sub'.tr,
-=======
           title: 'reg_address'.tr,
           subtitle: 'reg_address_sub'.tr,
->>>>>>> Stashed changes
         ),
         SizedBox(height: size.height * 0.025),
         
@@ -439,11 +384,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           controller: controller.streetController,
           label: 'reg_street'.tr,
           icon: Icons.alt_route,
-<<<<<<< Updated upstream
-          validator: (value) => controller.validateRequired(value, 'reg_street'),
-=======
           validator: (value) => controller.validateRequired(value, 'reg_street'.tr),
->>>>>>> Stashed changes
         ),
         SizedBox(height: size.height * 0.02),
         
@@ -452,11 +393,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           label: 'reg_number'.tr,
           icon: Icons.numbers_outlined,
           keyboardType: TextInputType.number,
-<<<<<<< Updated upstream
-          validator: (value) => controller.validateRequired(value, 'reg_number'),
-=======
           validator: (value) => controller.validateRequired(value, 'reg_number'.tr),
->>>>>>> Stashed changes
         ),
         SizedBox(height: size.height * 0.02),
         
@@ -471,11 +408,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           controller: controller.neighborhoodController,
           label: 'reg_neighborhood'.tr,
           icon: Icons.location_city_outlined,
-<<<<<<< Updated upstream
-          validator: (value) => controller.validateRequired(value, 'reg_neighborhood'),
-=======
           validator: (value) => controller.validateRequired(value, 'reg_neighborhood'.tr),
->>>>>>> Stashed changes
         ),
         SizedBox(height: size.height * 0.02),
         
@@ -483,11 +416,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           controller: controller.cityController,
           label: 'reg_city'.tr,
           icon: Icons.apartment_outlined,
-<<<<<<< Updated upstream
-          validator: (value) => controller.validateRequired(value, 'reg_city'),
-=======
           validator: (value) => controller.validateRequired(value, 'reg_city'.tr),
->>>>>>> Stashed changes
         ),
         SizedBox(height: size.height * 0.02),
         
@@ -497,33 +426,20 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           icon: Icons.map_outlined,
           items: controller.states,
           onChanged: (String? newValue) { controller.state.value = newValue; },
-<<<<<<< Updated upstream
-          validator: (v) => controller.validateDropdown(v, 'reg_state'),
-=======
           validator: (v) => controller.validateDropdown(v, 'reg_state'.tr),
->>>>>>> Stashed changes
         )),
         SizedBox(height: size.height * 0.03),
 
         _buildSectionHeader(
           icon: Icons.gavel_outlined,
-<<<<<<< Updated upstream
-          title: 'reg_section_terms'.tr,
-          subtitle: 'reg_section_terms_sub'.tr,
-=======
           title: 'reg_terms'.tr,
           subtitle: 'reg_terms_sub'.tr,
->>>>>>> Stashed changes
         ),
         SizedBox(height: size.height * 0.025),
         
         _buildCheckboxTile(
           value: controller.acceptTerms,
-<<<<<<< Updated upstream
-          title: 'reg_terms_accept'.tr,
-=======
           title: 'reg_accept_terms'.tr,
->>>>>>> Stashed changes
           linkText: 'reg_terms_link'.tr,
           onLinkTap: () => Get.to(() => const TermsScreen()),
         ),

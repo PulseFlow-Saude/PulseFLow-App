@@ -60,16 +60,6 @@ void main() async {
   Get.put(LoginController());
   Get.put(EnxaquecaService());
   Get.put(DiabetesService());
-<<<<<<< Updated upstream
-  Get.put(SettingsController());
-  await SettingsController.ensureLoaded();
-
-  try {
-           Get.put(NotificationService());
-         } catch (e) {
-           // Erro ao inicializar NotificationService
-         }
-=======
   final settingsController = Get.put(SettingsController());
   await settingsController.ensurePreferencesLoaded();
 
@@ -79,7 +69,6 @@ void main() async {
   Get.addTranslations(translations.keys);
   Get.fallbackLocale = const Locale('pt', 'BR');
   Get.locale = settingsController.effectiveLocale;
->>>>>>> Stashed changes
 
   try {
     Get.put(NotificationService());

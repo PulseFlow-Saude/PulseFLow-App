@@ -58,13 +58,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
       }
     } catch (e) {
       Get.snackbar(
-<<<<<<< Updated upstream
-        'exame_error'.tr,
-        'exame_error_select_file'.tr + ': ${e.toString()}',
-=======
         'common_error'.tr,
         'exam_file_error'.trParams({'e': e.toString()}),
->>>>>>> Stashed changes
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -92,13 +87,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
     
     if (_data == null) {
       Get.snackbar(
-<<<<<<< Updated upstream
-        'exame_attention'.tr,
-        'exame_select_date_msg'.tr,
-=======
         'exam_attention'.tr,
         'exam_select_date'.tr,
->>>>>>> Stashed changes
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
@@ -109,13 +99,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
 
     if (_selectedFile == null) {
       Get.snackbar(
-<<<<<<< Updated upstream
-        'exame_attention'.tr,
-        'exame_select_file_msg'.tr,
-=======
         'exam_attention'.tr,
         'exam_select_file'.tr,
->>>>>>> Stashed changes
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
@@ -131,11 +116,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
 
       final arquivoFile = File(_selectedFile!.path!);
       if (!await arquivoFile.exists()) {
-<<<<<<< Updated upstream
-        throw Exception('exame_file_not_found'.tr);
-=======
         throw Exception('exam_file_not_found'.tr);
->>>>>>> Stashed changes
       }
 
       final nome = _nomeController.text.trim();
@@ -184,13 +165,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
         
         HapticFeedback.mediumImpact();
         Get.snackbar(
-<<<<<<< Updated upstream
-          'exame_success'.tr,
-          uploadResult['message'] ?? 'exame_saved_success'.tr,
-=======
           'common_success'.tr,
           uploadResult['message'] ?? 'exam_saved'.tr,
->>>>>>> Stashed changes
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -208,11 +184,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
     } catch (e) {
       if (mounted) {
         Get.snackbar(
-<<<<<<< Updated upstream
-          'exame_error'.tr,
-=======
           'common_error'.tr,
->>>>>>> Stashed changes
           e.toString(),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
@@ -330,13 +302,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                                   
                                   _buildModernTextField(
                                     controller: _nomeController,
-<<<<<<< Updated upstream
-                                    label: 'exame_name_field'.tr,
-                                    hint: 'exame_name_hint_field'.tr,
-=======
                                     label: 'exam_name_field'.tr,
                                     hint: 'exam_name_hint_field'.tr,
->>>>>>> Stashed changes
                                     icon: Icons.description_outlined,
                                     isRequired: true,
                                     isSmallScreen: isSmallScreen,
@@ -345,13 +312,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                                   
                                   _buildModernTextField(
                                     controller: _categoriaController,
-<<<<<<< Updated upstream
-                                    label: 'exame_categoria_field'.tr,
-                                    hint: 'exame_categoria_hint_field'.tr,
-=======
                                     label: 'exam_category_field'.tr,
                                     hint: 'exam_category_hint_field'.tr,
->>>>>>> Stashed changes
                                     icon: Icons.category_outlined,
                                     isRequired: true,
                                     isSmallScreen: isSmallScreen,
@@ -407,11 +369,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-<<<<<<< Updated upstream
-                  'exame_upload_title'.tr,
-=======
                   'exam_attach_title'.tr,
->>>>>>> Stashed changes
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -420,11 +378,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-<<<<<<< Updated upstream
-                  'exame_upload_subtitle'.tr,
-=======
                   'exam_attach_sub'.tr,
->>>>>>> Stashed changes
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: isSmallScreen ? 12 : 14,
@@ -485,11 +439,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-<<<<<<< Updated upstream
-                  'exame_info_title'.tr,
-=======
                   'exam_info_title'.tr,
->>>>>>> Stashed changes
                   style: TextStyle(
                     fontSize: isSmallScreen ? 18 : 20,
                     fontWeight: FontWeight.w700,
@@ -498,11 +448,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-<<<<<<< Updated upstream
-                  'exame_info_subtitle'.tr,
-=======
                   'exam_info_sub'.tr,
->>>>>>> Stashed changes
                   style: TextStyle(
                     fontSize: isSmallScreen ? 12 : 14,
                     color: const Color(0xFF00324A).withOpacity(0.7),
@@ -591,11 +537,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
             ),
           ),
           validator: isRequired
-<<<<<<< Updated upstream
-              ? (v) => (v == null || v.trim().isEmpty) ? 'exame_required'.tr : null
-=======
               ? (v) => (v == null || v.trim().isEmpty) ? 'exam_required'.tr : null
->>>>>>> Stashed changes
               : null,
         ),
       ],
@@ -611,11 +553,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
             Icon(Icons.calendar_today_outlined, size: 18, color: const Color(0xFF00324A)),
             const SizedBox(width: 6),
             Text(
-<<<<<<< Updated upstream
-              'exame_date_field'.tr,
-=======
               'exam_date_label'.tr,
->>>>>>> Stashed changes
               style: TextStyle(
                 fontSize: isSmallScreen ? 14 : 15,
                 fontWeight: FontWeight.w600,
@@ -660,11 +598,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                   child: Text(
                     _data != null
                         ? DateFormat('dd/MM/yyyy').format(_data!)
-<<<<<<< Updated upstream
-                        : 'exame_select_date'.tr,
-=======
                         : 'common_select_date'.tr,
->>>>>>> Stashed changes
                     style: TextStyle(
                       fontSize: isSmallScreen ? 15 : 16,
                       color: _data != null ? const Color(0xFF212121) : Colors.grey[400],
@@ -693,11 +627,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
             Icon(Icons.attach_file_outlined, size: 18, color: const Color(0xFF00324A)),
             const SizedBox(width: 6),
             Text(
-<<<<<<< Updated upstream
-              'exame_file_label'.tr,
-=======
               'exam_file_label'.tr,
->>>>>>> Stashed changes
               style: TextStyle(
                 fontSize: isSmallScreen ? 14 : 15,
                 fontWeight: FontWeight.w600,
@@ -757,11 +687,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-<<<<<<< Updated upstream
-                        'exame_tap_select'.tr,
-=======
                         'exam_tap_select'.tr,
->>>>>>> Stashed changes
                         style: TextStyle(
                           fontSize: isSmallScreen ? 14 : 16,
                           fontWeight: FontWeight.w600,
@@ -770,11 +696,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-<<<<<<< Updated upstream
-                        'exame_file_types'.tr,
-=======
                         'exam_file_types'.tr,
->>>>>>> Stashed changes
                         style: TextStyle(
                           fontSize: isSmallScreen ? 12 : 13,
                           color: Colors.grey[600],
@@ -816,11 +738,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-<<<<<<< Updated upstream
-                                    'exame_file_selected'.tr,
-=======
                                     'exam_file_selected'.tr,
->>>>>>> Stashed changes
                                     style: TextStyle(
                                       fontSize: isSmallScreen ? 11 : 12,
                                       fontWeight: FontWeight.w500,
@@ -870,11 +788,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                               },
                               icon: const Icon(Icons.close_rounded, size: 22),
                               color: Colors.grey[600],
-<<<<<<< Updated upstream
-                              tooltip: 'exame_remove_file'.tr,
-=======
                               tooltip: 'exam_remove_file'.tr,
->>>>>>> Stashed changes
                             ),
                           ],
                         ),
@@ -885,11 +799,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                         child: OutlinedButton.icon(
                           onPressed: _pickFile,
                           icon: const Icon(Icons.refresh_outlined, size: 18),
-<<<<<<< Updated upstream
-                          label: Text('exame_change_file'.tr),
-=======
                           label: Text('exam_change_file'.tr),
->>>>>>> Stashed changes
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF00324A),
                             side: const BorderSide(color: Color(0xFF00324A), width: 1.5),
@@ -928,11 +838,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                   )
                 : const Icon(Icons.cloud_upload, size: 22),
             label: Text(
-<<<<<<< Updated upstream
-              _isSaving ? 'exame_saving'.tr : 'exame_save'.tr,
-=======
               _isSaving ? 'exam_saving'.tr : 'exam_save'.tr,
->>>>>>> Stashed changes
               style: TextStyle(
                 fontSize: isSmallScreen ? 16 : 18,
                 fontWeight: FontWeight.w600,
@@ -961,11 +867,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
             },
             icon: const Icon(Icons.visibility_outlined, size: 20),
             label: Text(
-<<<<<<< Updated upstream
-              'exame_view_exams'.tr,
-=======
               'exam_view'.tr,
->>>>>>> Stashed changes
               style: TextStyle(
                 fontSize: isSmallScreen ? 15 : 16,
                 fontWeight: FontWeight.w600,

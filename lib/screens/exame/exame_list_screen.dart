@@ -79,22 +79,14 @@ class _ExameListScreenState extends State<ExameListScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-<<<<<<< Updated upstream
-                'exame_delete_title'.tr,
-=======
                 'exam_delete_title'.tr,
->>>>>>> Stashed changes
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
         content: Text(
-<<<<<<< Updated upstream
-          'exame_delete_confirm'.trParams({'name': exame.nome}),
-=======
           'exam_delete_confirm'.trParams({'name': exame.nome}),
->>>>>>> Stashed changes
           style: const TextStyle(fontSize: 16),
         ),
         actions: [
@@ -114,11 +106,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-<<<<<<< Updated upstream
-            child: Text('exame_delete_btn'.tr),
-=======
             child: Text('common_delete'.tr),
->>>>>>> Stashed changes
           ),
         ],
       ),
@@ -135,13 +123,8 @@ class _ExameListScreenState extends State<ExameListScreen> {
         if (mounted) {
           HapticFeedback.mediumImpact();
           Get.snackbar(
-<<<<<<< Updated upstream
-            'exame_success'.tr,
-            'exame_deleted'.tr,
-=======
             'common_success'.tr,
             'exam_deleted'.tr,
->>>>>>> Stashed changes
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.green,
             colorText: Colors.white,
@@ -163,11 +146,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
         } catch (err2) {
           if (mounted) {
             Get.snackbar(
-<<<<<<< Updated upstream
-              'exame_error'.tr,
-=======
               'common_error'.tr,
->>>>>>> Stashed changes
               err2.toString(),
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: Colors.red,
@@ -269,11 +248,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
           backgroundColor: const Color(0xFF00324A),
           icon: const Icon(Icons.add, color: Colors.white),
           label: Text(
-<<<<<<< Updated upstream
-            'exame_new'.tr,
-=======
             'exam_new'.tr,
->>>>>>> Stashed changes
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
@@ -304,11 +279,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-<<<<<<< Updated upstream
-                  'exame_my_exams'.tr,
-=======
                   'exam_my'.tr,
->>>>>>> Stashed changes
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: isSmallScreen ? 24 : 28,
@@ -319,14 +290,9 @@ class _ExameListScreenState extends State<ExameListScreen> {
                 const SizedBox(height: 4),
                 Obx(() => Text(
                   _controller.exames.isEmpty
-<<<<<<< Updated upstream
-                      ? 'exame_none'.tr
-                      : 'exame_count'.trParams({'count': '${_controller.exames.length}'}),
-=======
                       ? 'exam_none'.tr
                       : (_controller.exames.length > 1
                           ? 'exam_count_plural' : 'exam_count').trParams({'n': _controller.exames.length.toString()}),
->>>>>>> Stashed changes
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: isSmallScreen ? 12 : 14,
@@ -355,11 +321,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
             ),
             SizedBox(height: isSmallScreen ? 12 : 16),
             Text(
-<<<<<<< Updated upstream
-              'exame_none'.tr,
-=======
               'exam_none'.tr,
->>>>>>> Stashed changes
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: isSmallScreen ? 16 : 18,
@@ -369,11 +331,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
             ),
             SizedBox(height: isSmallScreen ? 6 : 8),
             Text(
-<<<<<<< Updated upstream
-              'exame_empty_hint'.tr,
-=======
               'exam_empty_sub'.tr,
->>>>>>> Stashed changes
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: isSmallScreen ? 13 : 14,
@@ -404,13 +362,8 @@ class _ExameListScreenState extends State<ExameListScreen> {
                   controller: _nomeFilterController,
                   style: TextStyle(fontSize: isSmallScreen ? 14 : 15),
                   decoration: InputDecoration(
-<<<<<<< Updated upstream
-                    labelText: 'exame_name_label'.tr,
-                    hintText: 'exame_name_hint'.tr,
-=======
                     labelText: 'exam_name_label'.tr,
                     hintText: 'exam_name_hint'.tr,
->>>>>>> Stashed changes
                     prefixIcon: const Icon(Icons.search, size: 20),
                     suffixIcon: Obx(() {
                       if (_controller.filtroNome.value.isNotEmpty) {
@@ -451,13 +404,8 @@ class _ExameListScreenState extends State<ExameListScreen> {
                   controller: _categoriaFilterController,
                   style: TextStyle(fontSize: isSmallScreen ? 14 : 15),
                   decoration: InputDecoration(
-<<<<<<< Updated upstream
-                    labelText: 'exame_categoria_label'.tr,
-                    hintText: 'exame_categoria_hint'.tr,
-=======
                     labelText: 'exam_category_label'.tr,
                     hintText: 'exam_category_hint'.tr,
->>>>>>> Stashed changes
                     prefixIcon: const Icon(Icons.category_outlined, size: 20),
                     suffixIcon: Obx(() {
                       if (_controller.filtroCategoria.value.isNotEmpty) {
@@ -529,11 +477,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                   label: Obx(() {
                     final d = _controller.filtroInicio.value;
                     return Text(
-<<<<<<< Updated upstream
-                      d == null ? 'exame_date_start'.tr : _formatDate(d),
-=======
                       d == null ? 'horm_date_start'.tr : _formatDate(d),
->>>>>>> Stashed changes
                       style: TextStyle(fontSize: isSmallScreen ? 12 : 13),
                     );
                   }),
@@ -582,11 +526,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                   label: Obx(() {
                     final d = _controller.filtroFim.value;
                     return Text(
-<<<<<<< Updated upstream
-                      d == null ? 'exame_date_end'.tr : _formatDate(d),
-=======
                       d == null ? 'horm_date_end'.tr : _formatDate(d),
->>>>>>> Stashed changes
                       style: TextStyle(fontSize: isSmallScreen ? 12 : 13),
                     );
                   }),
@@ -609,11 +549,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
-<<<<<<< Updated upstream
-                  tooltip: 'exame_clear_filters'.tr,
-=======
                   tooltip: 'exam_clear_filters'.tr,
->>>>>>> Stashed changes
                   onPressed: () {
                     _nomeFilterController.clear();
                     _categoriaFilterController.clear();
@@ -668,22 +604,14 @@ class _ExameListScreenState extends State<ExameListScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-<<<<<<< Updated upstream
-                    'exame_delete_title'.tr,
-=======
                     'exam_delete_title'.tr,
->>>>>>> Stashed changes
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
             content: Text(
-<<<<<<< Updated upstream
-              'exame_delete_confirm'.trParams({'name': exame.nome}),
-=======
               'exam_delete_confirm'.trParams({'name': exame.nome}),
->>>>>>> Stashed changes
               style: const TextStyle(fontSize: 16),
             ),
             actions: [
@@ -703,11 +631,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-<<<<<<< Updated upstream
-                child: Text('exame_delete_btn'.tr),
-=======
                 child: Text('common_delete'.tr),
->>>>>>> Stashed changes
               ),
             ],
           ),
@@ -723,13 +647,8 @@ class _ExameListScreenState extends State<ExameListScreen> {
             await OpenFilex.open(exame.filePath);
           } catch (e) {
             Get.snackbar(
-<<<<<<< Updated upstream
-              'exame_error'.tr,
-              'exame_error_open_file'.tr,
-=======
               'common_error'.tr,
               'exam_open_error'.tr,
->>>>>>> Stashed changes
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: Colors.red,
               colorText: Colors.white,
@@ -834,11 +753,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                     onPressed: () => _deleteExame(exame),
                     icon: const Icon(Icons.delete_outline, size: 20),
                     color: Colors.red[300],
-<<<<<<< Updated upstream
-                    tooltip: 'exame_delete_tooltip'.tr,
-=======
                     tooltip: 'exam_delete_tooltip'.tr,
->>>>>>> Stashed changes
                   ),
                 ],
               ),

@@ -98,7 +98,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
         if (mounted) {
           Get.snackbar(
             'pk_warning'.tr,
-            'Usuário não autenticado. O código está disponível mas não será sincronizado.',
+            'pk_warning_user_unauth'.tr,
             backgroundColor: Colors.orange,
             colorText: Colors.white,
             snackPosition: SnackPosition.BOTTOM,
@@ -119,50 +119,51 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
     } catch (e) {
       // Não bloquear a funcionalidade - o código ainda funciona localmente
       if (mounted) {
-        String errorMessage = 'Não foi possível sincronizar com o servidor.';
+        String message;
         String fullError = e.toString();
         
         // Debug: mostrar erro completo no console
         print('⚠️ [PulseKeyScreen] Erro de sincronização (código ainda funciona): $fullError');
         
-        // Detectar tipo de erro específico
-        if (fullError.contains('Token de autenticação não encontrado') || 
+        // Detectar tipo de erro específico (usar .tr em literal para resolver tradução)
+        if (fullError.contains('Token de autenticação não encontrado') ||
             fullError.contains('Sessão expirada')) {
-          errorMessage = 'Sessão expirada. O código está disponível mas não será sincronizado.';
-        } else if (fullError.contains('ngrok está offline') || 
+          message = 'pk_sync_error_session'.tr;
+        } else if (fullError.contains('ngrok está offline') ||
                    fullError.contains('ERR_NGROK_3200') ||
                    fullError.contains('Túnel ngrok está offline')) {
-          errorMessage = 'Túnel ngrok está offline.\n\nO código está disponível localmente, mas não será sincronizado até que o túnel seja reiniciado no servidor.';
+          message = 'pk_sync_error_ngrok'.tr;
         } else if (fullError.contains('Servidor não está acessível') ||
-                   fullError.contains('URL do servidor inválida') || 
+                   fullError.contains('URL do servidor inválida') ||
                    fullError.contains('não foi possível conectar ao servidor') ||
                    fullError.contains('Connection refused') ||
                    fullError.contains('Network is unreachable')) {
-          // Para erros de conexão, mostrar aviso mais amigável
-          errorMessage = 'Servidor não acessível. O código está disponível localmente.\n\nVerifique a conexão com o servidor nas configurações.';
+          message = 'pk_sync_error_server_unreachable'.tr;
         } else if (fullError.contains('CORS')) {
-          errorMessage = 'Erro de configuração do servidor (CORS). O código está disponível localmente.';
+          message = 'pk_sync_error_cors'.tr;
         } else if (fullError.contains('401') || fullError.contains('Unauthorized')) {
-          errorMessage = 'Sessão expirada. O código está disponível mas não será sincronizado.';
+          message = 'pk_sync_error_unauthorized'.tr;
         } else if (fullError.contains('403') || fullError.contains('Forbidden')) {
-          errorMessage = 'Acesso negado. O código está disponível localmente.';
-        } else if (fullError.contains('ngrok offline') || 
+          message = 'pk_sync_error_forbidden'.tr;
+        } else if (fullError.contains('ngrok offline') ||
                    fullError.contains('Túnel ngrok offline') ||
                    fullError.contains('ERR_NGROK_3200')) {
-          errorMessage = 'Túnel ngrok offline. O código está disponível localmente.\n\nPara sincronizar, inicie o ngrok e atualize a URL no arquivo .env.';
+          message = 'pk_sync_error_ngrok_short'.tr;
         } else if (fullError.contains('404') || fullError.contains('not found')) {
-          errorMessage = 'Endpoint não encontrado. O código está disponível localmente.';
+          message = 'pk_sync_error_404'.tr;
         } else if (fullError.contains('500') || fullError.contains('Internal Server Error')) {
-          errorMessage = 'Erro no servidor. O código está disponível localmente.';
-        } else if (fullError.contains('Tempo de espera esgotado') || 
+          message = 'pk_sync_error_500'.tr;
+        } else if (fullError.contains('Tempo de espera esgotado') ||
                    fullError.contains('Timeout')) {
-          errorMessage = 'Servidor não respondeu. O código está disponível localmente.';
+          message = 'pk_sync_error_timeout'.tr;
+        } else {
+          message = 'pk_sync_error_generic'.tr;
         }
         
         // Mostrar aviso (não erro) já que o código ainda funciona
         Get.snackbar(
           'pk_sync_warning'.tr,
-          errorMessage,
+          message,
           backgroundColor: Colors.orange,
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,

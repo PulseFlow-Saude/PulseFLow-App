@@ -1,9 +1,6 @@
-<<<<<<< Updated upstream
 import 'dart:async';
-=======
 import 'dart:ui' as ui;
 
->>>>>>> Stashed changes
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,12 +68,6 @@ class SettingsController extends GetxController {
     dataVisibility.value = prefs.getBool(_dataVisibilityKey) ?? true;
     accessLogsEmail.value = prefs.getBool(_accessLogsEmailKey) ?? false;
     darkTheme.value = prefs.getBool(_darkThemeKey) ?? false;
-<<<<<<< Updated upstream
-    language.value = prefs.getString(_languageKey) ?? 'pt_BR';
-    if (!_prefsLoadedCompleter!.isCompleted) {
-      _prefsLoadedCompleter!.complete();
-    }
-=======
     final savedLang = prefs.getString(_languageKey) ?? 'system';
     language.value = supportedLanguages.contains(savedLang) ? savedLang : 'system';
     if (!supportedLanguages.contains(savedLang)) {
@@ -100,7 +91,6 @@ class SettingsController extends GetxController {
     if (lang.startsWith('pt')) return const Locale('pt', 'BR');
     if (lang.startsWith('en')) return const Locale('en', 'US');
     return const Locale('pt', 'BR');
->>>>>>> Stashed changes
   }
 
   Future<void> toggleCriticalAlerts(bool value) async {

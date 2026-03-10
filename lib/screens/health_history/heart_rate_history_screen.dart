@@ -126,11 +126,7 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
       initialDateRange: _selectedDateFrom != null && _selectedDateTo != null
           ? DateTimeRange(start: _selectedDateFrom!, end: _selectedDateTo!)
           : null,
-<<<<<<< Updated upstream
-      locale: Get.locale ?? const Locale('pt', 'BR'),
-=======
       locale: Get.find<SettingsController>().effectiveLocale,
->>>>>>> Stashed changes
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -297,13 +293,8 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-<<<<<<< Updated upstream
-Text(
-                        'health_period'.tr,
-=======
                         Text(
                           'common_period'.tr,
->>>>>>> Stashed changes
                           style: TextStyle(
                             fontSize: 12,
                             color: Color(0xFF64748B),
@@ -313,11 +304,7 @@ Text(
                         Text(
                           _selectedDateFrom != null && _selectedDateTo != null
                               ? '${DateFormat('dd/MM/yyyy').format(_selectedDateFrom!)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateTo!)}'
-<<<<<<< Updated upstream
-                              : 'health_select_period'.tr,
-=======
                               : 'common_select_period'.tr,
->>>>>>> Stashed changes
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -418,11 +405,7 @@ Text(
               const Icon(Icons.analytics, color: Colors.red, size: 20),
               const SizedBox(width: 8),
               Text(
-<<<<<<< Updated upstream
-                'health_stats_period'.tr,
-=======
                 'common_period_stats'.tr,
->>>>>>> Stashed changes
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -643,19 +626,19 @@ Text(
     
     // Análise baseada em valores normais de frequência cardíaca em repouso
     if (avg < 60) {
-      analysis = 'Frequência cardíaca abaixo do normal (bradicardia). Consulte um médico se persistir.';
+      analysis = 'health_analysis_brady'.tr;
       analysisColor = Colors.blue;
       analysisIcon = Icons.warning;
     } else if (avg >= 60 && avg <= 100) {
-      analysis = 'Frequência cardíaca dentro da faixa normal para adultos em repouso.';
+      analysis = 'health_analysis_normal'.tr;
       analysisColor = Colors.green;
       analysisIcon = Icons.check_circle;
     } else if (avg > 100 && avg <= 120) {
-      analysis = 'Frequência cardíaca ligeiramente elevada. Monitore e consulte se persistir.';
+      analysis = 'health_analysis_elevated'.tr;
       analysisColor = Colors.orange;
       analysisIcon = Icons.warning;
     } else {
-      analysis = 'Frequência cardíaca elevada (taquicardia). Consulte um médico.';
+      analysis = 'health_analysis_tachy'.tr;
       analysisColor = Colors.red;
       analysisIcon = Icons.error;
     }
@@ -767,11 +750,7 @@ Text(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-<<<<<<< Updated upstream
-                      '${AppDateFormat.weekdayLong(date)}, ${DateFormat('dd/MM/yyyy').format(date)}',
-=======
                       DateFormat('EEEE, dd/MM/yyyy', Get.find<SettingsController>().effectiveLocale.toString()).format(date),
->>>>>>> Stashed changes
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -851,11 +830,7 @@ Text(
           ),
           const SizedBox(height: 16),
           Text(
-<<<<<<< Updated upstream
-            'health_error_load'.tr,
-=======
             'common_error_load'.tr,
->>>>>>> Stashed changes
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -864,11 +839,7 @@ Text(
           ),
           const SizedBox(height: 8),
           Text(
-<<<<<<< Updated upstream
-            _error ?? 'health_unknown_error'.tr,
-=======
             _error ?? 'common_unknown_error'.tr,
->>>>>>> Stashed changes
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
@@ -882,11 +853,7 @@ Text(
               backgroundColor: const Color(0xFF00324A),
               foregroundColor: Colors.white,
             ),
-<<<<<<< Updated upstream
-            child: Text('health_try_again'.tr),
-=======
             child: Text('common_try_again'.tr),
->>>>>>> Stashed changes
           ),
         ],
       ),
@@ -905,11 +872,7 @@ Text(
           ),
           const SizedBox(height: 16),
           Text(
-<<<<<<< Updated upstream
-            'health_no_data'.tr,
-=======
             'common_no_data'.tr,
->>>>>>> Stashed changes
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -918,11 +881,7 @@ Text(
           ),
           const SizedBox(height: 8),
           Text(
-<<<<<<< Updated upstream
-            'health_no_heart_rate'.tr,
-=======
             'common_no_records_heart'.tr,
->>>>>>> Stashed changes
             style: TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
