@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'login_controller.dart';
+import '../../widgets/language_icon_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -92,13 +93,23 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   }
 
   Widget _buildLogoSection(Size size) {
-    return Center(
-      child: Image.asset(
-        'assets/images/pulseflow2.png',
-        width: size.width * 0.4,
-        height: size.width * 0.4,
-        fit: BoxFit.contain,
-      ),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Center(
+          child: Image.asset(
+            'assets/images/pulseflow2.png',
+            width: size.width * 0.4,
+            height: size.width * 0.4,
+            fit: BoxFit.contain,
+          ),
+        ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: const LanguageIconButton(),
+        ),
+      ],
     );
   }
 
@@ -155,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          'Bem-vindo!',
+          'auth_welcome'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 28,
@@ -164,9 +175,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             letterSpacing: 0.5,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
-          'Entre para continuar',
+          'auth_enter_to_continue'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,
@@ -189,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         keyboardType: TextInputType.emailAddress,
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          labelText: 'E-mail',
+          labelText: 'auth_email'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
           prefixIcon: Icon(Icons.email_outlined, color: const Color(0xFF00324A)),
           filled: true,
@@ -218,10 +229,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Por favor, digite seu e-mail';
+            return 'auth_email_required'.tr;
           }
           if (!GetUtils.isEmail(value)) {
-            return 'Por favor, digite um e-mail válido';
+            return 'auth_email_invalid'.tr;
           }
           return null;
         },
@@ -240,7 +251,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         obscureText: Get.find<LoginController>().obscurePassword.value,
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          labelText: 'Senha',
+          labelText: 'auth_password'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
           prefixIcon: Icon(Icons.lock_outlined, color: const Color(0xFF00324A)),
           suffixIcon: IconButton(
@@ -278,10 +289,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Por favor, digite sua senha';
+            return 'auth_password_required'.tr;
           }
           if (value.length < 6) {
-            return 'A senha deve ter pelo menos 6 caracteres';
+            return 'auth_password_min'.tr;
           }
           return null;
         },
@@ -308,7 +319,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               activeColor: const Color(0xFF00324A),
             )),
             Text(
-              'Lembrar-me',
+              'auth_remember_me'.tr,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -325,7 +336,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: Text(
-            'Esqueceu a senha?',
+            'auth_forgot_password'.tr,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -386,7 +397,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                   Icon(Icons.login, color: Colors.white, size: 20),
                   SizedBox(width: 8),
                   Text(
-                    'Entrar',
+                    'auth_login'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -407,7 +418,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'ou',
+            'auth_or'.tr,
             style: TextStyle(color: Colors.grey[600], fontSize: 14),
           ),
         ),
@@ -427,7 +438,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Text(
-          'Criar nova conta',
+          'auth_create_account'.tr,
           style: TextStyle(
             color: const Color(0xFF00324A),
             fontSize: 16,

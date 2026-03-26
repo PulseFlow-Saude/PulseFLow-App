@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../utils/intl_locale.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../services/health_data_service.dart';
 import '../../theme/app_theme.dart';
+import '../institutional/settings_controller.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../../widgets/pulse_drawer_button.dart';
@@ -47,11 +49,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     try {
       final currentUser = _authService.currentUser;
       if (currentUser?.id == null) {
-        throw 'Usuário não autenticado';
+        throw 'common_user_not_auth'.tr;
       }
 
       if (_selectedDateFrom == null || _selectedDateTo == null) {
-        throw 'Selecione um período';
+        throw 'common_select_period'.tr;
       }
 
       // Busca dados diretamente da coleção 'insonias'
@@ -122,7 +124,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       initialDateRange: _selectedDateFrom != null && _selectedDateTo != null
           ? DateTimeRange(start: _selectedDateFrom!, end: _selectedDateTo!)
           : null,
-      locale: const Locale('pt', 'BR'),
+      locale: Get.find<SettingsController>().effectiveLocale,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -180,7 +182,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             ),
           ],
         ),
-        bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
+        // bottomNavigationBar removido - tela tem sidebar
+        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
       ),
     );
   }
@@ -209,7 +212,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               Expanded(
                 child: Center(
                   child: Text(
-                    'Insônia / Sono',
+                    'health_sleep'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -227,8 +230,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                   if (authService.currentUser?.id != null) {
                     try {
                       Get.snackbar(
-                        'Sincronizando',
-                        'Atualizando dados do Apple Health...',
+                        'health_syncing'.tr,
+                        'health_sync_msg'.tr,
                         backgroundColor: Colors.blue,
                         colorText: Colors.white,
                         duration: const Duration(seconds: 2),
@@ -239,16 +242,16 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                       await _loadHealthData();
                       
                       Get.snackbar(
-                        'Sucesso',
-                        'Dados atualizados com sucesso!',
+                        'health_success'.tr,
+                        'health_updated'.tr,
                         backgroundColor: Colors.green,
                         colorText: Colors.white,
                         duration: const Duration(seconds: 2),
                       );
                     } catch (e) {
                       Get.snackbar(
-                        'Erro',
-                        'Erro ao sincronizar dados: $e',
+                        'health_error'.tr,
+                        '${'health_error_sync'.tr}: $e',
                         backgroundColor: Colors.red,
                         colorText: Colors.white,
                       );
@@ -288,8 +291,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Período',
+                        Text(
+                          'common_period'.tr,
                           style: TextStyle(
                             fontSize: 12,
                             color: Color(0xFF64748B),
@@ -299,7 +302,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                         Text(
                           _selectedDateFrom != null && _selectedDateTo != null
                               ? '${DateFormat('dd/MM/yyyy').format(_selectedDateFrom!)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateTo!)}'
-                              : 'Selecione um período',
+                              : 'common_select_period'.tr,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -348,7 +351,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     final max = values.reduce((a, b) => a > b ? a : b);
     
     // Calcula tendência
-    String trend = 'estável';
+    String trend = 'health_trend_stable'.tr;
     Color trendColor = Colors.grey;
     if (_dailyData.length >= 4) {
       final firstHalf = _dailyData.sublist(0, _dailyData.length ~/ 2);
@@ -357,10 +360,10 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       final secondAvg = secondHalf.map((d) => d['value'] as double).reduce((a, b) => a + b) / secondHalf.length;
       
       if (secondAvg > firstAvg + 0.5) {
-        trend = 'aumentando';
+        trend = 'health_trend_increasing'.tr;
         trendColor = Colors.green;
       } else if (secondAvg < firstAvg - 0.5) {
-        trend = 'diminuindo';
+        trend = 'health_trend_decreasing'.tr;
         trendColor = Colors.orange;
       }
     }
@@ -395,12 +398,12 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.analytics, color: Colors.blue, size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.analytics, color: Colors.blue, size: 20),
+              const SizedBox(width: 8),
               Text(
-                'Estatísticas do Período',
+                'common_period_stats'.tr,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -414,15 +417,15 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: _buildStatCard('Média', '${stats['avg'].toStringAsFixed(1)}', 'horas', Colors.blue, Icons.trending_up),
+                  child: _buildStatCard('health_avg'.tr, '${stats['avg'].toStringAsFixed(1)}', 'health_unit_h'.tr, Colors.blue, Icons.trending_up),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildStatCard('Mínimo', '${stats['min'].toStringAsFixed(1)}', 'horas', Colors.green, Icons.keyboard_arrow_down),
+                  child: _buildStatCard('health_min'.tr, '${stats['min'].toStringAsFixed(1)}', 'health_unit_h'.tr, Colors.green, Icons.keyboard_arrow_down),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildStatCard('Máximo', '${stats['max'].toStringAsFixed(1)}', 'horas', Colors.red, Icons.keyboard_arrow_up),
+                  child: _buildStatCard('health_max'.tr, '${stats['max'].toStringAsFixed(1)}', 'health_unit_h'.tr, Colors.red, Icons.keyboard_arrow_up),
                 ),
               ],
             ),
@@ -499,13 +502,13 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.show_chart, color: Colors.blue, size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.show_chart, color: Colors.blue, size: 20),
+              const SizedBox(width: 8),
               Text(
-                'Evolução',
-                style: TextStyle(
+                'health_evolution'.tr,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1E293B),
@@ -657,7 +660,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Análise',
+                  'health_analysis'.tr,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -674,7 +677,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Tendência: ${stats['trend']}',
+                  'health_trend_label'.trParams({'trend': stats['trend']}),
                   style: TextStyle(
                     fontSize: 11,
                     color: stats['trendColor'] as Color,
@@ -693,10 +696,10 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 12),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
           child: Text(
-            'Registros Diários',
+            'health_daily_records'.tr,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -746,7 +749,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      DateFormat('EEEE, dd/MM/yyyy', 'pt_BR').format(date),
+                      DateFormat('EEEE, dd/MM/yyyy', Get.find<SettingsController>().effectiveLocale.toString()).format(date),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -777,7 +780,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                   ),
                   if (count > 1)
                     Text(
-                      '$count registros',
+                      'health_records_count'.trParams({'count': '$count'}),
                       style: TextStyle(
                         fontSize: 11,
                         color: Colors.grey[600],
@@ -794,17 +797,17 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
+          const CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
-            'Carregando dados...',
-            style: TextStyle(
+            'health_loading'.tr,
+            style: const TextStyle(
               color: Color(0xFF64748B),
               fontSize: 16,
             ),
@@ -825,8 +828,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             color: Colors.red[300],
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Erro ao carregar dados',
+          Text(
+            'common_error_load'.tr,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -835,7 +838,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            _error ?? 'Erro desconhecido',
+            _error ?? 'common_unknown_error'.tr,
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
@@ -849,7 +852,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               backgroundColor: const Color(0xFF00324A),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Tentar novamente'),
+            child: Text('common_try_again'.tr),
           ),
         ],
       ),
@@ -867,8 +870,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             color: Colors.grey[300],
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Nenhum dado encontrado',
+          Text(
+            'common_no_data'.tr,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -876,8 +879,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Não há registros de sono no período selecionado',
+          Text(
+            'common_no_records_sleep'.tr,
             style: TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),

@@ -32,12 +32,12 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
   int _intensidadeDor = 0;
   DateTime _selectedDate = DateTime.now();
 
-  final List<String> _tipos = [
-    'Crise/Emergência',
-    'Acompanhamento de Condição Crônica',
-    'Episódio Psicológico ou Emocional',
-    'Evento Relacionado à Medicação',
-    'Outros',
+  static const List<String> _tipoKeys = [
+    'evento_tipo_crise',
+    'evento_tipo_cronico',
+    'evento_tipo_psicologico',
+    'evento_tipo_medicacao',
+    'evento_tipo_outros',
   ];
 
   final List<String> _especialidades = [
@@ -98,28 +98,28 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
     'Urologia',
   ];
 
-  String _getIntensidadeLabel(int intensidade) {
+  String _getIntensidadeLabelKey(int intensidade) {
     switch (intensidade) {
       case 0:
-        return 'Sem Dor';
+        return 'evt_pain_none'.tr;
       case 1:
       case 2:
-        return 'Dor Leve';
+        return 'evt_pain_light'.tr;
       case 3:
       case 4:
-        return 'Dor Moderada';
+        return 'evt_pain_moderate'.tr;
       case 5:
       case 6:
-        return 'Dor Moderada a Intensa';
+        return 'evt_pain_mod_intense'.tr;
       case 7:
       case 8:
-        return 'Dor Intensa';
+        return 'evt_pain_intense'.tr;
       case 9:
-        return 'Dor Muito Intensa';
+        return 'evt_pain_very_intense'.tr;
       case 10:
-        return 'Dor Insuportável';
+        return 'evt_pain_unbearable'.tr;
       default:
-        return 'Sem Dor';
+        return 'evt_pain_none'.tr;
     }
   }
 
@@ -181,16 +181,16 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                         // Campos principais
                         _buildTextField(
                           controller: _tituloController,
-                          label: 'Título do Evento',
-                          hint: 'Ex: Controle de epilepsia',
+                          label: 'evt_title'.tr,
+                          hint: 'evt_title_hint'.tr,
                           isRequired: true,
                         ),
                         const SizedBox(height: 12),
                         
                         _buildDropdownField(
-                          label: 'Tipo de Evento',
+                          label: 'evt_type_label'.tr,
                           value: _selectedTipo,
-                          items: _tipos,
+                          items: _tipoKeys,
                           onChanged: (value) => setState(() => _selectedTipo = value),
                           isRequired: true,
                         ),
@@ -204,23 +204,23 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                           
                           _buildTextField(
                             controller: _descricaoController,
-                            label: 'Descrição do Evento',
-                            hint: 'Descreva os sintomas e detalhes',
+                            label: 'evt_desc_label'.tr,
+                            hint: 'evt_desc_hint'.tr,
                             maxLines: 3,
                           ),
                           const SizedBox(height: 12),
                           
                           _buildTextField(
                             controller: _medicacaoController,
-                            label: 'Medicação e Alívio',
-                            hint: 'Medicamentos utilizados',
+                            label: 'evt_medication_label'.tr,
+                            hint: 'evt_medication_hint'.tr,
                           ),
                           const SizedBox(height: 12),
                           
                           _buildTextField(
                             controller: _sintomasController,
-                            label: 'Sintomas',
-                            hint: 'Descreva os sintomas apresentados',
+                            label: 'evt_symptoms_label'.tr,
+                            hint: 'evt_symptoms_hint'.tr,
                             maxLines: 2,
                           ),
                           const SizedBox(height: 20),
@@ -236,7 +236,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
+      // bottomNavigationBar removido - tela tem sidebar
+      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
     ));
   }
 
@@ -266,8 +267,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Registro de Evento Clínico',
+                Text(
+                  'evt_form_title'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -275,7 +276,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                   ),
                 ),
                 Text(
-                  'Documente seu evento médico',
+                  'evt_form_sub'.tr,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
@@ -295,7 +296,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-          'Intensidade da Dor',
+          'evt_pain_intensity_label'.tr,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -322,7 +323,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '${_getIntensidadeLabel(_intensidadeDor)} (${_intensidadeDor}/10)',
+                      '${_getIntensidadeLabelKey(_intensidadeDor).tr} (${_intensidadeDor}/10)',
                       style: TextStyle(
                         color: _getIntensidadeColor(_intensidadeDor),
                         fontWeight: FontWeight.w700,
@@ -397,7 +398,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
           maxLines: maxLines,
           validator: (value) {
             if (isRequired && (value == null || value.trim().isEmpty)) {
-              return 'Este campo é obrigatório';
+              return 'common_required'.tr;
             }
             return null;
           },
@@ -440,7 +441,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
     double? fontSize,
   }) {
     final double textSize = fontSize ?? 14.0;
-    final bool isTipoEvento = label == 'Tipo de Evento';
+    final bool isTipoEvento = label == 'evt_type_label'.tr;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,14 +475,14 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
           isExpanded: true,
           validator: (value) {
             if (isRequired && value == null) {
-              return 'Este campo é obrigatório';
+              return 'common_required'.tr;
             }
             return null;
           },
           selectedItemBuilder: (BuildContext context) {
             return items.map<Widget>((String item) {
               return Text(
-                item,
+                item.tr,
                 style: TextStyle(
                   fontSize: isTipoEvento ? 13.0 : textSize,
                   overflow: TextOverflow.ellipsis,
@@ -490,7 +491,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
             }).toList();
           },
           decoration: InputDecoration(
-            hintText: 'Selecione uma opção',
+            hintText: 'common_select_option'.tr,
             hintStyle: const TextStyle(
               color: Color(0xFF9CA3AF),
             ),
@@ -517,7 +518,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
           items: items.map((String item) {
             return DropdownMenuItem<String>(
               value: item,
-              child: Text(item),
+              child: Text(item.tr),
             );
           }).toList(),
         ),
@@ -529,8 +530,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Data',
+        Text(
+          'evt_date'.tr,
           style: TextStyle(
             fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -584,8 +585,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              'Limpar',
+            child: Text(
+              'common_clear'.tr,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
               ),
@@ -605,8 +606,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              'Salvar',
+            child: Text(
+              'common_save'.tr,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
               ),
@@ -703,8 +704,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Evento Registrado!',
+                      Text(
+                        'evt_registered'.tr,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -721,7 +722,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                   child: Column(
                     children: [
                       Text(
-                        'O evento clínico foi salvo com sucesso no seu histórico médico.',
+                        'evt_registered_msg'.tr,
                         style: TextStyle(
                           fontSize: 16,
                           color: const Color(0xFF64748B),
@@ -747,8 +748,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
-                            'Continuar',
+                          child: Text(
+                            'common_continue'.tr,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -775,8 +776,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
     final pacienteId = widget.pacienteId ?? AuthService.instance.currentUser?.id;
     if (pacienteId == null || pacienteId.isEmpty) {
       Get.snackbar(
-        'Erro',
-        'Paciente não identificado. Faça login novamente.',
+        'common_error'.tr,
+        'evt_patient_error'.tr,
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade800,
         snackPosition: SnackPosition.TOP,
@@ -789,8 +790,8 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
       final currentUser = AuthService.instance.currentUser;
       if (currentUser?.id == null) {
         Get.snackbar(
-          'Erro',
-          'Usuário não autenticado. Por favor, faça login novamente.',
+          'common_error'.tr,
+          'evt_auth_error'.tr,
           backgroundColor: Colors.red.shade100,
           colorText: Colors.red.shade800,
           snackPosition: SnackPosition.TOP,
@@ -833,7 +834,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
       }
       
       Get.snackbar(
-        'Erro',
+        'common_error'.tr,
         errorMessage,
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade800,

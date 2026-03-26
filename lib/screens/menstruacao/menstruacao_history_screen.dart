@@ -6,7 +6,9 @@ import '../../models/menstruacao.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/intl_locale.dart';
 import '../../routes/app_routes.dart';
+import '../institutional/settings_controller.dart';
 import '../../widgets/menstruacao_calendar.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
@@ -98,9 +100,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
         backgroundColor: const Color(0xFF00324A),
         systemOverlayStyle: AppTheme.blueSystemOverlayStyle,
           elevation: 0,
-        title: const Text(
-          'Histórico de Ciclos',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        title: Text(
+          'menst_history_title'.tr,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         leading: const PulseDrawerButton(iconSize: 22),
         centerTitle: true,
@@ -149,7 +151,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                            'Ciclos Registrados',
+                            'menst_cycles_registered'.tr,
                                 style: AppTheme.titleMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -157,7 +159,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                               ),
                           const SizedBox(height: 4),
                               Text(
-                            '${_menstruacoes.length} ciclos acompanhados',
+                            '${_menstruacoes.length} ${'menst_cycles_tracked'.tr}',
                             style: AppTheme.bodyMedium.copyWith(
                                   color: Colors.white.withOpacity(0.9),
                                 ),
@@ -242,7 +244,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
             child: const Icon(Icons.add_rounded, size: 20),
           ),
           label: Text(
-            'Novo Ciclo',
+            'menst_new_cycle'.tr,
             style: AppTheme.titleMedium.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,
@@ -251,7 +253,8 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
           ),
             ),
       ),
-      bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
+      // bottomNavigationBar removido - tela tem sidebar
+      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
     ));
   }
 
@@ -307,7 +310,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Carregando ciclos menstruais',
+                  'menst_loading'.tr,
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w700,
@@ -315,7 +318,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Aguarde enquanto buscamos seus dados...',
+                  'menst_loading_sub'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                   ),
@@ -378,7 +381,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Erro ao carregar ciclos',
+                  'menst_error_load'.tr,
                   style: AppTheme.titleLarge.copyWith(
                     color: Colors.red.shade600,
                     fontWeight: FontWeight.w800,
@@ -414,7 +417,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   child: ElevatedButton.icon(
                     onPressed: _loadMenstruacoes,
                     icon: const Icon(Icons.refresh_rounded, size: 20),
-                    label: const Text('Tentar Novamente'),
+                    label: Text('menst_try_again'.tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,
@@ -483,7 +486,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'Nenhum ciclo encontrado',
+                  'menst_no_cycle'.tr,
                   style: AppTheme.titleLarge.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w800,
@@ -491,7 +494,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Você ainda não registrou nenhum ciclo menstrual.\nClique no botão abaixo para começar a acompanhar sua saúde.',
+                  'menst_no_cycle_sub'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                     height: 1.6,
@@ -519,7 +522,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   child: ElevatedButton.icon(
                     onPressed: () => Get.toNamed(Routes.MENSTRUACAO_FORM),
                     icon: const Icon(Icons.add_rounded, size: 22),
-                    label: const Text('Registrar Primeiro Ciclo'),
+                    label: Text('menst_register_first'.tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,
@@ -609,7 +612,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                             ),
                             const SizedBox(width: 6),
                         Text(
-                                menstruacao.status,
+                                _translateStatus(menstruacao.status),
                                 style: AppTheme.bodySmall.copyWith(
                                   color: statusColor,
                                   fontWeight: FontWeight.w600,
@@ -633,7 +636,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 
                 // Título
                 Text(
-                  'Ciclo Menstrual',
+                  'menst_cycle_title'.tr,
                 style: AppTheme.titleMedium.copyWith(
                   color: const Color(0xFF00324A),
                   fontWeight: FontWeight.w700,
@@ -675,7 +678,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Período',
+                                  'menst_period'.tr,
                                   style: AppTheme.bodySmall.copyWith(
                                   color: const Color(0xFF00324A),
                                     fontWeight: FontWeight.w500,
@@ -718,7 +721,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Duração',
+                                  'menst_duration'.tr,
                                   style: AppTheme.bodySmall.copyWith(
                                   color: const Color(0xFF00324A),
                                     fontWeight: FontWeight.w500,
@@ -726,7 +729,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '${menstruacao.duracaoEmDias} dias',
+                                  '${menstruacao.duracaoEmDias} ${'menst_days'.tr}',
                                   style: AppTheme.bodyMedium.copyWith(
                                   color: const Color(0xFF00324A),
                                     fontWeight: FontWeight.w700,
@@ -764,7 +767,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Ver detalhes',
+                            'menst_view_details'.tr,
                             style: AppTheme.bodySmall.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -786,6 +789,51 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
         ),
       ),
     );
+  }
+
+  String _translateFluxo(String fluxo) {
+    switch (fluxo) {
+      case 'Leve':
+        return 'menst_flow_light'.tr;
+      case 'Moderado':
+        return 'menst_flow_moderate'.tr;
+      case 'Intenso':
+        return 'menst_flow_heavy'.tr;
+      default:
+        return fluxo.isEmpty ? 'menst_not_defined'.tr : fluxo;
+    }
+  }
+
+  String _translateHumor(String humor) {
+    switch (humor.toLowerCase()) {
+      case 'feliz':
+        return 'menst_mood_happy'.tr;
+      case 'normal':
+        return 'menst_mood_normal'.tr;
+      case 'triste':
+        return 'menst_mood_sad'.tr;
+      case 'ansioso':
+        return 'menst_mood_anxious'.tr;
+      case 'raiva':
+        return 'menst_mood_angry'.tr;
+      case 'cansado':
+        return 'menst_mood_tired'.tr;
+      default:
+        return humor.isEmpty ? 'menst_not_defined'.tr : humor;
+    }
+  }
+
+  String _translateStatus(String status) {
+    switch (status) {
+      case 'Ativa':
+        return 'menst_status_active'.tr;
+      case 'Próxima':
+        return 'menst_status_next'.tr;
+      case 'Finalizada':
+        return 'menst_status_finished'.tr;
+      default:
+        return status;
+    }
   }
 
   Color _getStatusColor(String status) {
@@ -821,9 +869,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
     final dateOnly = DateTime(date.year, date.month, date.day);
 
     if (dateOnly == today) {
-      return 'Hoje';
+      return 'common_today'.tr;
     } else if (dateOnly == yesterday) {
-      return 'Ontem';
+      return 'common_yesterday'.tr;
     } else {
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     }
@@ -909,9 +957,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                      const Text(
-                    'Detalhes do Ciclo',
-                        style: TextStyle(
+                      Text(
+                    'menst_details_cycle'.tr,
+                        style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 22,
                       fontWeight: FontWeight.w800,
@@ -920,7 +968,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Ciclo Menstrual',
+                        'menst_cycle_title'.tr,
                         style: const TextStyle(
                           color: Color(0xFF1E3A8A),
                           fontSize: 15,
@@ -948,13 +996,13 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 children: [
                   // Informações básicas
                   _buildDetailSection(
-                    title: 'Informações do Ciclo',
+                    title: 'menst_cycle_info'.tr,
                     icon: Icons.info_rounded,
                     children: [
-                      _buildDetailRow('Data de Início', DateFormat('dd/MM/yyyy às HH:mm').format(menstruacao.dataInicio)),
-                      _buildDetailRow('Data de Fim', DateFormat('dd/MM/yyyy às HH:mm').format(menstruacao.dataFim)),
-                      _buildDetailRow('Duração Total', '${menstruacao.duracaoEmDias} dias'),
-                      _buildDetailRow('Status', menstruacao.status),
+                      _buildDetailRow('menst_start_date'.tr, DateFormat('dd/MM/yyyy às HH:mm').format(menstruacao.dataInicio)),
+                      _buildDetailRow('menst_end_date'.tr, DateFormat('dd/MM/yyyy às HH:mm').format(menstruacao.dataFim)),
+                      _buildDetailRow('menst_total_duration'.tr, '${menstruacao.duracaoEmDias} ${'menst_days'.tr}'),
+                      _buildDetailRow('menst_status'.tr, _translateStatus(menstruacao.status)),
                     ],
                   ),
                   
@@ -963,7 +1011,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   // Dados por dia
                   if (menstruacao.diasPorData != null && menstruacao.diasPorData!.isNotEmpty) ...[
                     _buildDetailSection(
-                      title: 'Dados Diários',
+                      title: 'menst_daily_data'.tr,
                       icon: Icons.calendar_view_day_rounded,
                       children: [
                         ...menstruacao.diasPorData!.entries.map((entry) {
@@ -979,7 +1027,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      DateFormat('dd/MM/yyyy - EEEE', 'pt_BR').format(data),
+                                      DateFormat('dd/MM/yyyy - EEEE', Get.find<SettingsController>().effectiveLocale.toString()).format(data),
                                       style: const TextStyle(
                                         color: Color(0xFF1F2937),
                                         fontSize: 15,
@@ -994,9 +1042,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                         color: const Color(0xFF10B981).withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: const Text(
-                                        'Início',
-                                        style: TextStyle(
+                                      child: Text(
+                                        'menst_start'.tr,
+                                        style: const TextStyle(
                                           color: Color(0xFF10B981),
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
@@ -1010,9 +1058,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                         color: const Color(0xFFEF4444).withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: const Text(
-                                        'Fim',
-                                        style: TextStyle(
+                                      child: Text(
+                                        'menst_end'.tr,
+                                        style: const TextStyle(
                                           color: Color(0xFFEF4444),
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
@@ -1027,8 +1075,8 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                   Expanded(
                                     child: _buildDayDetailRow(
                                       icon: Icons.water_drop_rounded,
-                                      title: 'Fluxo',
-                                      value: dia.fluxo,
+                                      title: 'menst_flow'.tr,
+                                      value: _translateFluxo(dia.fluxo),
                                       valueColor: _getFluxoColor(dia.fluxo),
                                     ),
                                   ),
@@ -1036,8 +1084,8 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                   Expanded(
                                     child: _buildDayDetailRow(
                                       icon: Icons.health_and_safety_rounded,
-                                      title: 'Cólica',
-                                      value: dia.teveColica ? 'Sim' : 'Não',
+                                      title: 'menst_cramp'.tr,
+                                      value: dia.teveColica ? 'menst_yes'.tr : 'menst_no'.tr,
                                       valueColor: dia.teveColica ? const Color(0xFFEF4444) : const Color(0xFF10B981),
                                     ),
                                   ),
@@ -1046,8 +1094,8 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                               const SizedBox(height: 12),
                               _buildDayDetailRow(
                                 icon: Icons.mood_rounded,
-                                title: 'Humor',
-                                value: dia.humor,
+                                title: 'menst_mood'.tr,
+                                value: _translateHumor(dia.humor),
                                 valueColor: _getHumorColor(dia.humor),
                               ),
                               if (entry != menstruacao.diasPorData!.entries.last) ...[
@@ -1250,7 +1298,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                      'Resumo do Ciclo',
+                      'menst_cycle_summary'.tr,
                       style: AppTheme.titleMedium.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -1273,7 +1321,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  menstruacao.status,
+                  _translateStatus(menstruacao.status),
                   style: AppTheme.bodySmall.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -1290,16 +1338,16 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
               Expanded(
                 child: _buildSummaryItem(
                   icon: Icons.schedule_rounded,
-                  label: 'Duração',
-                  value: '${menstruacao.duracaoEmDias} dias',
+                  label: 'menst_duration'.tr,
+                  value: '${menstruacao.duracaoEmDias} ${'menst_days'.tr}',
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _buildSummaryItem(
                   icon: Icons.trending_up_rounded,
-                  label: 'Dados',
-                  value: '${menstruacao.diasPorData?.length ?? 0} dias',
+                  label: 'menst_data'.tr,
+                  value: '${menstruacao.diasPorData?.length ?? 0} ${'menst_days'.tr}',
                 ),
               ),
             ],
@@ -1353,7 +1401,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Informações Detalhadas',
+          'menst_detailed_info'.tr,
           style: AppTheme.titleMedium.copyWith(
             color: const Color(0xFF00324A),
             fontWeight: FontWeight.w700,
@@ -1363,29 +1411,29 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
         
         _buildModernDetailCard(
           icon: Icons.play_circle_outline_rounded,
-          title: 'Data de Início',
+          title: 'menst_start_date'.tr,
           value: DateFormat('dd/MM/yyyy').format(menstruacao.dataInicio),
           color: const Color(0xFF10B981),
         ),
         
         _buildModernDetailCard(
           icon: Icons.stop_circle_outlined,
-          title: 'Data de Fim',
+          title: 'menst_end_date'.tr,
           value: DateFormat('dd/MM/yyyy').format(menstruacao.dataFim),
           color: const Color(0xFFEF4444),
         ),
         
         _buildModernDetailCard(
           icon: Icons.schedule_rounded,
-          title: 'Duração Total',
-          value: '${menstruacao.duracaoEmDias} dias',
+          title: 'menst_total_duration'.tr,
+          value: '${menstruacao.duracaoEmDias} ${'menst_days'.tr}',
           color: const Color(0xFF3B82F6),
         ),
         
         _buildModernDetailCard(
           icon: Icons.info_outline_rounded,
-          title: 'Status Atual',
-          value: menstruacao.status,
+          title: 'menst_current_status'.tr,
+          value: _translateStatus(menstruacao.status),
           color: _getStatusColor(menstruacao.status),
         ),
       ],
@@ -1575,9 +1623,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                      const Text(
-                        'Detalhes do Dia',
-                        style: TextStyle(
+                      Text(
+                        'menst_details_day'.tr,
+                        style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
@@ -1586,7 +1634,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                       ),
                       const SizedBox(height: 4),
                         Text(
-                        DateFormat('dd/MM/yyyy - EEEE', 'pt_BR').format(day),
+                        DateFormat('dd/MM/yyyy - EEEE', Get.find<SettingsController>().effectiveLocale.toString()).format(day),
                         style: const TextStyle(
                           color: Color(0xFF1E3A8A),
                           fontSize: 15,
@@ -1614,15 +1662,15 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   children: [
                   // Informações do dia
                   _buildDetailSection(
-                    title: 'Dados do Dia',
+                    title: 'menst_day_data'.tr,
                     icon: Icons.water_drop_rounded,
                       children: [
                       if (dia != null) ...[
-                        _buildDetailRow('Fluxo', dia.fluxo),
-                        _buildDetailRow('Cólica', dia.teveColica ? 'Sim' : 'Não'),
-                        _buildDetailRow('Humor', dia.humor),
+                        _buildDetailRow('menst_flow'.tr, _translateFluxo(dia.fluxo)),
+                        _buildDetailRow('menst_cramp'.tr, dia.teveColica ? 'menst_yes'.tr : 'menst_no'.tr),
+                        _buildDetailRow('menst_mood'.tr, _translateHumor(dia.humor)),
                       ] else ...[
-                        _buildDetailRow('Status', 'Sem dados específicos'),
+                        _buildDetailRow('menst_status'.tr, 'menst_no_specific_data'.tr),
                         const SizedBox(height: 16),
                         Container(
                           padding: const EdgeInsets.all(16),
@@ -1643,7 +1691,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Este dia faz parte do ciclo menstrual, mas não possui dados detalhados registrados.',
+                                  'menst_day_data_msg'.tr,
                                   style: const TextStyle(
                                     color: Color(0xFF64748B),
                                     fontSize: 14,
@@ -1661,19 +1709,19 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   
                   // Informações do ciclo
                   _buildDetailSection(
-                    title: 'Informações do Ciclo',
+                    title: 'menst_cycle_info'.tr,
                     icon: Icons.info_rounded,
                     children: [
-                      _buildDetailRow('Data de Início', DateFormat('dd/MM/yyyy às HH:mm').format(menstruacao.dataInicio)),
-                      _buildDetailRow('Data de Fim', DateFormat('dd/MM/yyyy às HH:mm').format(menstruacao.dataFim)),
-                      _buildDetailRow('Duração Total', '${menstruacao.duracaoEmDias} dias'),
-                      _buildDetailRow('Status do Ciclo', menstruacao.status),
+                      _buildDetailRow('menst_start_date'.tr, DateFormat('dd/MM/yyyy às HH:mm').format(menstruacao.dataInicio)),
+                      _buildDetailRow('menst_end_date'.tr, DateFormat('dd/MM/yyyy às HH:mm').format(menstruacao.dataFim)),
+                      _buildDetailRow('menst_total_duration'.tr, '${menstruacao.duracaoEmDias} ${'menst_days'.tr}'),
+                      _buildDetailRow('menst_cycle_status'.tr, _translateStatus(menstruacao.status)),
                       
                       const SizedBox(height: 16),
                       
                       // Posição do dia no ciclo
-                      _buildDetailRow('Posição no Ciclo', _getDayPositionInCycle(day, menstruacao)),
-                      _buildDetailRow('Dias Restantes', _getRemainingDays(day, menstruacao)),
+                      _buildDetailRow('menst_position_in_cycle'.tr, _getDayPositionInCycle(day, menstruacao)),
+                      _buildDetailRow('menst_remaining_days'.tr, _getRemainingDays(day, menstruacao)),
                     ],
                   ),
                   
@@ -1681,12 +1729,12 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   
                   // Estatísticas do ciclo
                   _buildDetailSection(
-                    title: 'Estatísticas',
+                    title: 'menst_statistics'.tr,
                     icon: Icons.analytics_rounded,
                     children: [
-                      _buildDetailRow('Total de Dias', '${menstruacao.duracaoEmDias} dias'),
-                      _buildDetailRow('Dias com Dados', menstruacao.diasPorData != null ? '${menstruacao.diasPorData!.length} dias' : '0 dias'),
-                      _buildDetailRow('Progresso', '${_getCycleProgress(day, menstruacao)}%'),
+                      _buildDetailRow('menst_total_days'.tr, '${menstruacao.duracaoEmDias} ${'menst_days'.tr}'),
+                      _buildDetailRow('menst_days_with_data'.tr, menstruacao.diasPorData != null ? '${menstruacao.diasPorData!.length} ${'menst_days'.tr}' : '0 ${'menst_days'.tr}'),
+                      _buildDetailRow('menst_progress'.tr, '${_getCycleProgress(day, menstruacao)}%'),
                     ],
                   ),
                 ],
@@ -1720,23 +1768,23 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
   String _getDayPositionInCycle(DateTime day, Menstruacao menstruacao) {
     final dayDifference = day.difference(menstruacao.dataInicio).inDays + 1;
     if (dayDifference == 1) {
-      return '1º dia (Início)';
+      return 'menst_day_start'.tr;
     } else if (day == menstruacao.dataFim) {
-      return '$dayDifferenceº dia (Fim)';
+      return 'menst_day_end'.trParams({'n': dayDifference.toString()});
     } else {
-      return '$dayDifferenceº dia';
+      return 'menst_day_n'.trParams({'n': dayDifference.toString()});
     }
   }
 
   String _getRemainingDays(DateTime day, Menstruacao menstruacao) {
     if (day.isBefore(menstruacao.dataInicio)) {
       final daysUntilStart = menstruacao.dataInicio.difference(day).inDays;
-      return 'Faltam $daysUntilStart dias para iniciar';
+      return 'menst_days_until_start'.trParams({'n': daysUntilStart.toString()});
     } else if (day.isAfter(menstruacao.dataFim)) {
-      return 'Ciclo finalizado';
+      return 'menst_cycle_finished'.tr;
     } else {
       final remainingDays = menstruacao.dataFim.difference(day).inDays;
-      return remainingDays > 0 ? '$remainingDays dias restantes' : 'Último dia';
+      return remainingDays > 0 ? 'menst_days_remaining'.trParams({'n': remainingDays.toString()}) : 'menst_last_day'.tr;
     }
   }
 

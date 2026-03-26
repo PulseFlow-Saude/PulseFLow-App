@@ -84,23 +84,20 @@ class LoginController extends GetxController with SafeControllerMixin {
         passwordController.text,
       );
       
-      // Verifica se o usuário é admin (não precisa de 2FA)
       final patient = await _authService.getPatientById(patientId);
-      // Salva no controller global
       final pacienteController = Get.find<PacienteController>();
-       pacienteController.setPatientId(patientId);
+      pacienteController.setPatientId(patientId);
+
+      // Verifica se o usuário é admin (não precisa de 2FA)
       if (patient != null && patient.isAdmin) {
-        // Usuário admin: finaliza login diretamente
-        await _authService.verify2FACode(patientId, ''); // código vazio para admin
-        // Redirecionar para tela home
+        await _authService.verify2FACode(patientId, '');
         Get.offAllNamed('/home');
       } else {
-        // Usuário normal: redireciona direto para verificação 2FA
         Get.toNamed('/verify-2fa', arguments: {'patientId': patientId, 'method': 'email'});
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
+        'auth_error'.tr,
         e.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,

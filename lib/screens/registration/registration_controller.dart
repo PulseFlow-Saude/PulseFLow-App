@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../../models/patient.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import '../institutional/settings_controller.dart';
 import '../../utils/controller_mixin.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -72,21 +73,21 @@ class RegistrationController extends GetxController with SafeControllerMixin {
   final selectedDate = Rxn<DateTime>();
   late final GlobalKey<FormState> formKey;
 
-  // Listas para dropdowns
+  // Listas para dropdowns (chaves de tradução)
   final List<String> genders = [
-    'Masculino',
-    'Feminino',
-    'Não binário',
-    'Prefiro não informar'
+    'reg_gender_male',
+    'reg_gender_female',
+    'reg_gender_non_binary',
+    'reg_gender_prefer_not'
   ];
 
   final List<String> maritalStatuses = [
-    'Solteiro(a)',
-    'Casado(a)',
-    'Divorciado(a)',
-    'Viúvo(a)',
-    'União estável',
-    'Separado(a)'
+    'reg_marital_single',
+    'reg_marital_married',
+    'reg_marital_divorced',
+    'reg_marital_widowed',
+    'reg_marital_stable_union',
+    'reg_marital_separated'
   ];
 
   final List<String> states = [
@@ -97,120 +98,120 @@ class RegistrationController extends GetxController with SafeControllerMixin {
 
   final authService = Get.put(AuthService());
 
-  // Validators
+  // Validators (usam chaves de tradução via validate*)
   final nameValidator = MultiValidator([
-    RequiredValidator(errorText: 'Nome é obrigatório'),
-    MinLengthValidator(3, errorText: 'Nome deve ter pelo menos 3 caracteres'),
+    RequiredValidator(errorText: 'reg_name_required'.tr),
+    MinLengthValidator(3, errorText: 'reg_name_min'.tr),
   ]);
 
   final emailValidator = MultiValidator([
-    RequiredValidator(errorText: 'Email é obrigatório'),
-    EmailValidator(errorText: 'Email inválido'),
+    RequiredValidator(errorText: 'reg_email_required'.tr),
+    EmailValidator(errorText: 'reg_email_invalid'.tr),
   ]);
 
   final passwordValidator = MultiValidator([
-    RequiredValidator(errorText: 'Senha é obrigatória'),
-    MinLengthValidator(8, errorText: 'Senha deve ter pelo menos 8 caracteres'),
-    PatternValidator(r'[A-Z]', errorText: 'Senha deve conter pelo menos uma letra maiúscula'),
-    PatternValidator(r'[a-z]', errorText: 'Senha deve conter pelo menos uma letra minúscula'),
-    PatternValidator(r'[0-9]', errorText: 'Senha deve conter pelo menos um número'),
-    PatternValidator(r'[!@#$%^&*(),.?":{}|<>]', errorText: 'Senha deve conter pelo menos um caractere especial'),
+    RequiredValidator(errorText: 'reg_password_required'.tr),
+    MinLengthValidator(8, errorText: 'reg_password_min'.tr),
+    PatternValidator(r'[A-Z]', errorText: 'reg_password_upper'.tr),
+    PatternValidator(r'[a-z]', errorText: 'reg_password_lower'.tr),
+    PatternValidator(r'[0-9]', errorText: 'reg_password_digit'.tr),
+    PatternValidator(r'[!@#$%^&*(),.?":{}|<>]', errorText: 'reg_password_special'.tr),
   ]);
 
   final confirmPasswordValidator = MultiValidator([
-    RequiredValidator(errorText: 'Confirmação de senha é obrigatória'),
+    RequiredValidator(errorText: 'reg_confirm_required'.tr),
   ]);
 
   final cpfValidator = MultiValidator([
-    RequiredValidator(errorText: 'CPF é obrigatório'),
-    PatternValidator(r'^\d{3}\.\d{3}\.\d{3}-\d{2}$', errorText: 'CPF inválido'),
+    RequiredValidator(errorText: 'reg_cpf_required'.tr),
+    PatternValidator(r'^\d{3}\.\d{3}\.\d{3}-\d{2}$', errorText: 'reg_cpf_invalid'.tr),
   ]);
 
   final rgValidator = MultiValidator([
-    RequiredValidator(errorText: 'RG é obrigatório'),
+    RequiredValidator(errorText: 'reg_rg_required'.tr),
   ]);
 
   final phoneValidator = MultiValidator([
-    RequiredValidator(errorText: 'Telefone é obrigatório'),
-    PatternValidator(r'^\(\d{2}\) \d{5}-\d{4}$', errorText: 'Telefone inválido'),
+    RequiredValidator(errorText: 'reg_phone_required'.tr),
+    PatternValidator(r'^\(\d{2}\) \d{5}-\d{4}$', errorText: 'reg_phone_invalid'.tr),
   ]);
 
   final cepValidator = MultiValidator([
-    RequiredValidator(errorText: 'CEP é obrigatório'),
-    PatternValidator(r'^\d{5}-\d{3}$', errorText: 'CEP inválido'),
+    RequiredValidator(errorText: 'reg_cep_required'.tr),
+    PatternValidator(r'^\d{5}-\d{3}$', errorText: 'reg_cep_invalid'.tr),
   ]);
 
   // Validation methods
   String? validateName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Nome é obrigatório';
+      return 'reg_name_required'.tr;
     }
     if (value.length < 3) {
-      return 'Nome deve ter pelo menos 3 caracteres';
+      return 'reg_name_min'.tr;
     }
     if (!RegExp(r'^[a-zA-ZÀ-ÿ\s]+$').hasMatch(value)) {
-      return 'Nome deve conter apenas letras';
+      return 'reg_name_letters'.tr;
     }
     return null;
   }
 
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email é obrigatório';
+      return 'reg_email_required'.tr;
     }
     if (!GetUtils.isEmail(value)) {
-      return 'Email inválido';
+      return 'reg_email_invalid'.tr;
     }
     return null;
   }
 
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Senha é obrigatória';
+      return 'reg_password_required'.tr;
     }
     if (value.length < 8) {
-      return 'Senha deve ter pelo menos 8 caracteres';
+      return 'reg_password_min'.tr;
     }
     if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return 'Senha deve conter pelo menos uma letra maiúscula';
+      return 'reg_password_upper'.tr;
     }
     if (!RegExp(r'[a-z]').hasMatch(value)) {
-      return 'Senha deve conter pelo menos uma letra minúscula';
+      return 'reg_password_lower'.tr;
     }
     if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return 'Senha deve conter pelo menos um número';
+      return 'reg_password_digit'.tr;
     }
     if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
-      return 'Senha deve conter pelo menos um caractere especial';
+      return 'reg_password_special'.tr;
     }
     return null;
   }
 
   String? validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Confirmação de senha é obrigatória';
+      return 'reg_confirm_required'.tr;
     }
     if (value != passwordController.text) {
-      return 'As senhas não coincidem';
+      return 'reg_passwords_match'.tr;
     }
     return null;
   }
 
   String? validateCPF(String? value) {
     if (value == null || value.isEmpty) {
-      return 'CPF é obrigatório';
+      return 'reg_cpf_required'.tr;
     }
     
     // Remove máscara para validação
     final cpf = value.replaceAll(RegExp(r'[^\d]'), '');
     
     if (cpf.length != 11) {
-      return 'CPF deve ter 11 dígitos';
+      return 'reg_cpf_digits'.tr;
     }
     
     // Verifica se todos os dígitos são iguais (CPF inválido)
     if (RegExp(r'^(\d)\1{10}$').hasMatch(cpf)) {
-      return 'CPF inválido';
+      return 'reg_cpf_invalid'.tr;
     }
     
     // Validação dos dígitos verificadores
@@ -224,9 +225,9 @@ class RegistrationController extends GetxController with SafeControllerMixin {
     remainder = sum % 11;
     
     if (remainder < 2) {
-      if (int.parse(cpf[9]) != 0) return 'CPF inválido';
+      if (int.parse(cpf[9]) != 0) return 'reg_cpf_invalid'.tr;
     } else {
-      if (int.parse(cpf[9]) != (11 - remainder)) return 'CPF inválido';
+      if (int.parse(cpf[9]) != (11 - remainder)) return 'reg_cpf_invalid'.tr;
     }
     
     // Segundo dígito verificador
@@ -237,9 +238,9 @@ class RegistrationController extends GetxController with SafeControllerMixin {
     remainder = sum % 11;
     
     if (remainder < 2) {
-      if (int.parse(cpf[10]) != 0) return 'CPF inválido';
+      if (int.parse(cpf[10]) != 0) return 'reg_cpf_invalid'.tr;
     } else {
-      if (int.parse(cpf[10]) != (11 - remainder)) return 'CPF inválido';
+      if (int.parse(cpf[10]) != (11 - remainder)) return 'reg_cpf_invalid'.tr;
     }
     
     return null;
@@ -247,51 +248,51 @@ class RegistrationController extends GetxController with SafeControllerMixin {
 
   String? validateRG(String? value) {
     if (value == null || value.isEmpty) {
-      return 'RG é obrigatório';
+      return 'reg_rg_required'.tr;
     }
     return null;
   }
 
   String? validatePhone(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Telefone é obrigatório';
+      return 'reg_phone_required'.tr;
     }
     
     // Remove máscara para validação
     final phone = value.replaceAll(RegExp(r'[^\d]'), '');
     
     if (phone.length != 11) {
-      return 'Telefone deve ter 11 dígitos';
+      return 'reg_phone_digits'.tr;
     }
     
     return null;
   }
 
-  String? validateRequired(String? value, String fieldName) {
+  String? validateRequired(String? value, String fieldKey) {
     if (value == null || value.isEmpty) {
-      return '$fieldName é obrigatório';
+      return 'reg_field_required'.trParams({'field': fieldKey.tr});
     }
     return null;
   }
 
   String? validateCEP(String? value) {
     if (value == null || value.isEmpty) {
-      return 'CEP é obrigatório';
+      return 'reg_cep_required'.tr;
     }
     
     // Remove máscara para validação
     final cep = value.replaceAll(RegExp(r'[^\d]'), '');
     
     if (cep.length != 8) {
-      return 'CEP deve ter 8 dígitos';
+      return 'reg_cep_digits'.tr;
     }
     
     return null;
   }
 
-  String? validateDropdown(String? value, String fieldName) {
+  String? validateDropdown(String? value, String fieldKey) {
     if (value == null || value.isEmpty) {
-      return 'Selecione $fieldName';
+      return 'reg_select_field'.trParams({'field': fieldKey.tr});
     }
     return null;
   }
@@ -303,11 +304,11 @@ class RegistrationController extends GetxController with SafeControllerMixin {
     
     final height = double.tryParse(value.replaceAll(',', '.'));
     if (height == null) {
-      return 'Altura inválida';
+      return 'reg_height_invalid'.tr;
     }
     
     if (height < 50 || height > 250) {
-      return 'Altura deve estar entre 50 e 250 cm';
+      return 'reg_height_range'.tr;
     }
     
     return null;
@@ -320,11 +321,11 @@ class RegistrationController extends GetxController with SafeControllerMixin {
     
     final weight = double.tryParse(value.replaceAll(',', '.'));
     if (weight == null) {
-      return 'Peso inválido';
+      return 'reg_weight_invalid'.tr;
     }
     
     if (weight < 20 || weight > 300) {
-      return 'Peso deve estar entre 20 e 300 kg';
+      return 'reg_weight_range'.tr;
     }
     
     return null;
@@ -332,16 +333,16 @@ class RegistrationController extends GetxController with SafeControllerMixin {
 
   String? validateBirthDate(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Data de nascimento é obrigatória';
+      return 'reg_birth_required'.tr;
     }
     
     if (selectedDate.value == null) {
-      return 'Selecione uma data válida';
+      return 'reg_birth_select'.tr;
     }
     
     final age = DateTime.now().difference(selectedDate.value!).inDays ~/ 365;
     if (age < 18) {
-      return 'É necessário ter pelo menos 18 anos para se cadastrar';
+      return 'reg_birth_age'.tr;
     }
     
     return null;
@@ -355,7 +356,7 @@ class RegistrationController extends GetxController with SafeControllerMixin {
             const Duration(days: 365 * 18)), // Começa com 18 anos atrás
         firstDate: DateTime(1900),
         lastDate: DateTime.now(),
-        locale: const Locale('pt', 'BR'),
+        locale: Get.find<SettingsController>().effectiveLocale,
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
@@ -379,8 +380,8 @@ class RegistrationController extends GetxController with SafeControllerMixin {
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Erro ao selecionar data: ${e.toString()}',
+        'reg_error'.tr,
+        'reg_error_date'.trParams({'msg': e.toString()}),
         snackPosition: SnackPosition.BOTTOM,
       );
     }
@@ -404,8 +405,8 @@ class RegistrationController extends GetxController with SafeControllerMixin {
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Erro ao selecionar imagem: $e',
+        'reg_error'.tr,
+        'reg_error_image'.trParams({'msg': e.toString()}),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -431,8 +432,8 @@ class RegistrationController extends GetxController with SafeControllerMixin {
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Erro ao tirar foto: $e',
+        'reg_error'.tr,
+        'reg_error_camera'.trParams({'msg': e.toString()}),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -448,8 +449,8 @@ class RegistrationController extends GetxController with SafeControllerMixin {
       profilePhotoBase64.value = 'data:image/jpeg;base64,$base64String';
     } catch (e) {
       Get.snackbar(
-        'Erro',
-        'Erro ao processar imagem: $e',
+        'reg_error'.tr,
+        'reg_error_process_image'.trParams({'msg': e.toString()}),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -473,9 +474,9 @@ class RegistrationController extends GetxController with SafeControllerMixin {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Selecionar Foto de Perfil',
-                style: TextStyle(
+              Text(
+                'reg_photo_select_title'.tr,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -483,7 +484,7 @@ class RegistrationController extends GetxController with SafeControllerMixin {
               const SizedBox(height: 20),
               ListTile(
                 leading: const Icon(Icons.photo_library, color: Color(0xFF1CB5E0)),
-                title: const Text('Galeria'),
+                title: Text('reg_gallery'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   pickImageFromGallery();
@@ -491,7 +492,7 @@ class RegistrationController extends GetxController with SafeControllerMixin {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: Color(0xFF1CB5E0)),
-                title: const Text('Câmera'),
+                title: Text('reg_camera'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   takePhotoWithCamera();
@@ -500,7 +501,7 @@ class RegistrationController extends GetxController with SafeControllerMixin {
               if (profilePhoto.value != null)
                 ListTile(
                   leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text('Remover Foto'),
+                  title: Text('reg_remove_photo'.tr),
                   onTap: () {
                     Navigator.pop(context);
                     removeProfilePhoto();
@@ -516,8 +517,8 @@ class RegistrationController extends GetxController with SafeControllerMixin {
   Future<void> register() async {
     if (!formKey.currentState!.validate()) {
       Get.snackbar(
-        'Erro',
-        'Por favor, preencha todos os campos obrigatórios corretamente',
+        'reg_error'.tr,
+        'reg_please_fill'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -532,8 +533,8 @@ class RegistrationController extends GetxController with SafeControllerMixin {
       // Validar termos e autorizações
       if (!acceptTerms.value) {
         Get.snackbar(
-          'Erro',
-          'É necessário aceitar todos os termos e autorizações',
+          'reg_error'.tr,
+          'reg_terms_required'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -582,8 +583,8 @@ class RegistrationController extends GetxController with SafeControllerMixin {
       if (createdPatient != null) {
         // Mostrar mensagem de sucesso
         Get.snackbar(
-          'Sucesso',
-          'Cadastro realizado com sucesso! Bem-vindo(a), ${createdPatient.name}!',
+          'reg_success'.tr,
+          'reg_success_welcome'.trParams({'name': createdPatient.name}),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -599,11 +600,11 @@ class RegistrationController extends GetxController with SafeControllerMixin {
         // Redirecionar para a tela de login
         Get.offAllNamed('/login');
       } else {
-        throw 'Erro ao criar conta: Não foi possível criar o usuário';
+        throw 'reg_error_create'.tr;
       }
     } catch (e) {
       Get.snackbar(
-        'Erro',
+        'reg_error'.tr,
         e.toString(),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,

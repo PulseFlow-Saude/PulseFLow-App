@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 
 import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
+import '../../utils/specialty_translations.dart';
 import '../home/home_controller.dart';
+import '../institutional/settings_controller.dart';
 import 'appointment_scheduler_controller.dart';
 
 class AppointmentSchedulerScreen extends StatelessWidget {
@@ -38,22 +40,22 @@ class AppointmentSchedulerScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildSectionTitle('1. Escolha a especialidade'),
+                      _buildSectionTitle('appt_step_specialty'.tr),
                       const SizedBox(height: 12),
                       _buildSpecialtySection(controller),
                       const SizedBox(height: 28),
 
-                      _buildSectionTitle('2. Escolha o médico'),
+                      _buildSectionTitle('appt_step_doctor'.tr),
                       const SizedBox(height: 12),
                       _buildDoctorSection(controller),
                       const SizedBox(height: 28),
 
-                      _buildSectionTitle('3. Escolha a data'),
+                      _buildSectionTitle('appt_step_date'.tr),
                       const SizedBox(height: 12),
                       _buildDateSelector(controller),
                       const SizedBox(height: 28),
 
-                      _buildSectionTitle('4. Escolha o horário'),
+                      _buildSectionTitle('appt_step_slot'.tr),
                       const SizedBox(height: 12),
                       _buildSlotsGrid(controller),
                       const SizedBox(height: 28),
@@ -103,19 +105,19 @@ class AppointmentSchedulerScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text(
-                    'Agendamento de Consulta',
-                    style: TextStyle(
+                    'appt_scheduling_title'.tr,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Escolha a melhor combinação para você',
-                    style: TextStyle(
+                    'appt_scheduling_sub'.tr,
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
                     ),
@@ -133,13 +135,13 @@ class AppointmentSchedulerScreen extends StatelessWidget {
               border: Border.all(color: Colors.white24),
             ),
             child: Row(
-              children: const [
-                Icon(Icons.calendar_month_rounded, color: Colors.white, size: 26),
-                SizedBox(width: 12),
+              children: [
+                const Icon(Icons.calendar_month_rounded, color: Colors.white, size: 26),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Encontre horários disponíveis conforme a agenda do médico escolhido. Horários já ocupados não serão exibidos.',
-                    style: TextStyle(
+                    'appt_schedule_hint'.tr,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 13,
                     ),
@@ -190,7 +192,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    selected.name,
+                    SpecialtyTranslations.translate(selected.name),
                     style: AppTheme.titleMedium.copyWith(
                       color: const Color(0xFF1E293B),
                       fontWeight: FontWeight.w700,
@@ -209,7 +211,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
                 controller.resetSelections();
                 Get.offAllNamed(Routes.APPOINTMENTS_SPECIALTY);
               },
-              child: const Text('Trocar'),
+              child: Text('appt_change'.tr),
             ),
           ],
         ),
@@ -223,7 +225,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
     if (controller.selectedSpecialtyId.value == null) {
       return _buildEmptyState(
         icon: Icons.info_outline,
-        message: 'Selecione uma especialidade para listar os médicos.',
+        message: 'appt_select_specialty'.tr,
       );
     }
     if (doctor != null) {
@@ -259,7 +261,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${doctor.specialtyName} • ${doctor.crm}',
+                    '${SpecialtyTranslations.translate(doctor.specialtyName)} • ${doctor.crm}',
                     style: AppTheme.bodySmall.copyWith(color: Colors.grey[600]),
                   ),
                 ],
@@ -273,7 +275,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
                 controller.selectedDoctorId.value = null;
                 Get.toNamed(Routes.APPOINTMENTS_DOCTORS);
               },
-              child: const Text('Trocar'),
+              child: Text('appt_change'.tr),
             ),
           ],
         ),
@@ -293,7 +295,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
           controller: controller.specialtySearchController,
           onChanged: controller.updateSpecialtySearch,
           decoration: InputDecoration(
-            hintText: 'Pesquise por especialidade',
+            hintText: 'appt_search_specialty'.tr,
             prefixIcon: const Icon(Icons.search_rounded),
             filled: true,
             fillColor: Colors.grey[100],
@@ -312,8 +314,8 @@ class AppointmentSchedulerScreen extends StatelessWidget {
           _buildEmptyState(
             icon: Icons.search_off_rounded,
             message: query.isEmpty
-                ? 'Nenhuma especialidade disponível no momento.'
-                : 'Não encontramos especialidades que contenham "$query".',
+                ? 'appt_no_specialty'.tr
+                : '${'appt_no_specialty_match'.tr} "$query".',
           )
         else
           Wrap(
@@ -329,7 +331,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        specialty.name,
+                        SpecialtyTranslations.translate(specialty.name),
                         style: AppTheme.titleSmall.copyWith(
                           color: isSelected ? Colors.white : const Color(0xFF1E293B),
                           fontWeight: FontWeight.w700,
@@ -371,15 +373,15 @@ class AppointmentSchedulerScreen extends StatelessWidget {
       if (controller.selectedSpecialtyId.value == null) {
         return _buildEmptyState(
           icon: Icons.info_outline,
-          message: 'Selecione uma especialidade para listar os médicos.',
+          message: 'appt_select_specialty'.tr,
         );
       }
       if (doctors.isEmpty) {
         return _buildEmptyState(
           icon: Icons.search_off_rounded,
           message: controller.doctorQuery.value.isEmpty
-              ? 'Nenhum médico encontrado para esta especialidade.'
-              : 'Não encontramos médicos que contenham "${controller.doctorQuery.value}".',
+              ? 'appt_no_doctor'.tr
+              : '${'appt_no_doctor_match'.tr} "${controller.doctorQuery.value}".',
         );
       }
 
@@ -390,7 +392,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
             controller: controller.doctorSearchController,
             onChanged: controller.updateDoctorSearch,
             decoration: InputDecoration(
-              hintText: 'Pesquise pelo médico',
+              hintText: 'appt_search_doctor'.tr,
               prefixIcon: const Icon(Icons.search_rounded),
               filled: true,
               fillColor: Colors.grey[100],
@@ -440,7 +442,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 4),
                   Text(
-                    '${doctor.specialtyName} • ${doctor.crm}',
+                    '${SpecialtyTranslations.translate(doctor.specialtyName)} • ${doctor.crm}',
                     style: AppTheme.bodySmall.copyWith(color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 6),
@@ -467,7 +469,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
       if (controller.selectedDoctor == null) {
         return _buildEmptyState(
           icon: Icons.calendar_today_rounded,
-          message: 'Selecione um médico para visualizar as datas disponíveis.',
+          message: 'appt_select_doctor_dates'.tr,
         );
       }
 
@@ -476,7 +478,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
       if (availableDates.isEmpty) {
         return _buildEmptyState(
           icon: Icons.event_busy_rounded,
-          message: 'Este médico não possui horários disponíveis cadastrados.',
+          message: 'appt_no_slots_doctor'.tr,
         );
       }
 
@@ -505,7 +507,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        DateFormat('E', 'pt_BR').format(date).toUpperCase(),
+                        DateFormat('E', Get.find<SettingsController>().effectiveLocale.toString()).format(date).toUpperCase(),
                         style: TextStyle(
                           color: isSelected ? Colors.white70 : Colors.grey[600],
                           fontSize: 12,
@@ -523,7 +525,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        isToday ? 'Hoje' : DateFormat('MMM', 'pt_BR').format(date),
+                        isToday ? 'common_today'.tr : DateFormat('MMM', Get.find<SettingsController>().effectiveLocale.toString()).format(date),
                         style: TextStyle(
                           color: isSelected ? Colors.white70 : Colors.grey[500],
                           fontSize: 12,
@@ -544,7 +546,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
     if (controller.selectedDoctor == null) {
       return _buildEmptyState(
         icon: Icons.work_history_outlined,
-        message: 'Selecione um médico para visualizar os horários disponíveis.',
+          message: 'appt_select_doctor_slots'.tr,
       );
     }
 
@@ -568,7 +570,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
       if (availableSlots.isEmpty) {
         return _buildEmptyState(
           icon: Icons.event_busy_rounded,
-          message: 'Não há horários disponíveis para esta data. Selecione outra data.',
+          message: 'appt_no_slots_date'.tr,
         );
       }
 
@@ -623,21 +625,21 @@ class AppointmentSchedulerScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Resumo da consulta',
+            'appt_summary'.tr,
             style: AppTheme.titleMedium.copyWith(
               color: const Color(0xFF1E293B),
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 12),
-          _buildSummaryRow('Paciente', patientName),
-          _buildSummaryRow('Especialidade', specialty?.name ?? 'Selecione a especialidade'),
-          _buildSummaryRow('Médico', doctor?.name ?? 'Selecione o médico'),
+          _buildSummaryRow('appt_patient'.tr, patientName),
+          _buildSummaryRow('appt_specialty'.tr, specialty != null ? SpecialtyTranslations.translate(specialty.name) : 'appt_select_specialty_placeholder'.tr),
+          _buildSummaryRow('appt_doctor'.tr, doctor?.name ?? 'appt_select_doctor_placeholder'.tr),
           _buildSummaryRow(
-            'Data',
-            DateFormat('dd/MM/yyyy (EEEE)', 'pt_BR').format(date),
+            'appt_date'.tr,
+            DateFormat('dd/MM/yyyy (EEEE)', Get.find<SettingsController>().effectiveLocale.toString()).format(date),
           ),
-          _buildSummaryRow('Horário', slot ?? 'Selecione um horário disponível'),
+          _buildSummaryRow('appt_time'.tr, slot ?? 'appt_select_slot_placeholder'.tr),
         ],
       ),
     );
@@ -690,8 +692,8 @@ class AppointmentSchedulerScreen extends StatelessWidget {
             // stay on screen, summary already updated
           }
         },
-        label: const Text(
-          'Confirmar agendamento',
+        label: Text(
+          'appt_confirm'.tr,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),

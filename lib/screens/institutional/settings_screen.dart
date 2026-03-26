@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../widgets/institutional_page.dart';
+import '../../widgets/language_icon_button.dart';
 import 'settings_controller.dart';
+
+void _showLanguagePicker(BuildContext context, SettingsController controller) {
+  LanguageIconButton.showLanguageModal(context);
+}
 
 class SettingsScreen extends StatelessWidget {
   SettingsScreen({super.key});
@@ -70,16 +75,12 @@ class SettingsScreen extends StatelessWidget {
                   value: controller.darkTheme.value,
                   onChanged: controller.toggleDarkTheme,
                 )),
-            Obx(() => _DropdownCard(
+            Obx(() => _LanguageTileCard(
                   label: 'inst_settings_language_label'.tr,
                   description: 'inst_settings_language_desc'.tr,
                   icon: Icons.language_outlined,
-                  value: controller.language.value,
-                  items: [
-                    DropdownMenuItem(value: 'pt_BR', child: Text('inst_settings_language_pt'.tr)),
-                    DropdownMenuItem(value: 'en_US', child: Text('inst_settings_language_en'.tr)),
-                  ],
-                  onChanged: controller.changeLanguage,
+                  currentCode: controller.language.value,
+                  onTap: () => _showLanguagePicker(context, controller),
                 )),
           ],
         ),
@@ -234,6 +235,96 @@ class _ToggleCard extends StatelessWidget {
   }
 }
 
+class _LanguageTileCard extends StatelessWidget {
+  const _LanguageTileCard({
+    required this.label,
+    required this.description,
+    required this.icon,
+    required this.currentCode,
+    required this.onTap,
+  });
+
+  final String label;
+  final String description;
+  final IconData icon;
+  final String currentCode;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final opt = kLanguageOptions.firstWhere(
+      (o) => o.localeCode == currentCode,
+      orElse: () => kLanguageOptions.first,
+    );
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00324A).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: const Color(0xFF00324A)),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      color: Colors.grey[700],
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(opt.flag, style: const TextStyle(fontSize: 20)),
+                      const SizedBox(width: 8),
+                      Text(
+                        opt.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF00324A),
+                        ),
+                      ),
+                      const Spacer(),
+                      Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey[600]),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _DropdownCard extends StatelessWidget {
   const _DropdownCard({
     required this.label,
@@ -295,7 +386,7 @@ class _DropdownCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 DropdownButton<String>(
-                  value: value,
+                  value: items.any((i) => i.value == value) ? value : null,
                   items: items,
                   underline: const SizedBox.shrink(),
                   onChanged: (selected) {

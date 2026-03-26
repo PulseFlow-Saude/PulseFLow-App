@@ -111,7 +111,7 @@ class NotificationsController extends GetxController {
 
           notificationsList.add(NotificationItem(
             id: localId,
-            title: local['title']?.toString() ?? 'Notificação',
+            title: local['title']?.toString() ?? 'notif_default'.tr,
             message: local['message']?.toString() ?? '',
             date: localDate ?? DateTime.now(),
             isRead: local['isRead'] == true,
@@ -151,7 +151,7 @@ class NotificationsController extends GetxController {
         return null;
       }
 
-      final title = notif['title']?.toString() ?? 'Notificação';
+      final title = notif['title']?.toString() ?? 'notif_default'.tr;
       final description = notif['description']?.toString() ?? '';
       final unread = notif['unread'] == true ||
           notif['unread'] == 'true' ||
@@ -343,15 +343,15 @@ class NotificationsController extends GetxController {
     if (difference.inDays == 0) {
       if (difference.inHours == 0) {
         if (difference.inMinutes == 0) {
-          return 'Agora';
+          return 'notif_now'.tr;
         }
-        return '${difference.inMinutes} min atrás';
+        return 'notif_min_ago'.trParams({'n': '${difference.inMinutes}'});
       }
-      return '${difference.inHours}h atrás';
+      return 'notif_hours_ago'.trParams({'nh': '${difference.inHours}h'});
     } else if (difference.inDays == 1) {
-      return 'Ontem';
+      return 'notif_yesterday'.tr;
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} dias atrás';
+      return 'notif_days_ago'.trParams({'n': '${difference.inDays}'});
     } else {
       return DateFormat('dd/MM/yyyy').format(date);
     }

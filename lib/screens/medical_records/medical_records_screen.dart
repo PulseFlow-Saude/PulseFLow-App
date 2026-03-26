@@ -71,7 +71,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
           // Header moderno com gradiente
           _buildModernHeader(),
           
-          // Conteúdo
+          // Conteúdo (mesmo layout do histórico de eventos)
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -81,54 +81,40 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   topRight: Radius.circular(24),
                 ),
               ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isTablet = constraints.maxWidth > 600;
-            final isPhone = constraints.maxWidth < 400;
-            
-                  return SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 32 : (isPhone ? 16 : 24),
-                        vertical: 24,
-                    ),
-                    child: Column(
-                      children: [
-                        Obx(() {
-                          if (controller.isLoading.value) {
-                            return _buildLoadingState();
-                          }
-
-                          final notes = controller.notes.toList();
-                          final filtered = _applyFilters(notes);
-                          final totalCount = notes.length;
-                          final filteredCount = filtered.length;
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildCounterSection(totalCount, filteredCount),
-                              const SizedBox(height: 24),
-                              if (totalCount == 0)
-                                _buildEmptyState()
-                              else if (filtered.isEmpty)
-                                _buildNoResultsState()
-                              else
-                                _buildRecordsList(filtered, isTablet, isPhone),
-                            ],
-                          );
-                        }),
-                      ],
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return _buildLoadingState();
+                  }
+                  final notes = controller.notes.toList();
+                  final filtered = _applyFilters(notes);
+                  final totalCount = notes.length;
+                  final filteredCount = filtered.length;
+                  if (totalCount == 0) {
+                    return _buildEmptyState();
+                  }
+                  if (filtered.isEmpty) {
+                    return _buildNoResultsState();
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCounterCard(totalCount, filteredCount),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: _buildRecordsList(filtered),
                       ),
-                    ),
+                    ],
                   );
-                },
-                    ),
-                  ),
-                ),
-              ],
+                }),
+              ),
+            ),
+          ),
+        ],
       ),
-      bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
+      // bottomNavigationBar removido - tela tem sidebar
+      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
     ));
   }
 
@@ -154,10 +140,10 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
           Row(
             children: [
               const PulseDrawerButton(),
-              const SizedBox(width: 8),
-              const Expanded(
+              const SizedBox(width: 12),
+              Expanded(
                 child: Text(
-                  'Histórico Clínico',
+                  'med_history_title'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -200,8 +186,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 size: 16,
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Filtros',
+              Text(
+                'common_filters'.tr,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -218,7 +204,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
             children: [
               Expanded(
                 child: _buildEnhancedDropdown(
-                  hint: 'Especialidade',
+                  hint: 'med_specialty'.tr,
                   icon: Icons.category_outlined,
                   value: _selectedEspecialidade,
                   onTap: () {
@@ -230,7 +216,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
               const SizedBox(width: 8),
               Expanded(
                 child: _buildEnhancedDropdown(
-                  hint: 'Médico',
+                  hint: 'med_doctor'.tr,
                   icon: Icons.person_search,
                   value: _selectedMedico,
                   onTap: () {
@@ -307,40 +293,56 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
     );
   }
 
-  Widget _buildCounterSection(int totalCount, int filteredCount) {
+  Widget _buildCounterCard(int totalCount, int filteredCount) {
     final hasFilter = ((_selectedEspecialidade != null && _selectedEspecialidade!.isNotEmpty) ||
         (_selectedMedico != null && _selectedMedico!.isNotEmpty));
     final text = hasFilter && totalCount != filteredCount
-        ? '$filteredCount registro${filteredCount != 1 ? 's' : ''} filtrado${filteredCount != 1 ? 's' : ''} de $totalCount'
-        : '$filteredCount registro${filteredCount != 1 ? 's' : ''} encontrado${filteredCount != 1 ? 's' : ''}';
+        ? 'mrec_count_filtered'.trParams({'filtered': '$filteredCount', 'total': '$totalCount'})
+        : filteredCount == 1
+            ? 'mrec_count_found_one'.tr
+            : 'mrec_count_found'.trParams({'count': '$filteredCount'});
 
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E293B),
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 12),
-        IconButton(
-          onPressed: () => Get.find<MedicalRecordsController>().loadNotes(),
-          icon: const Icon(Icons.refresh_rounded),
-          color: const Color(0xFF00324A),
-          style: IconButton.styleFrom(
-            backgroundColor: const Color(0xFF00324A).withOpacity(0.1),
-            padding: const EdgeInsets.all(8),
-            minimumSize: const Size(36, 36),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+          const SizedBox(width: 12),
+          IconButton(
+            onPressed: () => Get.find<MedicalRecordsController>().loadNotes(),
+            icon: const Icon(Icons.refresh_rounded),
+            color: const Color(0xFF00324A),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFF00324A).withOpacity(0.1),
+              padding: const EdgeInsets.all(8),
+              minimumSize: const Size(36, 36),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -407,7 +409,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Histórico Clínico',
+                                'mrec_title'.tr,
                                 style: AppTheme.titleMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -418,7 +420,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Acompanhe seus registros clínicos',
+                                'mrec_subtitle'.tr,
                                 style: AppTheme.bodySmall.copyWith(
                                   color: Colors.white.withOpacity(0.9),
                                   fontSize: isTablet ? 12 : 11,
@@ -606,7 +608,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
           ),
           const SizedBox(height: 16),
           Text(
-            'Seu Histórico Clínico',
+            'mrec_hero_title'.tr,
             style: AppTheme.titleLarge.copyWith(
               color: const Color(0xFF1E293B),
               fontWeight: FontWeight.w700,
@@ -615,7 +617,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
           ),
           const SizedBox(height: 8),
           Text(
-            'Visualize todos os registros clínicos em ordem cronológica.',
+            'mrec_hero_subtitle'.tr,
             style: AppTheme.bodyMedium.copyWith(
               color: const Color(0xFF64748B),
             ),
@@ -630,7 +632,9 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                '${controller.notes.length} registros encontrados',
+                controller.notes.length == 1
+                ? 'mrec_count_found_one'.tr
+                : 'mrec_count_found'.trParams({'count': '${controller.notes.length}'}),
                 style: AppTheme.bodySmall.copyWith(
                   color: const Color(0xFF1E3A8A),
                   fontWeight: FontWeight.w600,
@@ -717,7 +721,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Filtros de Pesquisa',
+                    'mrec_filters_search'.tr,
                     style: AppTheme.titleMedium.copyWith(
                       color: const Color(0xFF1E293B),
                       fontWeight: FontWeight.w700,
@@ -762,7 +766,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'Novo',
+                              'mrec_new'.tr,
                               style: AppTheme.bodySmall.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -788,7 +792,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   children: [
                     Expanded(
                       child: _buildSearchField(
-                        hint: 'Buscar por especialidade',
+                        hint: 'mrec_search_especialidade'.tr,
                         prefixIcon: Icons.category_outlined,
                         suffixIcon: Icons.keyboard_arrow_down,
                         onTap: () {},
@@ -797,7 +801,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                     const SizedBox(width: 16),
                     Expanded(
                       child: _buildSearchField(
-                        hint: 'Buscar por médico responsável',
+                        hint: 'mrec_search_medico'.tr,
                         prefixIcon: Icons.search,
                       ),
                     ),
@@ -808,14 +812,14 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 return Column(
                   children: [
                     _buildSearchField(
-                      hint: 'Buscar por especialidade',
+                      hint: 'mrec_search_especialidade'.tr,
                       prefixIcon: Icons.category_outlined,
                       suffixIcon: Icons.keyboard_arrow_down,
                       onTap: () {},
                     ),
                     const SizedBox(height: 16),
                     _buildSearchField(
-                      hint: 'Buscar por médico responsável',
+                      hint: 'mrec_search_medico'.tr,
                       prefixIcon: Icons.search,
                     ),
                   ],
@@ -928,7 +932,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Carregando registros clínicos',
+                  'med_loading'.tr,
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w700,
@@ -936,7 +940,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Aguarde enquanto buscamos seus dados...',
+                  'menst_loading_sub'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                   ),
@@ -951,371 +955,252 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
   }
 
   Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(60),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFF1E3A8A).withOpacity(0.1),
-                  const Color(0xFF3B82F6).withOpacity(0.05),
-                ],
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00324A).withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00324A).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
               ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: const Color(0xFF1E3A8A).withOpacity(0.2),
+              child: const Icon(
+                Icons.medical_services_outlined,
+                size: 48,
+                color: Color(0xFF00324A),
               ),
             ),
-            child: Column(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFF1E3A8A),
-                        const Color(0xFF3B82F6),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(50),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1E3A8A).withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.medical_services_rounded,
-                    size: 50,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  'Nenhum registro encontrado',
-                  style: AppTheme.titleLarge.copyWith(
-                    color: const Color(0xFF1E293B),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Você ainda não possui registros clínicos.\nEntre em contato com seu médico para obter seus registros.',
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: const Color(0xFF64748B),
-                    height: 1.6,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+            const SizedBox(height: 24),
+            Text(
+              'med_empty'.tr,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              'med_empty_sub'.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildNoResultsState() {
-    return Container(
-      padding: const EdgeInsets.all(60),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFFF59E0B).withOpacity(0.1),
-                  const Color(0xFFFBBF24).withOpacity(0.05),
-                ],
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00324A).withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00324A).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
               ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: const Color(0xFFF59E0B).withOpacity(0.2),
+              child: const Icon(
+                Icons.search_off_rounded,
+                size: 48,
+                color: Color(0xFF00324A),
               ),
             ),
-            child: Column(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFFF59E0B),
-                        Color(0xFFFBBF24),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(50),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFF59E0B).withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.search_off_rounded,
-                    size: 50,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  'Nenhum resultado encontrado',
-                  style: AppTheme.titleLarge.copyWith(
-                    color: const Color(0xFF1E293B),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Não há registros que correspondam aos filtros selecionados.\nTente ajustar os filtros para ver mais resultados.',
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: const Color(0xFF64748B),
-                    height: 1.6,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+            const SizedBox(height: 24),
+            Text(
+              'med_no_results'.tr,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              'med_no_results_sub'.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildRecordsList(List<MedicalNote> list, bool isTablet, bool isPhone) {
-    return Column(
-      children: [
-        for (int i = 0; i < list.length; i++) ...[
-          _buildRecordCard(list[i], i, isTablet, isPhone),
-          if (i < list.length - 1) const SizedBox(height: 16),
-        ],
-      ],
+
+  Widget _buildRecordsList(List<MedicalNote> list) {
+    return ListView.separated(
+      padding: const EdgeInsets.only(bottom: 24),
+      itemCount: list.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        return _buildRecordCard(list[index], index);
+      },
     );
   }
 
-  Widget _buildRecordCard(MedicalNote record, int index, bool isTablet, bool isPhone) {
-    final d = record.data;
-    final dd = d.day.toString().padLeft(2, '0');
-    final mm = d.month.toString().padLeft(2, '0');
-    final yy = d.year.toString();
-    
+  Widget _buildRecordCard(MedicalNote record, int index) {
+    const primaryColor = Color(0xFF00324A);
     return Container(
-      margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            const Color(0xFFFAFBFC),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0),
-          width: 1.5,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-            spreadRadius: 0,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(24),
           onTap: () => _showRecordDetails(record),
-          child: Container(
-            padding: EdgeInsets.all(isTablet ? 28 : 24),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header com especialidade e data
                 Row(
                   children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E3A8A).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: const Color(0xFF1E3A8A).withOpacity(0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.medical_services_rounded,
-                              size: 14,
-                              color: const Color(0xFF1E3A8A),
-                            ),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                record.categoria,
-                                style: AppTheme.bodySmall.copyWith(
-                                  color: const Color(0xFF1E3A8A),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            primaryColor.withOpacity(0.1),
+                            primaryColor.withOpacity(0.05),
                           ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        '$dd/$mm/$yy',
-                        style: AppTheme.bodySmall.copyWith(
-                          color: const Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: primaryColor.withOpacity(0.2),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Título
-                Text(
-                  record.titulo,
-                  style: AppTheme.titleLarge.copyWith(
-                    color: const Color(0xFF0F172A),
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    fontSize: isTablet ? 20 : 18,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Informações principais
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFFE2E8F0),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      // Médico
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1E3A8A).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(
-                              Icons.person_rounded,
-                              size: 18,
-                              color: const Color(0xFF1E3A8A),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Médico Responsável',
-                                  style: AppTheme.bodySmall.copyWith(
-                                    color: const Color(0xFF64748B),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  record.medico,
-                                  style: AppTheme.bodyMedium.copyWith(
-                                    color: const Color(0xFF1E293B),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Footer com ação
-                Row(
-                  children: [
-                    Text(
-                      'Clique para ver detalhes',
-                      style: AppTheme.bodySmall.copyWith(
-                        color: const Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E3A8A),
-                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Ver detalhes',
-                            style: AppTheme.bodySmall.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          const Icon(
+                            Icons.medical_services,
+                            size: 16,
+                            color: primaryColor,
                           ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 12,
-                            color: Colors.white,
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              record.categoria,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: primaryColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${record.data.day}/${record.data.month}/${record.data.year}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF666666),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  record.titulo,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1A1A),
+                    height: 1.3,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (record.medico.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    record.medico,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF4A4A4A),
+                      height: 1.4,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      'common_tap_details'.tr,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: Colors.grey[600],
                     ),
                   ],
                 ),
@@ -1350,7 +1235,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       final bytes = await rootBundle.load('assets/images/Pulselogo.png');
       final logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
       final patientName =
-          Get.find<MedicalRecordsController>().patient.value?.name ?? 'Paciente não identificado';
+          Get.find<MedicalRecordsController>().patient.value?.name ?? 'mrec_patient_unknown'.tr;
 
       pw.Widget pdfInfoRow(String label, String value) {
         return pw.Container(
@@ -1372,7 +1257,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
               ),
               pw.Expanded(
                 child: pw.Text(
-                  value.isEmpty ? 'Não informado' : value,
+                  value.isEmpty ? 'mrec_not_informed'.tr : value,
                   style: pw.TextStyle(
                     fontSize: 12,
                     color: PdfColors.blueGrey900,
@@ -1388,7 +1273,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       final atendimentoEm = _formatDate(record.data);
 
       final summaryText = record.titulo.isEmpty
-          ? 'Não há informações adicionais registradas para este atendimento.'
+          ? 'mrec_no_extra_info'.tr
           : (record.titulo.length > 220 ? '${record.titulo.substring(0, 220)}...' : record.titulo);
 
       pdf.addPage(
@@ -1409,7 +1294,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
                           pw.Text(
-                            'Histórico Clínico',
+                            'mrec_title'.tr,
                             style: pw.TextStyle(
                               fontSize: 20,
                               fontWeight: pw.FontWeight.bold,
@@ -1418,7 +1303,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                           ),
                           pw.SizedBox(height: 6),
                           pw.Text(
-                            'Documento gerado em $generatedAt',
+                            'mrec_pdf_generated'.trParams({'date': generatedAt}),
                             style: pw.TextStyle(
                               fontSize: 10,
                               color: PdfColors.blueGrey600,
@@ -1435,7 +1320,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   ),
                   pw.SizedBox(height: 24),
                   pw.Text(
-                    'Dados Principais',
+                    'mrec_dados_principais'.tr,
                     style: pw.TextStyle(
                       fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
@@ -1443,14 +1328,14 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                     ),
                   ),
                   pw.SizedBox(height: 8),
-                  pdfInfoRow('Título', record.titulo),
-                  pdfInfoRow('Paciente', patientName),
-                  pdfInfoRow('Especialidade', record.categoria),
-                  pdfInfoRow('Médico responsável', record.medico),
-                  pdfInfoRow('Data do atendimento', atendimentoEm),
+                  pdfInfoRow('mrec_titulo'.tr, record.titulo),
+                  pdfInfoRow('mrec_paciente'.tr, patientName),
+                  pdfInfoRow('mrec_especialidade'.tr, record.categoria),
+                  pdfInfoRow('mrec_medico_responsavel_short'.tr, record.medico),
+                  pdfInfoRow('mrec_data_atendimento'.tr, atendimentoEm),
                   pw.SizedBox(height: 16),
                   pw.Text(
-                    'Resumo do Registro',
+                    'mrec_resumo_registro'.tr,
                     style: pw.TextStyle(
                       fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
@@ -1468,7 +1353,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   ),
                   pw.SizedBox(height: 12),
                   pw.Text(
-                    'Histórico exportado automaticamente pelo aplicativo PulseFlow.',
+                    'mrec_exported_by'.tr,
                     style: pw.TextStyle(
                       fontSize: 9,
                       color: PdfColors.blueGrey600,
@@ -1496,8 +1381,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       await file.writeAsBytes(savedBytes, flush: true);
 
       Get.snackbar(
-        'PDF exportado',
-        'Arquivo salvo como $filename',
+        'mrec_pdf_exported'.tr,
+        'mrec_file_saved'.trParams({'filename': filename}),
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -1508,8 +1393,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       final openResult = await OpenFilex.open(file.path);
       if (openResult.type != ResultType.done) {
         Get.snackbar(
-          'Abrir arquivo',
-          'Não foi possível abrir o PDF automaticamente. Caminho: ${file.path}',
+          'mrec_open_file'.tr,
+          'mrec_could_not_open_pdf'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.orange.shade100,
           colorText: const Color(0xFF1E293B),
@@ -1519,8 +1404,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       }
     } catch (e) {
       Get.snackbar(
-        'Erro ao exportar',
-        'Não foi possível gerar o PDF. Tente novamente.',
+        'mrec_export_error'.tr,
+        'mrec_export_error_msg'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100,
         colorText: const Color(0xFF1E293B),
@@ -1620,13 +1505,13 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 children: [
                   // Informações básicas
                   _buildDetailSection(
-                    title: 'Informações do Registro',
+                    title: 'med_reg_info'.tr,
                     icon: Icons.info_rounded,
                     children: [
-                      _buildDetailRow('Especialidade', record.categoria),
-                      _buildDetailRow('Data do Atendimento', _formatDate(record.data)),
-                      _buildDetailRow('Médico Responsável', record.medico),
-                      _buildDetailRow('Tipo da Consulta', 'Consulta Regular'),
+                      _buildDetailRow('med_specialty'.tr, record.categoria),
+                      _buildDetailRow('med_date_attendance'.tr, _formatDate(record.data)),
+                      _buildDetailRow('med_responsible'.tr, record.medico),
+                      _buildDetailRow('evt_consult_type'.tr, 'med_consult_regular'.tr),
                     ],
                   ),
                   
@@ -1634,7 +1519,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   
                   // Descrição do registro
                   _buildDetailSection(
-                    title: 'Registro Clínico',
+                    title: 'med_clinical_record'.tr,
                     icon: Icons.description_rounded,
                     children: [
                       Text(
@@ -1671,7 +1556,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                     child: OutlinedButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close_rounded),
-                      label: const Text('Fechar'),
+                      label: Text('common_close'.tr),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF64748B),
                         side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1690,7 +1575,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                         await _exportRecordToPdf(record);
                       },
                       icon: const Icon(Icons.picture_as_pdf_rounded),
-                      label: const Text('Exportar PDF'),
+                      label: Text('common_export_pdf'.tr),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E3A8A),
                         foregroundColor: Colors.white,
@@ -1847,8 +1732,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
     final especialidades = _getAvailableEspecialidades(notes);
     if (especialidades.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhuma especialidade disponível nos registros.',
+        'mrec_filter'.tr,
+        'mrec_no_especialidade'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -1904,7 +1789,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                         children: [
                           Expanded(
                             child: Text(
-                              'Filtrar por especialidade',
+                              'mrec_filter_especialidade'.tr,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -1922,7 +1807,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                                 isModalOpen = false;
                                 Navigator.pop(context);
                               },
-                              child: const Text('Limpar'),
+                              child: Text('common_clear'.tr),
                             ),
                         ],
                       ),
@@ -1932,7 +1817,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                       child: TextField(
                         controller: searchController,
                         decoration: InputDecoration(
-                          hintText: 'Buscar especialidade',
+                          hintText: 'mrec_buscar_especialidade'.tr,
                           prefixIcon: const Icon(Icons.search_rounded),
                           filled: true,
                           fillColor: const Color(0xFFF1F5F9),
@@ -1976,8 +1861,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                               Expanded(
                                 child: Text(
                                   query.isEmpty
-                                      ? 'Nenhuma especialidade disponível no momento.'
-                                      : 'Nenhuma especialidade encontrada para "$query".',
+                                      ? 'mrec_no_especialidade_momento'.tr
+                                      : 'mrec_no_especialidade_query'.trParams({'query': query}),
                                   style: const TextStyle(
                                     fontSize: 13,
                                     color: Color(0xFF475569),
@@ -2057,8 +1942,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
     final medicos = _getAvailableMedicos(notes);
     if (medicos.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhum médico disponível nos registros.',
+        'mrec_filter'.tr,
+        'mrec_no_medico'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -2114,7 +1999,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                         children: [
                           Expanded(
                             child: Text(
-                              'Filtrar por médico',
+                              'mrec_filter_medico'.tr,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -2132,7 +2017,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                                 isModalOpen = false;
                                 Navigator.pop(context);
                               },
-                              child: const Text('Limpar'),
+                              child: Text('common_clear'.tr),
                             ),
                         ],
                       ),
@@ -2142,7 +2027,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                       child: TextField(
                         controller: searchController,
                         decoration: InputDecoration(
-                          hintText: 'Buscar médico',
+                          hintText: 'mrec_buscar_medico'.tr,
                           prefixIcon: const Icon(Icons.search_rounded),
                           filled: true,
                           fillColor: const Color(0xFFF1F5F9),
@@ -2186,8 +2071,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                               Expanded(
                                 child: Text(
                                   query.isEmpty
-                                      ? 'Nenhum médico disponível no momento.'
-                                      : 'Nenhum médico encontrado para "$query".',
+                                      ? 'mrec_no_medico_momento'.tr
+                                      : 'mrec_no_medico_query'.trParams({'query': query}),
                                   style: const TextStyle(
                                     fontSize: 13,
                                     color: Color(0xFF475569),
@@ -2290,7 +2175,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
   String _sanitizeFileName(String input) {
     final sanitized = input.replaceAll(RegExp(r'[^\w\s-]'), '').trim();
     if (sanitized.isEmpty) {
-      return 'registro';
+      return 'mrec_filename_fallback'.tr;
     }
     return sanitized.replaceAll(RegExp(r'\s+'), '_').toLowerCase();
   }
@@ -2349,7 +2234,7 @@ class _Sidebar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              name != null ? 'Dra. ${name!}' : 'Paciente',
+              name != null ? '${'mrec_dr_prefix'.tr} ${name!}' : 'mrec_sidebar_patient'.tr,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -2360,11 +2245,11 @@ class _Sidebar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          _SidebarItem(icon: Icons.person_outline, label: 'Perfil Paciente'),
-          _SidebarItem(icon: Icons.description_outlined, label: 'Registro Clínico', isActive: true),
-          _SidebarItem(icon: Icons.attachment_outlined, label: 'Anexo de Exames'),
-          _SidebarItem(icon: Icons.event_note_outlined, label: 'Eventos Clínicos'),
-          _SidebarItem(icon: Icons.bar_chart_outlined, label: 'Relatórios e Dashboards'),
+          _SidebarItem(icon: Icons.person_outline, label: 'mrec_perfil_paciente'.tr),
+          _SidebarItem(icon: Icons.description_outlined, label: 'mrec_registro_clinico_sidebar'.tr, isActive: true),
+          _SidebarItem(icon: Icons.attachment_outlined, label: 'mrec_anexo_exames'.tr),
+          _SidebarItem(icon: Icons.event_note_outlined, label: 'mrec_eventos_clinicos'.tr),
+          _SidebarItem(icon: Icons.bar_chart_outlined, label: 'mrec_relatorios'.tr),
           const Spacer(),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -2376,15 +2261,15 @@ class _Sidebar extends StatelessWidget {
                 Get.offAllNamed(Routes.LOGIN);
               },
               borderRadius: BorderRadius.circular(8),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.logout, color: Colors.red, size: 18),
-                    SizedBox(width: 8),
+                    const Icon(Icons.logout, color: Colors.red, size: 18),
+                    const SizedBox(width: 8),
                     Text(
-                      'Sair',
+                      'mrec_sair'.tr,
                       style: TextStyle(
                         color: Colors.red,
                         fontSize: 16,

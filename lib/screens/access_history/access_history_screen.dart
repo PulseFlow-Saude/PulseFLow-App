@@ -109,7 +109,7 @@ class AccessHistoryScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Histórico de Acessos',
+                  'access_history_title'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: isSmallScreen ? 24 : 28,
@@ -120,8 +120,10 @@ class AccessHistoryScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Obx(() => Text(
                   controller.acessos.isEmpty
-                      ? 'Nenhum acesso registrado'
-                      : '${controller.acessos.length} acesso${controller.acessos.length > 1 ? 's' : ''} registrado${controller.acessos.length > 1 ? 's' : ''}',
+                      ? 'access_none'.tr
+                      : controller.acessos.length > 1
+                          ? 'access_count_plural'.trParams({'n': controller.acessos.length.toString()})
+                          : 'access_count'.trParams({'n': controller.acessos.length.toString()}),
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: isSmallScreen ? 12 : 14,
@@ -150,7 +152,7 @@ class AccessHistoryScreen extends StatelessWidget {
             ),
             SizedBox(height: isSmallScreen ? 12 : 16),
             Text(
-              'Nenhum acesso registrado',
+              'access_none'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: isSmallScreen ? 16 : 18,
@@ -160,7 +162,7 @@ class AccessHistoryScreen extends StatelessWidget {
             ),
             SizedBox(height: isSmallScreen ? 6 : 8),
             Text(
-              'Os acessos dos médicos ao seu prontuário\nserão exibidos aqui',
+              'access_empty_sub'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: isSmallScreen ? 13 : 14,
@@ -257,7 +259,7 @@ class AccessHistoryScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'ATIVO',
+                      'access_active'.tr,
                       style: TextStyle(
                         fontSize: isSmallScreen ? 9 : 10,
                         fontWeight: FontWeight.bold,
@@ -280,7 +282,7 @@ class AccessHistoryScreen extends StatelessWidget {
                 SizedBox(width: isSmallScreen ? 5 : 6),
                 Flexible(
                   child: Text(
-                    'Acesso em: ${controller.formatarDataCompleta(acesso.dataHora)}',
+                    '${'access_at'.tr} ${controller.formatarDataCompleta(acesso.dataHora)}',
                     style: TextStyle(
                       fontSize: isSmallScreen ? 12 : 13,
                       color: Colors.grey[700],
@@ -302,7 +304,7 @@ class AccessHistoryScreen extends StatelessWidget {
                   SizedBox(width: isSmallScreen ? 5 : 6),
                   Flexible(
                     child: Text(
-                      'Desconectado em: ${controller.formatarDataCompleta(acesso.desconectadoEm!)}',
+                      '${'access_disconnected'.tr} ${controller.formatarDataCompleta(acesso.desconectadoEm!)}',
                       style: TextStyle(
                         fontSize: isSmallScreen ? 12 : 13,
                         color: Colors.grey[700],
@@ -325,7 +327,7 @@ class AccessHistoryScreen extends StatelessWidget {
                   SizedBox(width: isSmallScreen ? 5 : 6),
                   Flexible(
                     child: Text(
-                      'Duração: ${acesso.duracaoFormatada}',
+                      '${'access_duration'.tr} ${acesso.duracaoFormatada}',
                       style: TextStyle(
                         fontSize: isSmallScreen ? 12 : 13,
                         color: Colors.grey[700],

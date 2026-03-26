@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
 import 'notification_channels.dart';
 import 'notification_builders.dart';
 import 'notification_storage.dart';
@@ -15,7 +16,7 @@ class FirebaseHandlers {
     _showLocalNotification(
       localNotifications,
       message.notification?.title ?? 'PulseFlow',
-      message.notification?.body ?? 'Nova mensagem',
+      message.notification?.body ?? 'notif_new_message'.tr,
       message.data,
     );
   }
@@ -72,11 +73,11 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final FlutterLocalNotificationsPlugin localNotifications =
       FlutterLocalNotificationsPlugin();
 
-  // Criar o canal de notificação
+  // Criar o canal de notificação (usa fallback - Get não disponível em background)
   await localNotifications
       .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(NotificationChannels.doctorAccessChannel);
+      ?.createNotificationChannel(NotificationChannels.generalChannelForBackground);
 
   // Exibir notificação
   await localNotifications.show(

@@ -4,9 +4,11 @@ import 'package:intl/intl.dart';
 
 import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
+import '../../utils/specialty_translations.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../../widgets/pulse_drawer_button.dart';
+import '../institutional/settings_controller.dart';
 import 'upcoming_appointments_controller.dart';
 
 class UpcomingAppointmentsScreen extends StatelessWidget {
@@ -77,7 +79,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text('Tentar novamente'),
+                              child: Text('common_try_again'.tr),
                             ),
                           ],
                         ),
@@ -104,7 +106,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Próximas consultas',
+                            'appt_upcoming'.tr,
                             style: AppTheme.titleLarge.copyWith(
                               color: const Color(0xFF1E293B),
                               fontWeight: FontWeight.bold,
@@ -112,7 +114,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '${appointments.length} ${appointments.length == 1 ? 'consulta agendada' : 'consultas agendadas'}',
+                            '${appointments.length} ${appointments.length == 1 ? 'appt_appointment_singular'.tr : 'appt_appointment_plural'.tr}',
                             style: AppTheme.bodyMedium.copyWith(
                               color: Colors.grey[600],
                             ),
@@ -135,9 +137,10 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: const PulseBottomNavigation(
-        activeItem: PulseNavItem.home,
-      ),
+      // bottomNavigationBar removido - tela tem sidebar
+      // bottomNavigationBar: const PulseBottomNavigation(
+      //   activeItem: PulseNavItem.home,
+      // ),
     );
   }
 
@@ -167,9 +170,9 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text(
-                    'Próximas Consultas',
+                    'appt_upcoming_header'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -178,7 +181,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Visualize e gerencie seus agendamentos',
+                    'appt_upcoming_sub'.tr,
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
@@ -207,7 +210,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Você ainda não possui consultas agendadas',
+              'appt_no_appointments'.tr,
               style: AppTheme.titleMedium.copyWith(
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w600,
@@ -216,7 +219,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Agende sua primeira consulta agora mesmo',
+              'appt_book_first'.tr,
               style: AppTheme.bodyMedium.copyWith(
                 color: Colors.grey[500],
               ),
@@ -237,8 +240,8 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              label: const Text(
-                'Agendar consulta',
+              label: Text(
+                'appt_book_appointment'.tr,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -270,7 +273,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'STATUS',
+                      'appt_status'.tr,
                       style: AppTheme.bodySmall.copyWith(
                         color: Colors.grey[600],
                         fontWeight: FontWeight.w600,
@@ -295,9 +298,13 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           items: controller.statusOptions.map((String status) {
+                            final key = status == 'Todos' ? 'appt_filter_all'
+                                : status == 'Agendada' ? 'appt_filter_scheduled'
+                                : status == 'Cancelada' ? 'appt_filter_cancelled'
+                                : 'appt_filter_completed';
                             return DropdownMenuItem<String>(
                               value: status,
-                              child: Text(status),
+                              child: Text(key.tr),
                             );
                           }).toList(),
                           onChanged: (String? newValue) {
@@ -332,7 +339,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Limpar',
+                          'appt_clear'.tr,
                           style: AppTheme.bodyMedium.copyWith(
                             color: Colors.grey[600],
                             fontWeight: FontWeight.w600,
@@ -352,7 +359,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'PERÍODO',
+                'appt_period'.tr,
                 style: AppTheme.bodySmall.copyWith(
                   color: Colors.grey[600],
                   fontWeight: FontWeight.w600,
@@ -370,7 +377,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                           initialDate: controller.dataInicioFiltro.value ?? DateTime.now(),
                           firstDate: DateTime(2020),
                           lastDate: DateTime(2100),
-                          locale: const Locale('pt', 'BR'),
+                          locale: Get.find<SettingsController>().effectiveLocale,
                         );
                         if (date != null) {
                           controller.setDataInicio(date);
@@ -388,7 +395,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 controller.dataInicioFiltro.value != null
-                                    ? DateFormat('dd/MM/yyyy', 'pt_BR').format(controller.dataInicioFiltro.value!)
+                                    ? DateFormat('dd/MM/yyyy', Get.find<SettingsController>().effectiveLocale.toString()).format(controller.dataInicioFiltro.value!)
                                     : 'dd/mm/aaaa',
                                 style: AppTheme.bodyMedium.copyWith(
                                   color: controller.dataInicioFiltro.value != null
@@ -411,7 +418,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
-                      'ATÉ',
+                      'appt_to'.tr,
                       style: AppTheme.bodySmall.copyWith(
                         color: Colors.grey[600],
                         fontWeight: FontWeight.w600,
@@ -427,7 +434,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                           initialDate: controller.dataFimFiltro.value ?? DateTime.now(),
                           firstDate: DateTime(2020),
                           lastDate: DateTime(2100),
-                          locale: const Locale('pt', 'BR'),
+                          locale: Get.find<SettingsController>().effectiveLocale,
                         );
                         if (date != null) {
                           controller.setDataFim(date);
@@ -445,7 +452,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 controller.dataFimFiltro.value != null
-                                    ? DateFormat('dd/MM/yyyy', 'pt_BR').format(controller.dataFimFiltro.value!)
+                                    ? DateFormat('dd/MM/yyyy', Get.find<SettingsController>().effectiveLocale.toString()).format(controller.dataFimFiltro.value!)
                                     : 'dd/mm/aaaa',
                                 style: AppTheme.bodyMedium.copyWith(
                                   color: controller.dataFimFiltro.value != null
@@ -478,9 +485,10 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
     UpcomingAppointmentsController controller,
     AppointmentBooking booking,
   ) {
-    final dateStr = DateFormat('dd/MM/yyyy', 'pt_BR').format(booking.startTime);
+    final localeStr = Get.find<SettingsController>().effectiveLocale.toString();
+    final dateStr = DateFormat('dd/MM/yyyy', localeStr).format(booking.startTime);
     final timeStr = DateFormat('HH:mm').format(booking.startTime);
-    final weekdayStr = DateFormat('EEEE', 'pt_BR').format(booking.startTime);
+    final weekdayStr = DateFormat('EEEE', localeStr).format(booking.startTime);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -533,7 +541,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      booking.specialtyName,
+                      SpecialtyTranslations.translate(booking.specialtyName),
                       style: AppTheme.bodySmall.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -581,21 +589,21 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                   onPressed: () async {
                     final confirm = await Get.dialog<bool>(
                       AlertDialog(
-                        title: const Text('Cancelar consulta'),
-                        content: const Text(
-                          'Tem certeza que deseja cancelar esta consulta?',
+                        title: Text('appt_cancel_title'.tr),
+                        content: Text(
+                          'appt_cancel_confirm'.tr,
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Get.back(result: false),
-                            child: const Text('Não'),
+                            child: Text('common_no'.tr),
                           ),
                           TextButton(
                             onPressed: () => Get.back(result: true),
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.red,
                             ),
-                            child: const Text('Sim, cancelar'),
+                            child: Text('appt_cancel_yes'.tr),
                           ),
                         ],
                       ),
@@ -636,7 +644,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  booking.status == 'cancelada' ? 'Cancelado' : 'Agendado',
+                  booking.status == 'cancelada' ? 'appt_status_cancelled'.tr : 'appt_status_scheduled'.tr,
                   style: AppTheme.bodySmall.copyWith(
                     color: booking.status == 'cancelada'
                         ? Colors.red[700]
@@ -667,8 +675,8 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        label: const Text(
-          'Agendar nova consulta',
+        label: Text(
+          'appt_book_new'.tr,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,

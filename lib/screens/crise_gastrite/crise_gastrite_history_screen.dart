@@ -98,9 +98,9 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     final selectedPeriodo = _selectedPeriodo?.trim();
 
     final filtered = _crises.where((crise) {
-      if (selectedIntensidade != null && selectedIntensidade.isNotEmpty) {
-        final label = _getIntensityFilterLabel(crise.intensidadeDor).toLowerCase();
-        if (label != selectedIntensidade) {
+      if (selectedIntensidade != null && selectedIntensidade.trim().isNotEmpty) {
+        final eventKey = _getIntensityFilterLabelKey(crise.intensidadeDor);
+        if (eventKey != selectedIntensidade!.trim()) {
           return false;
         }
       }
@@ -132,7 +132,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
           // Header moderno com gradiente
           _buildModernHeader(),
           
-          // Conteúdo
+          // Conteúdo (mesmo layout do histórico de eventos)
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -142,38 +142,17 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   topRight: Radius.circular(24),
                 ),
               ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isTablet = constraints.maxWidth > 600;
-                  final isPhone = constraints.maxWidth < 400;
-                  
-                  return SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isTablet ? 32 : (isPhone ? 16 : 24),
-                        vertical: 24,
-                      ),
-                      child: Column(
-                        children: [
-                          // Contador e ações
-                          _buildCounterSection(),
-                          const SizedBox(height: 24),
-                          
-                          if (_isLoading)
-                            _buildLoadingState()
-                          else if (_hasError)
-                            _buildErrorState()
-                          else if (_crises.isEmpty)
-                            _buildEmptyState()
-                          else if (_filteredCrises.isEmpty)
-                            _buildNoResultsState()
-                          else
-                            _buildCrisesList(isTablet, isPhone),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: _isLoading
+                    ? _buildLoadingState()
+                    : _hasError
+                        ? _buildErrorState()
+                        : _crises.isEmpty
+                            ? _buildEmptyState()
+                            : _filteredCrises.isEmpty
+                                ? _buildNoResultsState()
+                                : _buildCrisesList(),
               ),
             ),
           ),
@@ -183,15 +162,16 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
         onPressed: () => Get.toNamed(Routes.CRISE_GASTRITE_FORM),
         backgroundColor: const Color(0xFF00324A),
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Nova Crise',
+          label: Text(
+          'crise_new'.tr,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
       ),
-      bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
+      // bottomNavigationBar removido - tela tem sidebar
+      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
     ));
   }
 
@@ -217,10 +197,10 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
           Row(
             children: [
               const PulseDrawerButton(),
-              const SizedBox(width: 8),
-              const Expanded(
+              const SizedBox(width: 12),
+              Expanded(
                 child: Text(
-                  'Histórico Crise Gastrite',
+                  'crise_history_title'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -241,11 +221,20 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
   }
 
   Widget _buildFilterSection() {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withOpacity(0.1),
+            Colors.white.withOpacity(0.05),
+          ],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: Colors.white.withOpacity(0.2),
@@ -254,34 +243,40 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
       ),
       child: Column(
         children: [
-          // Header dos filtros
           Row(
             children: [
-              Icon(
-                Icons.tune_rounded,
-                color: Colors.white.withOpacity(0.8),
-                size: 16,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.tune_rounded,
+                  color: Colors.white.withOpacity(0.8),
+                  size: 16,
+                ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Filtros',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  'common_filters'.tr,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
           ),
-          
           const SizedBox(height: 12),
-          
-          // Filtros em linha única
           Row(
             children: [
               Expanded(
-                child: _buildFilterDropdown(
-                  hint: 'Intensidade',
+                child: _buildEnhancedDropdown(
+                  hint: 'crise_intensity'.tr,
                   icon: Icons.favorite_rounded,
                   value: _selectedIntensidade,
                   onTap: () {
@@ -292,9 +287,9 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _buildFilterDropdown(
-                  hint: 'Período',
-                  icon: Icons.date_range,
+                child: _buildEnhancedDropdown(
+                  hint: 'crise_period'.tr,
+                  icon: Icons.date_range_rounded,
                   value: _selectedPeriodo,
                   onTap: () {
                     final options = _getAvailablePeriodos();
@@ -309,7 +304,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     );
   }
 
-  Widget _buildFilterDropdown({
+  Widget _buildEnhancedDropdown({
     required String hint,
     required IconData icon,
     required VoidCallback onTap,
@@ -393,7 +388,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     final map = <int, String>{};
     for (final crise in _crises) {
       final bucket = _getIntensityBucket(crise.intensidadeDor);
-      map.putIfAbsent(bucket, () => _getIntensityFilterLabel(crise.intensidadeDor));
+      map.putIfAbsent(bucket, () => _getIntensityFilterLabelKey(crise.intensidadeDor));
     }
     final entries = map.entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
@@ -416,8 +411,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
   void _showIntensidadeFilter(List<String> intensidades) {
     if (intensidades.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhuma intensidade registrada para filtrar.',
+        'gastrite_filter_label'.tr,
+        'gastrite_no_intensidade'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -431,7 +426,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        final selectedValue = _selectedIntensidade?.trim().toLowerCase();
+        final selectedKey = _selectedIntensidade?.trim();
         return SafeArea(
           top: false,
           child: Container(
@@ -460,7 +455,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     children: [
                       Expanded(
                         child: Text(
-                          'Filtrar por intensidade',
+                          'gastrite_filter_by_intensidade'.tr,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -470,7 +465,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (selectedValue != null && selectedValue.isNotEmpty)
+                      if (selectedKey != null && selectedKey.isNotEmpty)
                         TextButton(
                           onPressed: () {
                             setState(() {
@@ -479,7 +474,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                             _applyFilters();
                             Navigator.pop(context);
                           },
-                          child: const Text('Limpar'),
+                          child: Text('common_clear'.tr),
                         ),
                     ],
                   ),
@@ -491,7 +486,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     separatorBuilder: (_, __) => const SizedBox(height: 6),
                     itemBuilder: (context, index) {
                       final intensidade = intensidades[index];
-                      final isSelected = intensidade.toLowerCase() == selectedValue;
+                      final isSelected = intensidade == selectedKey;
                       return ListTile(
                         onTap: () {
                           setState(() {
@@ -512,7 +507,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                           ),
                         ),
                         title: Text(
-                          intensidade,
+                          intensidade.tr,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -538,8 +533,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
   void _showPeriodoFilter(List<String> periodos) {
     if (periodos.isEmpty) {
       Get.snackbar(
-        'Filtro',
-        'Nenhum período disponível para filtrar.',
+        'gastrite_filter_label'.tr,
+        'gastrite_no_periodo'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.white,
         colorText: const Color(0xFF1E293B),
@@ -594,7 +589,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         children: [
                           Expanded(
                             child: Text(
-                              'Filtrar por período (MM/AAAA)',
+                              'gastrite_filter_by_periodo'.tr,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -613,7 +608,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                                 _applyFilters();
                                 Navigator.pop(context);
                               },
-                              child: const Text('Limpar'),
+                              child: Text('common_clear'.tr),
                             ),
                         ],
                       ),
@@ -624,7 +619,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         controller: searchController,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                          hintText: 'Digite o período (MM/AAAA)',
+                          hintText: 'gastrite_hint_periodo'.tr,
                           prefixIcon: const Icon(Icons.search_rounded),
                           filled: true,
                           fillColor: const Color(0xFFF1F5F9),
@@ -686,8 +681,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                               Expanded(
                                 child: Text(
                                   query.isEmpty
-                                      ? 'Nenhum período disponível no momento.'
-                                      : 'Nenhum período encontrado para \"$query\". Verifique o formato MM/AAAA.',
+                                      ? 'gastrite_no_period_now'.tr
+                                      : 'gastrite_no_period_for_query'.trParams({'query': query}),
                                   style: const TextStyle(
                                     fontSize: 13,
                                     color: Color(0xFF475569),
@@ -752,42 +747,56 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     ).whenComplete(() => searchController.dispose());
   }
 
-  Widget _buildCounterSection() {
+  Widget _buildCounterCard() {
     final totalCount = _crises.length;
     final filteredCount = _filteredCrises.length;
     final hasFilters = (_selectedIntensidade != null && _selectedIntensidade!.trim().isNotEmpty) ||
         (_selectedPeriodo != null && _selectedPeriodo!.trim().isNotEmpty);
     final text = hasFilters && filteredCount != totalCount
-        ? '$filteredCount registro${filteredCount == 1 ? '' : 's'} filtrado${filteredCount == 1 ? '' : 's'} de $totalCount'
-        : '$filteredCount registro${filteredCount == 1 ? '' : 's'} encontrado${filteredCount == 1 ? '' : 's'}';
+        ? 'gastrite_count_filtered'.trParams({'filtered': '$filteredCount', 'total': '$totalCount'})
+        : 'gastrite_count_found'.trParams({'count': '$filteredCount'});
 
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E293B),
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 12),
-        IconButton(
-          onPressed: _loadCrises,
-          icon: const Icon(Icons.refresh_rounded),
-          color: const Color(0xFF00324A),
-          style: IconButton.styleFrom(
-            backgroundColor: const Color(0xFF00324A).withOpacity(0.1),
-            padding: const EdgeInsets.all(8),
-            minimumSize: const Size(36, 36),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+          const SizedBox(width: 12),
+          IconButton(
+            onPressed: _loadCrises,
+            icon: const Icon(Icons.refresh_rounded),
+            color: const Color(0xFF00324A),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFF00324A).withOpacity(0.1),
+              padding: const EdgeInsets.all(8),
+              minimumSize: const Size(36, 36),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -854,7 +863,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Histórico de Crises',
+                                'gastrite_crises_title'.tr,
                                 style: AppTheme.titleMedium.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -865,7 +874,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Acompanhe suas crises',
+                                'gastrite_crises_subtitle'.tr,
                                 style: AppTheme.bodySmall.copyWith(
                                   color: Colors.white.withOpacity(0.9),
                                   fontSize: isTablet ? 12 : 11,
@@ -965,7 +974,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            'Crises de Gastrite',
+            'gastrite_crises_title'.tr,
             style: AppTheme.titleLarge.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,
@@ -973,7 +982,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Acompanhe o histórico das suas crises de gastrite',
+            'gastrite_crises_subtitle'.tr,
             style: AppTheme.bodyMedium.copyWith(
               color: Colors.white.withOpacity(0.9),
             ),
@@ -1034,7 +1043,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Carregando crises de gastrite',
+                  'crise_loading'.tr,
                   style: AppTheme.titleMedium.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w700,
@@ -1042,7 +1051,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Aguarde enquanto buscamos seus dados...',
+                  'menst_loading_sub'.tr,
                   style: AppTheme.bodyMedium.copyWith(
                     color: const Color(0xFF64748B),
                   ),
@@ -1105,7 +1114,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Erro ao carregar crises',
+                  'crise_error_load'.tr,
                   style: AppTheme.titleLarge.copyWith(
                     color: Colors.red.shade600,
                     fontWeight: FontWeight.w800,
@@ -1141,7 +1150,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   child: ElevatedButton.icon(
                     onPressed: _loadCrises,
                     icon: const Icon(Icons.refresh_rounded, size: 20),
-                    label: const Text('Tentar Novamente'),
+                    label: Text('common_try_again'.tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,
@@ -1162,117 +1171,93 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
   }
 
   Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(60),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFF1E3A8A).withOpacity(0.1),
-                  const Color(0xFF3B82F6).withOpacity(0.05),
-                ],
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00324A).withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00324A).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
               ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: const Color(0xFF1E3A8A).withOpacity(0.2),
+              child: const Icon(
+                Icons.restaurant_menu_outlined,
+                size: 48,
+                color: Color(0xFF00324A),
               ),
             ),
-            child: Column(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF1E3A8A),
-                        Color(0xFF3B82F6),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(50),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1E3A8A).withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.restaurant_menu_rounded,
-                    size: 50,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  'Nenhuma crise encontrada',
-                  style: AppTheme.titleLarge.copyWith(
-                    color: const Color(0xFF1E293B),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Você ainda não registrou nenhuma crise de gastrite.\nClique no botão abaixo para começar a acompanhar sua saúde.',
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: const Color(0xFF64748B),
-                    height: 1.6,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 40),
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF1E3A8A),
-                        Color(0xFF3B82F6),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1E3A8A).withOpacity(0.3),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton.icon(
-                    onPressed: () => Get.toNamed(Routes.CRISE_GASTRITE_FORM),
-                    icon: const Icon(Icons.add_rounded, size: 22),
-                    label: const Text('Registrar Primeira Crise'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 24),
+            Text(
+              'crise_empty'.tr,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              'crise_empty_sub'.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: () => Get.toNamed(Routes.CRISE_GASTRITE_FORM),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: Text('crise_register_first'.tr),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00324A),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 2,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildCrisesList(bool isTablet, bool isPhone) {
+  Widget _buildCrisesList() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (int i = 0; i < _filteredCrises.length; i++) ...[
-          _buildCriseCard(_filteredCrises[i], i, isTablet, isPhone),
-          if (i < _filteredCrises.length - 1) const SizedBox(height: 16),
-        ],
+        _buildCounterCard(),
+        const SizedBox(height: 16),
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.only(bottom: 24),
+            itemCount: _filteredCrises.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 16),
+            itemBuilder: (context, index) {
+              final crise = _filteredCrises[index];
+              return _buildCriseCard(crise, index);
+            },
+          ),
+        ),
       ],
     );
   }
@@ -1286,365 +1271,210 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     return 5;
   }
 
-  String _getIntensityFilterLabel(int intensidade) {
+  String _getIntensityFilterLabelKey(int intensidade) {
     final bucket = _getIntensityBucket(intensidade);
     switch (bucket) {
-      case 0:
-        return 'Sem Dor (0/10)';
-      case 1:
-        return 'Dor Leve (1-2/10)';
-      case 2:
-        return 'Dor Moderada (3-4/10)';
-      case 3:
-        return 'Dor Moderada a Intensa (5-6/10)';
-      case 4:
-        return 'Dor Intensa (7-8/10)';
-      case 5:
-        return 'Dor Muito Intensa (9-10/10)';
-      default:
-        return 'Dor Moderada';
+      case 0: return 'pain_0_10';
+      case 1: return 'pain_1_2_10';
+      case 2: return 'pain_3_4_10';
+      case 3: return 'pain_5_6_10';
+      case 4: return 'pain_7_8_10';
+      case 5: return 'pain_9_10_range';
+      default: return 'pain_3_4_10';
     }
   }
 
   Widget _buildNoResultsState() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E3A8A).withOpacity(0.08),
-              shape: BoxShape.circle,
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00324A).withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
             ),
-            child: const Icon(
-              Icons.search_off_rounded,
-              size: 32,
-              color: Color(0xFF1E3A8A),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00324A).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.search_off_rounded,
+                size: 48,
+                color: Color(0xFF00324A),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Nenhuma crise encontrada',
-            style: AppTheme.titleMedium.copyWith(
-              color: const Color(0xFF1E293B),
-              fontWeight: FontWeight.w700,
+            const SizedBox(height: 24),
+            Text(
+              'gastrite_empty_title'.tr,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Ajuste os filtros ou limpe a seleção para visualizar outras crises registradas.',
-            style: AppTheme.bodySmall.copyWith(
-              color: const Color(0xFF64748B),
+            const SizedBox(height: 12),
+            Text(
+              'crise_no_results'.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 14,
+                height: 1.5,
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildCriseCard(CriseGastrite crise, int index, bool isTablet, bool isPhone) {
+  Widget _buildCriseCard(CriseGastrite crise, int index) {
     final intensityColor = _getIntensidadeColor(crise.intensidadeDor);
-    
     return Container(
-      margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            Color(0xFFFAFBFC),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0),
-          width: 1.5,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-            spreadRadius: 0,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(24),
           onTap: () => _showCriseDetails(crise),
-          child: Container(
-            padding: EdgeInsets.all(isTablet ? 28 : 24),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header com data e intensidade
                 Row(
                   children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: intensityColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: intensityColor.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.favorite_rounded,
-                              size: 14,
-                              color: intensityColor,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                '${_getIntensidadeLabel(crise.intensidadeDor)} (${crise.intensidadeDor}/10)',
-                                style: AppTheme.bodySmall.copyWith(
-                                  color: intensityColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _formatDate(crise.data),
-                      style: AppTheme.bodySmall.copyWith(
-                        color: const Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Título
-                Text(
-                  'Crise de Gastrite',
-                  style: AppTheme.titleLarge.copyWith(
-                    color: const Color(0xFF0F172A),
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    fontSize: isTablet ? 20 : 18,
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Informações principais
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFFE2E8F0),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      // Sintomas
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1E3A8A).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.health_and_safety_rounded,
-                              size: 18,
-                              color: Color(0xFF1E3A8A),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Sintomas',
-                                  style: AppTheme.bodySmall.copyWith(
-                                    color: const Color(0xFF64748B),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  crise.sintomas,
-                                  style: AppTheme.bodyMedium.copyWith(
-                                    color: const Color(0xFF1E293B),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 12),
-                      
-                      // Medicação
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF10B981).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.medication_rounded,
-                              size: 18,
-                              color: Color(0xFF10B981),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Medicação',
-                                  style: AppTheme.bodySmall.copyWith(
-                                    color: const Color(0xFF64748B),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  crise.medicacao,
-                                  style: AppTheme.bodyMedium.copyWith(
-                                    color: const Color(0xFF1E293B),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                
-                if (crise.observacoes.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  
-                  // Observações
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFFE2E8F0),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.note_alt_rounded,
-                              size: 16,
-                              color: Color(0xFF64748B),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Observações',
-                              style: AppTheme.bodySmall.copyWith(
-                                color: const Color(0xFF64748B),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          crise.observacoes.length > 120 
-                              ? '${crise.observacoes.substring(0, 120)}...'
-                              : crise.observacoes,
-                          style: AppTheme.bodyMedium.copyWith(
-                            color: const Color(0xFF4B5563),
-                            height: 1.5,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                
-                const SizedBox(height: 20),
-                
-                // Footer com hora e ação
-                Row(
-                  children: [
-                    Text(
-                      _formatTime(crise.data),
-                      style: AppTheme.bodySmall.copyWith(
-                        color: const Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E3A8A),
-                        borderRadius: BorderRadius.circular(12),
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFF00324A).withOpacity(0.1),
+                            const Color(0xFF00324A).withOpacity(0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFF00324A).withOpacity(0.2),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Ver detalhes',
-                            style: AppTheme.bodySmall.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          Icon(
+                            Icons.favorite_rounded,
+                            size: 16,
+                            color: intensityColor,
                           ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 12,
-                            color: Colors.white,
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              '${_getIntensidadeLabelKey(crise.intensidadeDor).tr} (${crise.intensidadeDor}/10)',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: intensityColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${crise.data.day}/${crise.data.month}/${crise.data.year}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF666666),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'crise_title'.tr,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1A1A),
+                    height: 1.3,
+                  ),
+                ),
+                if (crise.sintomas.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    crise.sintomas,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF4A4A4A),
+                      height: 1.4,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildInfoChip(
+                      Icons.medication_outlined,
+                      crise.medicacao.isNotEmpty
+                          ? '${'crise_passed_with_medication'.tr}: ${crise.alivioMedicacao ? 'menst_yes'.tr : 'menst_no'.tr}'
+                          : '${'crise_passed_with_medication'.tr}: ${'mrec_not_informed'.tr}',
+                      const Color(0xFF00324A),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      'common_tap_details'.tr,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: Colors.grey[600],
                     ),
                   ],
                 ),
@@ -1656,25 +1486,41 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     );
   }
 
-  String _getIntensidadeLabel(int intensidade) {
+  Widget _buildInfoChip(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getIntensidadeLabelKey(int intensidade) {
     switch (intensidade) {
-      case 1:
-      case 2:
-        return 'Dor Leve';
-      case 3:
-      case 4:
-        return 'Dor Moderada';
-      case 5:
-      case 6:
-        return 'Dor Moderada a Intensa';
-      case 7:
-      case 8:
-        return 'Dor Intensa';
-      case 9:
-      case 10:
-        return 'Dor Muito Intensa';
-      default:
-        return 'Dor Moderada';
+      case 0: return 'crise_pain_none';
+      case 1: case 2: return 'crise_pain_mild';
+      case 3: case 4: return 'crise_pain_moderate';
+      case 5: case 6: return 'crise_pain_moderate_intense';
+      case 7: case 8: return 'crise_pain_intense';
+      case 9: case 10: return 'crise_pain_very_intense';
+      default: return 'crise_pain_moderate';
     }
   }
 
@@ -1691,9 +1537,9 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     final dateOnly = DateTime(date.year, date.month, date.day);
 
     if (dateOnly == today) {
-      return 'Hoje';
+      return 'common_today'.tr;
     } else if (dateOnly == yesterday) {
-      return 'Ontem';
+      return 'common_yesterday'.tr;
     } else {
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     }
@@ -1754,8 +1600,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Detalhes da Crise',
+                      Text(
+                        'crise_details'.tr,
                         style: TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 22,
@@ -1765,7 +1611,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Crise de Gastrite',
+                        'gastrite_title'.tr,
                         style: const TextStyle(
                           color: Color(0xFF1E3A8A),
                           fontSize: 15,
@@ -1793,12 +1639,12 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                 children: [
                   // Informações básicas
                   _buildDetailSection(
-                    title: 'Informações do Registro',
+                    title: 'crise_reg_info'.tr,
                     icon: Icons.info_rounded,
                     children: [
-                      _buildDetailRow('Data da Crise', '${crise.data.day.toString().padLeft(2, '0')}/${crise.data.month.toString().padLeft(2, '0')}/${crise.data.year} às ${_formatTime(crise.data)}'),
-                      _buildDetailRow('Intensidade da Dor', '${_getIntensidadeLabel(crise.intensidadeDor)} (${crise.intensidadeDor}/10)'),
-                      _buildDetailRow('Tipo de Registro', 'Crise de Gastrite'),
+                      _buildDetailRow('crise_date'.tr, '${crise.data.day.toString().padLeft(2, '0')}/${crise.data.month.toString().padLeft(2, '0')}/${crise.data.year} às ${_formatTime(crise.data)}'),
+                      _buildDetailRow('crise_pain_intensity'.tr, '${_getIntensidadeLabelKey(crise.intensidadeDor).tr} (${crise.intensidadeDor}/10)'),
+                      _buildDetailRow('crise_reg_type'.tr, 'crise_title'.tr),
                     ],
                   ),
                   
@@ -1809,8 +1655,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     title: '',
                     icon: Icons.description_rounded,
                     children: [
-                      Text(
-                        'Sintomas:',
+                        Text(
+                        'evt_symptoms'.tr,
                         style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 15,
@@ -1828,8 +1674,8 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Text(
-                        'Alimentos Ingeridos:',
+                        Text(
+                        'crise_food_ingested'.tr,
                         style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 15,
@@ -1852,7 +1698,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   if (crise.medicacao.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _buildDetailSection(
-                      title: 'Medicação/Alívio',
+                      title: 'evt_medication'.tr,
                       icon: Icons.medication_rounded,
                       children: [
                         Text(
@@ -1877,7 +1723,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Alívio após medicação: ${crise.alivioMedicacao ? 'Sim' : 'Não'}',
+                              'crise_relief_after'.trParams({'value': crise.alivioMedicacao ? 'menst_yes'.tr : 'menst_no'.tr}),
                               style: TextStyle(
                                 color: crise.alivioMedicacao ? Colors.green : Colors.red,
                                 fontSize: 15,
@@ -1894,7 +1740,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                   if (crise.observacoes.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _buildDetailSection(
-                      title: 'Observações',
+                      title: 'crise_notes_label'.tr,
                       icon: Icons.note_alt_rounded,
                       children: [
                         Text(
@@ -1933,7 +1779,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     child: OutlinedButton.icon(
                       onPressed: () => Navigator.pop(context),
                       icon: const Icon(Icons.close_rounded),
-                      label: const Text('Fechar'),
+                      label: Text('common_close'.tr),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF64748B),
                         side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1955,7 +1801,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                         );
                       },
                       icon: const Icon(Icons.edit_rounded),
-                      label: const Text('Editar'),
+                      label: Text('menst_edit'.tr),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E3A8A),
                         foregroundColor: Colors.white,

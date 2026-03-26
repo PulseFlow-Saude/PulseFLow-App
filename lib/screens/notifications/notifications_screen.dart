@@ -26,11 +26,12 @@ class NotificationsScreen extends StatelessWidget {
           child: Scaffold(
         backgroundColor: Colors.transparent,
         drawer: const PulseSideMenu(),
-        bottomNavigationBar: const PulseBottomNavigation(showOutline: false),
+        // bottomNavigationBar removido - tela tem sidebar
+        // bottomNavigationBar: const PulseBottomNavigation(showOutline: false),
             body: Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF011627), Color(0xFF023A63)],
+                  colors: [Color(0xFF00324A), Color(0xFF00557A)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -135,9 +136,9 @@ class NotificationsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Notificações',
-                  style: TextStyle(
+                Text(
+                  'notif_title'.tr,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
@@ -147,8 +148,8 @@ class NotificationsScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Obx(() => Text(
                       controller.unreadCount > 0
-                          ? '${controller.unreadCount} notificações pendentes'
-                          : 'Tudo em dia',
+                          ? 'notif_pending'.trParams({'n': controller.unreadCount.toString()})
+                          : 'notif_all_ok'.tr,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.9),
                         fontSize: 14,
@@ -202,7 +203,7 @@ class NotificationsScreen extends StatelessWidget {
           TextButton.icon(
             onPressed: () => _openFilterSheet(controller),
             icon: const Icon(Icons.tune, size: 16),
-            label: const Text('Alterar'),
+            label: Text('notif_change'.tr),
           )
         ],
       ),
@@ -225,13 +226,13 @@ class NotificationsScreen extends StatelessWidget {
   String _getSelectedFilterLabel(String value) {
     switch (value) {
       case 'unread':
-        return 'Exibindo apenas não lidas';
+        return 'notif_filter_unread'.tr;
       case 'appointments':
-        return 'Filtrando agendamentos';
+        return 'notif_filter_appointments'.tr;
       case 'archived':
-        return 'Arquivadas';
+        return 'notif_filter_archived'.tr;
       default:
-        return 'Todas as notificações';
+        return 'notif_filter_all'.tr;
     }
   }
 
@@ -239,26 +240,26 @@ class NotificationsScreen extends StatelessWidget {
     final filters = [
       _FilterOption(
         value: 'all',
-        label: 'Todas',
-        description: 'Exibe todas as notificações disponíveis',
+        label: 'notif_filter_all_label'.tr,
+        description: 'notif_filter_all_desc'.tr,
         icon: Icons.ballot_outlined,
       ),
       _FilterOption(
         value: 'unread',
-        label: 'Não lidas',
-        description: 'Somente as notificações pendentes de leitura',
+        label: 'notif_filter_unread_label'.tr,
+        description: 'notif_filter_unread_desc'.tr,
         icon: Icons.mark_email_unread_outlined,
       ),
       _FilterOption(
         value: 'appointments',
-        label: 'Agendamentos',
-        description: 'Alertas de consultas, exames e pulse key',
+        label: 'notif_filter_appointments_label'.tr,
+        description: 'notif_filter_appointments_desc'.tr,
         icon: Icons.event_available_outlined,
       ),
       _FilterOption(
         value: 'archived',
-        label: 'Arquivadas',
-        description: 'Itens que você arquivou anteriormente',
+        label: 'notif_filter_archived_label'.tr,
+        description: 'notif_filter_archived_desc'.tr,
         icon: Icons.archive_outlined,
       ),
     ];
@@ -279,8 +280,8 @@ class NotificationsScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Text(
-                  'Filtros',
+                Text(
+                  'notif_filters'.tr,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -399,7 +400,7 @@ class NotificationsScreen extends StatelessWidget {
           TextButton.icon(
             onPressed: () => controller.markAllAsRead(),
             icon: const Icon(Icons.done_all, size: 18),
-            label: const Text('Marcar todas como lidas'),
+            label: Text('notif_mark_all_read'.tr),
             style: TextButton.styleFrom(
               foregroundColor: const Color(0xFF00324A),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -451,8 +452,8 @@ class NotificationsScreen extends StatelessWidget {
         if (direction == DismissDirection.startToEnd) {
           controller.archiveNotification(notification.id);
           Get.snackbar(
-            'Arquivado',
-            'Notificação arquivada',
+            'notif_archived'.tr,
+            'notif_archived_msg'.tr,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.orange,
             colorText: Colors.white,
@@ -562,13 +563,13 @@ class NotificationsScreen extends StatelessWidget {
                                 color: const Color(0xFFF97316).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(999),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.warning_amber_rounded, size: 14, color: Color(0xFFF97316)),
-                                  SizedBox(width: 4),
+                                  const Icon(Icons.warning_amber_rounded, size: 14, color: Color(0xFFF97316)),
+                                  const SizedBox(width: 4),
                                   Text(
-                                    'Aviso de consulta',
+                                    'notif_appointment_warning'.tr,
                                     style: TextStyle(
                                       color: Color(0xFFF97316),
                                       fontSize: 11,
@@ -629,23 +630,23 @@ class NotificationsScreen extends StatelessWidget {
                                     color: Colors.grey[700],
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(notification.isArchived ? 'Desarquivar' : 'Arquivar'),
+                                  Text(notification.isArchived ? 'notif_unarchive'.tr : 'notif_archive'.tr),
                                 ],
                               ),
                             ),
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.delete_outline,
                                     size: 18,
                                     color: Colors.red,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    'Excluir',
-                                    style: TextStyle(color: Colors.red),
+                                    'common_delete'.tr,
+                                    style: const TextStyle(color: Colors.red),
                                   ),
                                 ],
                               ),
@@ -679,15 +680,15 @@ class NotificationsScreen extends StatelessWidget {
     
     switch (controller.filter.value) {
       case 'unread':
-        message = 'Você não possui notificações não lidas';
+        message = 'notif_empty_unread'.tr;
         icon = Icons.mark_email_read_outlined;
         break;
       case 'archived':
-        message = 'Você não possui notificações arquivadas';
+        message = 'notif_empty_archived'.tr;
         icon = Icons.archive_outlined;
         break;
       default:
-        message = 'Você não possui notificações no momento';
+        message = 'notif_empty_default'.tr;
         icon = Icons.notifications_none_rounded;
     }
 
@@ -720,7 +721,7 @@ class NotificationsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Novas notificações aparecerão aqui',
+              'notif_new_here'.tr,
               style: AppTheme.bodyMedium.copyWith(
                 color: Colors.grey[600],
               ),
@@ -736,7 +737,7 @@ class NotificationsScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Atualizar agora'),
+                child: Text('notif_refresh'.tr),
               ),
             ),
           ],
@@ -789,22 +790,22 @@ class NotificationsScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        title: const Text(
-          'Excluir notificação',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          'notif_delete_title'.tr,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        content: const Text('Deseja realmente excluir esta notificação?'),
+        content: Text('notif_delete_confirm'.tr),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text('Cancelar'),
+            child: Text('common_cancel'.tr),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('Excluir'),
+            child: Text('common_delete'.tr),
           ),
         ],
       ),
@@ -818,23 +819,23 @@ class NotificationsScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        title: const Text(
-          'Excluir notificação',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          'notif_delete_title'.tr,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        content: const Text('Deseja realmente excluir esta notificação?'),
+        content: Text('notif_delete_confirm'.tr),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Cancelar'),
+            child: Text('common_cancel'.tr),
           ),
           TextButton(
             onPressed: () {
               controller.deleteNotification(notification.id);
               Get.back();
               Get.snackbar(
-                'Excluído',
-                'Notificação excluída',
+                'notif_deleted'.tr,
+                'notif_deleted_msg'.tr,
                 snackPosition: SnackPosition.BOTTOM,
                 backgroundColor: Colors.red,
                 colorText: Colors.white,
@@ -846,7 +847,7 @@ class NotificationsScreen extends StatelessWidget {
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('Excluir'),
+            child: Text('common_delete'.tr),
           ),
         ],
       ),
@@ -856,20 +857,20 @@ class NotificationsScreen extends StatelessWidget {
   String _getTypeLabel(String? type) {
     switch ((type ?? '').toLowerCase()) {
       case 'appointment':
-        return 'Consulta';
+        return 'notif_type_appointment'.tr;
       case 'reminder':
-        return 'Lembrete';
+        return 'notif_type_reminder'.tr;
       case 'exam':
-        return 'Exame';
+        return 'notif_type_exam'.tr;
       case 'prescription':
-        return 'Prescrição';
+        return 'notif_type_prescription'.tr;
       case 'pulse_key':
-        return 'Pulse Key';
+        return 'notif_type_pulse_key'.tr;
       case 'profile_update':
-        return 'Perfil';
+        return 'notif_type_profile'.tr;
       case 'updates':
       default:
-        return 'Atualização';
+        return 'notif_type_update'.tr;
     }
   }
 

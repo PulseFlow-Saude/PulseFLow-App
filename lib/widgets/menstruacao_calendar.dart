@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../models/menstruacao.dart';
@@ -54,7 +55,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Calendário Menstrual',
+                      'menst_calendar_title'.tr,
                       style: AppTheme.titleMedium.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -62,7 +63,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Acompanhe seus ciclos no calendário',
+                      'menst_calendar_sub'.tr,
                       style: AppTheme.bodySmall.copyWith(
                         color: Colors.white.withOpacity(0.9),
                       ),
@@ -225,10 +226,10 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                 return _buildDayMarker(day, menstruacao);
               },
               dowBuilder: (context, day) {
-                final weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                final keys = ['menst_dow_sun', 'menst_dow_mon', 'menst_dow_tue', 'menst_dow_wed', 'menst_dow_thu', 'menst_dow_fri', 'menst_dow_sat'];
                 return Center(
                   child: Text(
-                    weekdays[day.weekday % 7],
+                    keys[day.weekday % 7].tr,
                     style: AppTheme.bodySmall.copyWith(
                       color: const Color(0xFF00324A),
                       fontWeight: FontWeight.w600,
@@ -290,7 +291,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
           child: Column(
             children: [
               Text(
-                'Legenda',
+                'menst_legend'.tr,
                 style: AppTheme.bodyMedium.copyWith(
                   color: const Color(0xFF00324A),
                   fontWeight: FontWeight.w600,
@@ -300,9 +301,9 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildLegendItem('Leve', const Color(0xFF10B981)),
-                  _buildLegendItem('Moderado', const Color(0xFFF59E0B)),
-                  _buildLegendItem('Intenso', const Color(0xFFEF4444)),
+                  _buildLegendItem('menst_flow_light'.tr, const Color(0xFF10B981)),
+                  _buildLegendItem('menst_flow_moderate'.tr, const Color(0xFFF59E0B)),
+                  _buildLegendItem('menst_flow_heavy'.tr, const Color(0xFFEF4444)),
                 ],
               ),
             ],

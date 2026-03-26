@@ -30,8 +30,8 @@ class ForgotPasswordController extends GetxController with SafeControllerMixin {
       final patient = await _authService.checkEmailExists(email);
       if (patient == null) {
         Get.snackbar(
-          'E-mail não encontrado',
-          'Este e-mail não está cadastrado em nossa base de dados.',
+          'auth_email_not_found'.tr,
+          'auth_email_not_registered'.tr,
           backgroundColor: Colors.orange,
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
@@ -43,8 +43,8 @@ class ForgotPasswordController extends GetxController with SafeControllerMixin {
       await _authService.sendPasswordResetCode(email);
       
       Get.snackbar(
-        'Código enviado!',
-        'Verifique seu e-mail para o código de redefinição.',
+        'auth_code_sent'.tr,
+        'auth_check_email'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -56,7 +56,7 @@ class ForgotPasswordController extends GetxController with SafeControllerMixin {
       
     } catch (e) {
       Get.snackbar(
-        'Erro',
+        'auth_error'.tr,
         e.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,

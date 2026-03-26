@@ -156,7 +156,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
                   child: Column(
                     children: [
                       Text(
-                        'Registro',
+                        'reg_title'.tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: titleFontSize.clamp(20.0, 32.0),
@@ -167,7 +167,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
                       ),
                       SizedBox(height: size.height * 0.01),
                       Text(
-                        'Complete seus dados para começar',
+                        'reg_subtitle'.tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: subtitleFontSize.clamp(12.0, 16.0),
@@ -210,14 +210,14 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         SizedBox(height: size.height * 0.02),
         _buildSectionHeader(
           icon: Icons.person_outline,
-          title: 'Informações de Conta',
-          subtitle: 'Dados básicos para acesso',
+          title: 'reg_account_info'.tr,
+          subtitle: 'reg_account_sub'.tr,
         ),
         SizedBox(height: size.height * 0.025),
         
         _buildTextField(
           controller: controller.nameController,
-          label: 'Nome completo',
+          label: 'reg_full_name'.tr,
           icon: Icons.person_outline,
           validator: controller.validateName,
         ),
@@ -225,7 +225,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildTextField(
           controller: controller.emailController,
-          label: 'Email',
+          label: 'auth_email'.tr,
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           validator: controller.validateEmail,
@@ -234,14 +234,14 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildPasswordField(
           controller: controller.passwordController,
-          label: 'Senha',
+          label: 'auth_password'.tr,
           validator: controller.validatePassword,
         ),
         SizedBox(height: size.height * 0.02),
         
         _buildPasswordField(
           controller: controller.confirmPasswordController,
-          label: 'Confirmar Senha',
+          label: 'reg_confirm_password'.tr,
           validator: controller.validateConfirmPassword,
         ),
         SizedBox(height: size.height * 0.02),
@@ -251,14 +251,14 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
 
         _buildSectionHeader(
           icon: Icons.assignment_ind_outlined,
-          title: 'Informações Pessoais',
-          subtitle: 'Dados de identificação',
+          title: 'reg_personal_info'.tr,
+          subtitle: 'reg_personal_sub'.tr,
         ),
         SizedBox(height: size.height * 0.025),
         
         _buildTextField(
           controller: controller.cpfController,
-          label: 'CPF',
+          label: 'profile_cpf'.tr,
           icon: Icons.badge_outlined,
           keyboardType: TextInputType.number,
           inputFormatters: [controller.cpfMask],
@@ -268,7 +268,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildTextField(
           controller: controller.rgController,
-          label: 'RG',
+          label: 'profile_rg'.tr,
           icon: Icons.credit_card_outlined,
           keyboardType: TextInputType.text,
           inputFormatters: [controller.rgMask],
@@ -278,7 +278,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildTextField(
           controller: controller.phoneController,
-          label: 'Telefone',
+          label: 'profile_phone'.tr,
           icon: Icons.phone_iphone_outlined,
           keyboardType: TextInputType.phone,
           inputFormatters: [controller.phoneMask],
@@ -288,15 +288,15 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildTextField(
           controller: controller.nationalityController,
-          label: 'Nacionalidade',
+          label: 'reg_nationality'.tr,
           icon: Icons.flag_outlined,
-          validator: (value) => controller.validateRequired(value, 'Nacionalidade'),
+          validator: (value) => controller.validateRequired(value, 'reg_nationality'.tr),
         ),
         SizedBox(height: size.height * 0.02),
         
         _buildTextField(
           controller: controller.birthDateController,
-          label: 'Data de Nascimento',
+          label: 'profile_birth_date'.tr,
           icon: Icons.cake_outlined,
           readOnly: true,
           onTap: () => controller.selectDate(context),
@@ -306,27 +306,27 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         Obx(() => _buildDropdownField(
           value: controller.gender.value,
-          label: 'Sexo / Gênero',
+          label: 'reg_gender'.tr,
           icon: Icons.transgender,
           items: controller.genders,
           onChanged: (String? newValue) { controller.gender.value = newValue; },
-          validator: (v) => controller.validateDropdown(v, 'Sexo / Gênero'),
+          validator: (v) => controller.validateDropdown(v, 'reg_gender'.tr),
         )),
         SizedBox(height: size.height * 0.02),
         
         Obx(() => _buildDropdownField(
           value: controller.maritalStatus.value,
-          label: 'Estado Civil',
+          label: 'reg_marital_status'.tr,
           icon: Icons.family_restroom_outlined,
           items: controller.maritalStatuses,
           onChanged: (String? newValue) { controller.maritalStatus.value = newValue; },
-          validator: (v) => controller.validateDropdown(v, 'Estado Civil'),
+          validator: (v) => controller.validateDropdown(v, 'reg_marital_status'.tr),
         )),
         SizedBox(height: size.height * 0.02),
         
         _buildTextField(
           controller: controller.heightController,
-          label: 'Altura (cm)',
+          label: 'reg_height'.tr,
           icon: Icons.height_outlined,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           validator: controller.validateHeight,
@@ -335,7 +335,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildTextField(
           controller: controller.weightController,
-          label: 'Peso (kg)',
+          label: 'reg_weight'.tr,
           icon: Icons.monitor_weight_outlined,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           validator: controller.validateWeight,
@@ -344,21 +344,21 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildTextField(
           controller: controller.professionController,
-          label: 'Profissão',
+          label: 'reg_profession'.tr,
           icon: Icons.work_outline,
         ),
         SizedBox(height: size.height * 0.03),
 
         _buildSectionHeader(
           icon: Icons.home_outlined,
-          title: 'Endereço',
-          subtitle: 'Localização residencial',
+          title: 'reg_address'.tr,
+          subtitle: 'reg_address_sub'.tr,
         ),
         SizedBox(height: size.height * 0.025),
         
         _buildTextField(
           controller: controller.cepController,
-          label: 'CEP',
+          label: 'reg_cep'.tr,
           icon: Icons.location_on_outlined,
           keyboardType: TextInputType.number,
           inputFormatters: [controller.cepMask],
@@ -382,65 +382,65 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         
         _buildTextField(
           controller: controller.streetController,
-          label: 'Rua',
+          label: 'reg_street'.tr,
           icon: Icons.alt_route,
-          validator: (value) => controller.validateRequired(value, 'Rua'),
+          validator: (value) => controller.validateRequired(value, 'reg_street'.tr),
         ),
         SizedBox(height: size.height * 0.02),
         
         _buildTextField(
           controller: controller.numberController,
-          label: 'Número',
+          label: 'reg_number'.tr,
           icon: Icons.numbers_outlined,
           keyboardType: TextInputType.number,
-          validator: (value) => controller.validateRequired(value, 'Número'),
+          validator: (value) => controller.validateRequired(value, 'reg_number'.tr),
         ),
         SizedBox(height: size.height * 0.02),
         
         _buildTextField(
           controller: controller.complementController,
-          label: 'Complemento',
+          label: 'reg_complement'.tr,
           icon: Icons.add_location_alt_outlined,
         ),
         SizedBox(height: size.height * 0.02),
         
         _buildTextField(
           controller: controller.neighborhoodController,
-          label: 'Bairro',
+          label: 'reg_neighborhood'.tr,
           icon: Icons.location_city_outlined,
-          validator: (value) => controller.validateRequired(value, 'Bairro'),
+          validator: (value) => controller.validateRequired(value, 'reg_neighborhood'.tr),
         ),
         SizedBox(height: size.height * 0.02),
         
         _buildTextField(
           controller: controller.cityController,
-          label: 'Cidade',
+          label: 'reg_city'.tr,
           icon: Icons.apartment_outlined,
-          validator: (value) => controller.validateRequired(value, 'Cidade'),
+          validator: (value) => controller.validateRequired(value, 'reg_city'.tr),
         ),
         SizedBox(height: size.height * 0.02),
         
         Obx(() => _buildDropdownField(
           value: controller.state.value,
-          label: 'UF',
+          label: 'reg_state'.tr,
           icon: Icons.map_outlined,
           items: controller.states,
           onChanged: (String? newValue) { controller.state.value = newValue; },
-          validator: (v) => controller.validateDropdown(v, 'UF'),
+          validator: (v) => controller.validateDropdown(v, 'reg_state'.tr),
         )),
         SizedBox(height: size.height * 0.03),
 
         _buildSectionHeader(
           icon: Icons.gavel_outlined,
-          title: 'Termos e Condições',
-          subtitle: 'Autorizações necessárias',
+          title: 'reg_terms'.tr,
+          subtitle: 'reg_terms_sub'.tr,
         ),
         SizedBox(height: size.height * 0.025),
         
         _buildCheckboxTile(
           value: controller.acceptTerms,
-          title: 'Aceito os ',
-          linkText: 'termos de uso',
+          title: 'reg_accept_terms'.tr,
+          linkText: 'reg_terms_link'.tr,
           onLinkTap: () => Get.to(() => const TermsScreen()),
         ),
         SizedBox(height: size.height * 0.04),
@@ -747,7 +747,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           return DropdownMenuItem<String>(
             value: value,
             child: Text(
-              value,
+              value.tr,
               overflow: TextOverflow.visible,
               style: TextStyle(
                 fontSize: fontSize.clamp(14.0, 18.0),
@@ -867,7 +867,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
               SizedBox(width: size.width * 0.02),
               Flexible(
                 child: Text(
-                  'Foto de Perfil',
+                  'reg_photo_profile'.tr,
                   maxLines: 1,
                   softWrap: false,
                   style: TextStyle(
@@ -881,7 +881,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
               Spacer(),
               Flexible(
                 child: Text(
-                  '(Opcional)',
+                  'reg_photo_optional'.tr,
                   style: TextStyle(
                     color: Colors.grey[500],
                     fontSize: subtitleSize.clamp(10.0, 14.0),
@@ -901,7 +901,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           
           SizedBox(height: size.height * 0.01),
           Text(
-            'Adicione uma foto para personalizar seu perfil',
+            'reg_photo_hint'.tr,
             style: TextStyle(
               color: Colors.grey[600],
               fontSize: subtitleSize.clamp(11.0, 14.0),
@@ -958,7 +958,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
               onPressed: () => controller.showImageSourceDialog(context),
               icon: Icon(Icons.edit, size: iconSize.clamp(16.0, 20.0)),
               label: Text(
-                'Alterar',
+                'reg_photo_change'.tr,
                 style: TextStyle(fontSize: fontSize.clamp(12.0, 16.0)),
               ),
               style: ElevatedButton.styleFrom(
@@ -977,7 +977,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
               onPressed: controller.removeProfilePhoto,
               icon: Icon(Icons.delete, size: iconSize.clamp(16.0, 20.0)),
               label: Text(
-                'Remover',
+                'reg_photo_remove'.tr,
                 style: TextStyle(fontSize: fontSize.clamp(12.0, 16.0)),
               ),
               style: ElevatedButton.styleFrom(
@@ -1032,7 +1032,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
             SizedBox(height: size.height * 0.01),
             Center(
               child: Text(
-                'Adicionar\nFoto',
+                'reg_photo_add'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.grey[600],
@@ -1100,7 +1100,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
                   SizedBox(width: size.width * 0.02),
                   Flexible(
                     child: Text(
-                      'CRIAR MINHA CONTA',
+                      'reg_btn_create'.tr,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: fontSize.clamp(14.0, 18.0),
@@ -1130,7 +1130,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['erro'] == true) {
-          cepError.value = 'CEP não encontrado';
+          cepError.value = 'reg_cep_not_found'.tr;
         } else {
           controller.streetController.text = data['logradouro'] ?? '';
           controller.neighborhoodController.text = data['bairro'] ?? '';
@@ -1140,7 +1140,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         }
       }
     } catch (e) {
-      cepError.value = 'Erro ao buscar CEP';
+      cepError.value = 'reg_cep_error'.tr;
     } finally {
       isCepLoading.value = false;
     }
@@ -1150,8 +1150,8 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
     if (controller.formKey.currentState?.validate() ?? false) {
       if (!controller.acceptTerms.value) {
         Get.snackbar(
-          'Termos não aceitos',
-          'Você deve aceitar todos os termos para continuar',
+          'reg_terms_not_accepted'.tr,
+          'reg_terms_must_accept'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,

@@ -73,28 +73,28 @@ class _ExameListScreenState extends State<ExameListScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
-            SizedBox(width: 12),
+            const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Excluir Exame',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                'exam_delete_title'.tr,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
         content: Text(
-          'Deseja excluir "${exame.nome}"?',
+          'exam_delete_confirm'.trParams({'name': exame.nome}),
           style: const TextStyle(fontSize: 16),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text(
-              'Cancelar',
-              style: TextStyle(color: Colors.grey),
+            child: Text(
+              'common_cancel'.tr,
+              style: const TextStyle(color: Colors.grey),
             ),
           ),
           ElevatedButton(
@@ -106,7 +106,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('Excluir'),
+            child: Text('common_delete'.tr),
           ),
         ],
       ),
@@ -123,8 +123,8 @@ class _ExameListScreenState extends State<ExameListScreen> {
         if (mounted) {
           HapticFeedback.mediumImpact();
           Get.snackbar(
-            'Sucesso',
-            'Exame excluído com sucesso',
+            'common_success'.tr,
+            'exam_deleted'.tr,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.green,
             colorText: Colors.white,
@@ -136,8 +136,8 @@ class _ExameListScreenState extends State<ExameListScreen> {
           await _controller.removerExameByObject(exame);
           if (mounted) {
             Get.snackbar(
-              'Sucesso',
-              'Exame excluído com sucesso',
+              'common_success'.tr,
+              'exam_deleted'.tr,
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: Colors.green,
               colorText: Colors.white,
@@ -146,7 +146,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
         } catch (err2) {
           if (mounted) {
             Get.snackbar(
-              'Erro',
+              'common_error'.tr,
               err2.toString(),
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: Colors.red,
@@ -247,15 +247,16 @@ class _ExameListScreenState extends State<ExameListScreen> {
           },
           backgroundColor: const Color(0xFF00324A),
           icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text(
-            'Novo Exame',
+          label: Text(
+            'exam_new'.tr,
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
-        bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
+        // bottomNavigationBar removido - tela tem sidebar
+        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
       ),
     );
   }
@@ -278,7 +279,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Meus Exames',
+                  'exam_my'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: isSmallScreen ? 24 : 28,
@@ -289,8 +290,9 @@ class _ExameListScreenState extends State<ExameListScreen> {
                 const SizedBox(height: 4),
                 Obx(() => Text(
                   _controller.exames.isEmpty
-                      ? 'Nenhum exame registrado'
-                      : '${_controller.exames.length} exame${_controller.exames.length > 1 ? 's' : ''} registrado${_controller.exames.length > 1 ? 's' : ''}',
+                      ? 'exam_none'.tr
+                      : (_controller.exames.length > 1
+                          ? 'exam_count_plural' : 'exam_count').trParams({'n': _controller.exames.length.toString()}),
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: isSmallScreen ? 12 : 14,
@@ -319,7 +321,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
             ),
             SizedBox(height: isSmallScreen ? 12 : 16),
             Text(
-              'Nenhum exame registrado',
+              'exam_none'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: isSmallScreen ? 16 : 18,
@@ -329,7 +331,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
             ),
             SizedBox(height: isSmallScreen ? 6 : 8),
             Text(
-              'Adicione exames ao seu prontuário\nusando o botão abaixo',
+              'exam_empty_sub'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: isSmallScreen ? 13 : 14,
@@ -360,8 +362,8 @@ class _ExameListScreenState extends State<ExameListScreen> {
                   controller: _nomeFilterController,
                   style: TextStyle(fontSize: isSmallScreen ? 14 : 15),
                   decoration: InputDecoration(
-                    labelText: 'Nome do exame',
-                    hintText: 'Buscar por nome...',
+                    labelText: 'exam_name_label'.tr,
+                    hintText: 'exam_name_hint'.tr,
                     prefixIcon: const Icon(Icons.search, size: 20),
                     suffixIcon: Obx(() {
                       if (_controller.filtroNome.value.isNotEmpty) {
@@ -402,8 +404,8 @@ class _ExameListScreenState extends State<ExameListScreen> {
                   controller: _categoriaFilterController,
                   style: TextStyle(fontSize: isSmallScreen ? 14 : 15),
                   decoration: InputDecoration(
-                    labelText: 'Categoria',
-                    hintText: 'Buscar categoria...',
+                    labelText: 'exam_category_label'.tr,
+                    hintText: 'exam_category_hint'.tr,
                     prefixIcon: const Icon(Icons.category_outlined, size: 20),
                     suffixIcon: Obx(() {
                       if (_controller.filtroCategoria.value.isNotEmpty) {
@@ -475,7 +477,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                   label: Obx(() {
                     final d = _controller.filtroInicio.value;
                     return Text(
-                      d == null ? 'Data início' : _formatDate(d),
+                      d == null ? 'horm_date_start'.tr : _formatDate(d),
                       style: TextStyle(fontSize: isSmallScreen ? 12 : 13),
                     );
                   }),
@@ -524,7 +526,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                   label: Obx(() {
                     final d = _controller.filtroFim.value;
                     return Text(
-                      d == null ? 'Data fim' : _formatDate(d),
+                      d == null ? 'horm_date_end'.tr : _formatDate(d),
                       style: TextStyle(fontSize: isSmallScreen ? 12 : 13),
                     );
                   }),
@@ -547,7 +549,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
-                  tooltip: 'Limpar filtros',
+                  tooltip: 'exam_clear_filters'.tr,
                   onPressed: () {
                     _nomeFilterController.clear();
                     _categoriaFilterController.clear();
@@ -596,28 +598,28 @@ class _ExameListScreenState extends State<ExameListScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
-                SizedBox(width: 12),
+                const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Excluir Exame',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    'exam_delete_title'.tr,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
             content: Text(
-              'Deseja excluir "${exame.nome}"?',
+              'exam_delete_confirm'.trParams({'name': exame.nome}),
               style: const TextStyle(fontSize: 16),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text(
-                  'Cancelar',
-                  style: TextStyle(color: Colors.grey),
+                child: Text(
+                  'common_cancel'.tr,
+                  style: const TextStyle(color: Colors.grey),
                 ),
               ),
               ElevatedButton(
@@ -629,7 +631,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text('Excluir'),
+                child: Text('common_delete'.tr),
               ),
             ],
           ),
@@ -645,8 +647,8 @@ class _ExameListScreenState extends State<ExameListScreen> {
             await OpenFilex.open(exame.filePath);
           } catch (e) {
             Get.snackbar(
-              'Erro',
-              'Não foi possível abrir o arquivo',
+              'common_error'.tr,
+              'exam_open_error'.tr,
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: Colors.red,
               colorText: Colors.white,
@@ -751,7 +753,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
                     onPressed: () => _deleteExame(exame),
                     icon: const Icon(Icons.delete_outline, size: 20),
                     color: Colors.red[300],
-                    tooltip: 'Excluir exame',
+                    tooltip: 'exam_delete_tooltip'.tr,
                   ),
                 ],
               ),

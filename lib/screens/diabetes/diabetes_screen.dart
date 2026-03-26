@@ -8,6 +8,8 @@ import '../../models/diabetes.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../../widgets/pulse_drawer_button.dart';
+import '../../utils/intl_locale.dart';
+import '../institutional/settings_controller.dart';
 
 String formatarData(DateTime d) {
   final dd = d.day.toString().padLeft(2, '0');
@@ -16,18 +18,12 @@ String formatarData(DateTime d) {
   return "$dd/$mm/$yyyy";
 }
 
-String formatarMesAno(DateTime d) {
-  const meses = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
-  return '${meses[d.month - 1]} de ${d.year}';
-}
+String formatarMesAno(DateTime d) => AppDateFormat.monthYear(d);
 
-String formatarMes(int mes) {
-  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  return meses[mes - 1];
-}
+/// Mês + ano em formato curto para caber no layout (ex: "Fev 2025" / "Feb 2025").
+String formatarMesAnoShort(DateTime d) => AppDateFormat.monthYearShort(d);
+
+String formatarMes(int mes) => AppDateFormat.monthShort(mes);
 
 String calcularMediaGlicemia(List<Diabetes> data) {
   if (data.isEmpty) return '0';
@@ -60,17 +56,11 @@ Color getCorGlicemia(double glicemia) {
   return Colors.red; // Diabetes
 }
 
-String getStatusGlicemia(double glicemia) {
-  if (glicemia < 70) {
-    return 'Baixa';
-  }
-  if (glicemia <= 100) {
-    return 'Normal';
-  }
-  if (glicemia <= 125) {
-    return 'Elevada';
-  }
-  return 'Alta';
+String getStatusGlicemiaKey(double glicemia) {
+  if (glicemia < 70) return 'diabetes_low';
+  if (glicemia <= 100) return 'diabetes_normal';
+  if (glicemia <= 125) return 'diabetes_elevada';
+  return 'diabetes_high';
 }
 
 class DiabetesScreen extends StatelessWidget {
@@ -93,7 +83,7 @@ class DiabetesScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF00324A),
         elevation: 0,
-        title: const Text('Registro de Diabetes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        title: Text('diab_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
         leading: const PulseDrawerButton(iconSize: 22),
         centerTitle: true,
       ),
@@ -124,23 +114,23 @@ class DiabetesScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Novo registro',
-                              style: TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600),
+                        Text(
+                          'common_new_record'.tr,
+                              style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 16),
                         TextField(
                           controller: glicemiaController,
-                          decoration: const InputDecoration(
-                            labelText: 'Glicemia (mg/dL)',
-                            hintText: 'Ex: 95',
+                          decoration: InputDecoration(
+                            labelText: 'diab_glucose_label'.tr,
+                            hintText: 'diab_glucose_hint'.tr,
                           ),
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         ),
                         const SizedBox(height: 16),
                         Obx(() {
                           final dataText = dataSelecionada.value == null
-                              ? 'Selecione a data'
+                              ? 'common_select_date'.tr
                               : formatarData(dataSelecionada.value!);
                           return InkWell(
                             onTap: () async {
@@ -150,9 +140,9 @@ class DiabetesScreen extends StatelessWidget {
                                 initialDate: dataSelecionada.value ?? hoje,
                                 firstDate: DateTime(2000),
                                 lastDate: DateTime(hoje.year, hoje.month, hoje.day),
-                                helpText: 'Selecione a data da medição',
-                                cancelText: 'Cancelar',
-                                confirmText: 'Confirmar',
+                                helpText: 'common_date_measurement'.tr,
+                                cancelText: 'common_cancel'.tr,
+                                confirmText: 'common_confirm'.tr,
                               );
                               if (picked != null) {
                                 dataSelecionada.value = DateTime(picked.year, picked.month, picked.day);
@@ -192,12 +182,12 @@ class DiabetesScreen extends StatelessWidget {
                                 ),
                                 onPressed: () async {
                                   if (dataSelecionada.value == null) {
-                                    Get.snackbar('Data obrigatória', 'Selecione a data da medição');
+                                    Get.snackbar('common_data_required'.tr, 'common_date_measurement'.tr);
                                     return;
                                   }
                                   final glicemia = double.tryParse(glicemiaController.text.replaceAll(',', '.'));
                                   if (glicemia == null) {
-                                    Get.snackbar('Glicemia inválida', 'Digite um valor numérico');
+                                    Get.snackbar('diab_glucose_invalid'.tr, 'diab_glucose_invalid_msg'.tr);
                                     return;
                                   }
 
@@ -210,9 +200,9 @@ class DiabetesScreen extends StatelessWidget {
 
                                   glicemiaController.clear();
                                   dataSelecionada.value = null;
-                                    Get.snackbar('Sucesso', 'Registro de glicemia salvo com sucesso');
+                                    Get.snackbar('common_success'.tr, 'diab_glucose_saved'.tr);
                                 },
-                                child: const Text('Registrar', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                                child: Text('common_register'.tr, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -226,7 +216,7 @@ class DiabetesScreen extends StatelessWidget {
                                 onPressed: () {
                                   mostrarGrafico.value = !mostrarGrafico.value;
                                 },
-                                    child: Obx(() => Text(mostrarGrafico.value ? "Visualizar registros" : "Visualizar dados", style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
+                                    child: Obx(() => Text(mostrarGrafico.value ? 'common_view_records'.tr : 'common_view_data'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
                                   ),
                                 ),
                               ],
@@ -303,7 +293,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-                        const Text('Menor', style: TextStyle(color: Color(0xFF00324A), fontSize: 12)),
+                        Text('common_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
                         Text(calcularMenorGlicemiaValor(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -311,7 +301,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-                        const Text('Média', style: TextStyle(color: Color(0xFF00324A), fontSize: 12)),
+                        Text('common_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
                         Text('${calcularMediaGlicemia(data)}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -319,7 +309,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-                        const Text('Maior', style: TextStyle(color: Color(0xFF00324A), fontSize: 12)),
+                        Text('common_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
                         Text('${calcularMaiorGlicemia(data)}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -392,7 +382,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                               const Icon(Icons.event, color: Color(0xFF00324A), size: 14),
                                 const SizedBox(width: 6),
                                 Text(
-                                  'Data: ${formatarData(item.data)}',
+                                  '${'diab_date_label'.tr} ${formatarData(item.data)}',
                                 style: const TextStyle(color: Color(0xFF00324A), fontSize: 14),
                                 ),
                               ],
@@ -405,22 +395,28 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: () {
-                          final s = getStatusGlicemia(item.glicemia);
-                          if (s == 'Normal') return Colors.green.withOpacity(0.15);
-                          if (s == 'Elevada') return Colors.amber.withOpacity(0.2);
-                          if (s == 'Alta' || s == 'Baixa') return Colors.red.withOpacity(0.15);
+                          final s = getStatusGlicemiaKey(item.glicemia);
+                          if (s == 'diabetes_normal') return Colors.green.withOpacity(0.15);
+                          if (s == 'diabetes_elevada') return Colors.amber.withOpacity(0.2);
+                          if (s == 'diabetes_high' || s == 'diabetes_low') return Colors.red.withOpacity(0.15);
                           return const Color(0xFF00324A).withOpacity(0.10);
                         }(),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        getStatusGlicemia(item.glicemia),
+                        () {
+                          final s = getStatusGlicemiaKey(item.glicemia);
+                          if (s == 'diabetes_low') return 'diab_status_low'.tr;
+                          if (s == 'diabetes_normal') return 'diab_status_normal'.tr;
+                          if (s == 'diabetes_elevada') return 'diab_status_elevated'.tr;
+                          return 'diab_status_high'.tr;
+                        }(),
                         style: TextStyle(
                           color: () {
-                            final s = getStatusGlicemia(item.glicemia);
-                            if (s == 'Normal') return Colors.green.shade700;
-                            if (s == 'Elevada') return Colors.amber.shade800;
-                            if (s == 'Alta' || s == 'Baixa') return Colors.red.shade700;
+                            final s = getStatusGlicemiaKey(item.glicemia);
+                            if (s == 'diabetes_normal') return Colors.green.shade700;
+                            if (s == 'diabetes_elevada') return Colors.amber.shade800;
+                            if (s == 'diabetes_high' || s == 'diabetes_low') return Colors.red.shade700;
                             return const Color(0xFF00324A);
                           }(),
                           fontSize: 12,
@@ -447,10 +443,10 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                   await launchUrlString(url);
                 }
               },
-              child: const Text(
-                'Referência: Classificação de glicemia',
+              child: Text(
+                'diab_ref'.tr,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
+                style: const TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
               ),
             ),
           ),
@@ -473,7 +469,7 @@ class _GraficoDiabetes extends StatelessWidget {
     final data = registros.toList()
       ..sort((a, b) => a.data.compareTo(b.data));
 
-    final mes = formatarMesAno(mesSelecionado); 
+    final mes = formatarMesAnoShort(mesSelecionado); 
 
     return Card(
       color: const Color(0xFFFFFFFF),
@@ -491,9 +487,13 @@ class _GraficoDiabetes extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Evolução da Glicemia', style: TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
+                      Text('diab_evolution'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 4),
-                      Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14)),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
                     ],
                   ),
                 ),
@@ -510,10 +510,10 @@ class _GraficoDiabetes extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Column(
-                  children: const [
-                    Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)),
-                    SizedBox(height: 8),
-                    Text('Sem dados neste mês', style: TextStyle(color: Color(0xFF00324A), fontSize: 14)),
+                  children: [
+                    const Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)),
+                    const SizedBox(height: 8),
+                    Text('common_no_data_month'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14)),
                   ],
                 ),
               ),
@@ -656,7 +656,7 @@ class _GraficoDiabetes extends StatelessWidget {
                   ),
 
                   icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16),
-                  label: const Text('Anterior', style: TextStyle(color: Colors.white, fontSize: 12)),
+                  label: Text('common_previous'.tr, style: const TextStyle(color: Colors.white, fontSize: 12)),
                 ),
 
                 ElevatedButton.icon(
@@ -673,7 +673,7 @@ class _GraficoDiabetes extends StatelessWidget {
                   ),
 
                   icon: const Icon(Icons.chevron_right, color: Colors.white, size: 16),
-                  label: const Text('Próximo', style: TextStyle(color: Colors.white, fontSize: 12)),
+                  label: Text('common_next'.tr, style: const TextStyle(color: Colors.white, fontSize: 12)),
                 ),
 
               ],

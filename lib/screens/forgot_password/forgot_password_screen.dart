@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'forgot_password_controller.dart';
+import '../../widgets/language_icon_button.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -83,15 +84,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         ],
       );
     } else {
+      final isSmallHeight = size.height < 700;
       return Column(
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
-            flex: 1,
+            flex: isSmallHeight ? 3 : 2,
             child: _buildLogoSection(size),
           ),
           Expanded(
-            flex: 4,
+            flex: isSmallHeight ? 5 : 4,
             child: _buildFormSection(size),
           ),
         ],
@@ -100,45 +102,53 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
   }
 
   Widget _buildLogoSection(Size size) {
-    final availableHeight = size.height * 0.3; // Altura aproximada disponível para o logo
     final isSmallHeight = size.height < 700;
     final logoSize = isSmallHeight
-        ? (size.width * 0.25).clamp(60.0, 100.0)
+        ? (size.width * 0.22).clamp(50.0, 90.0)
         : (size.width * 0.35).clamp(80.0, 140.0);
-    final spacing = isSmallHeight ? 4.0 : size.height * 0.015;
+    final spacing = isSmallHeight ? 6.0 : size.height * 0.015;
+    final fontSize = isSmallHeight
+        ? (size.width * 0.045).clamp(16.0, 22.0)
+        : (size.width * 0.05).clamp(18.0, 28.0);
 
-    return Center(
-      child: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/images/pulseflow2.png',
-              width: logoSize,
-              height: logoSize,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(height: spacing),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
-              child: Text(
-                'Esqueceu sua senha?',
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                style: TextStyle(
-                  fontSize: (size.width * 0.05).clamp(18.0, 28.0),
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
+    return Stack(
+      children: [
+        Align(
+          alignment: Alignment.topCenter,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(size.width * 0.06, 16, size.width * 0.06, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/pulseflow2.png',
+                  width: logoSize,
+                  height: logoSize,
+                  fit: BoxFit.contain,
                 ),
-                overflow: TextOverflow.visible,
-              ),
+                SizedBox(height: spacing),
+                Text(
+                  'auth_forgot_title'.tr,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        const Positioned(
+          top: 8,
+          right: 8,
+          child: LanguageIconButton(),
+        ),
+      ],
     );
   }
 
@@ -193,7 +203,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          'Recuperar Senha',
+          'auth_recover_password'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 28,
@@ -204,7 +214,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         ),
         SizedBox(height: 8),
         Text(
-          'Enviaremos um código para seu e-mail',
+          'auth_code_sent_email'.tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,
@@ -227,9 +237,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         keyboardType: TextInputType.emailAddress,
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          labelText: 'E-mail',
+          labelText: 'auth_email'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
-          hintText: 'Digite seu e-mail cadastrado',
+          hintText: 'auth_email_hint'.tr,
           prefixIcon: Icon(Icons.email_outlined, color: const Color(0xFF00324A)),
           filled: true,
           fillColor: Colors.grey[50],
@@ -257,10 +267,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Por favor, digite seu e-mail';
+            return 'auth_email_required'.tr;
           }
           if (!GetUtils.isEmail(value)) {
-            return 'Por favor, digite um e-mail válido';
+            return 'auth_email_invalid'.tr;
           }
           return null;
         },
@@ -312,7 +322,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                   Icon(Icons.send, color: Colors.white, size: 20),
                   SizedBox(width: 8),
                   Text(
-                    'Enviar Código',
+                    'auth_send_code'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -342,7 +352,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             Icon(Icons.arrow_back, color: const Color(0xFF00324A), size: 20),
             SizedBox(width: 8),
             Text(
-              'Voltar para o login',
+              'auth_back_login'.tr,
               style: TextStyle(
                 color: const Color(0xFF00324A),
                 fontSize: 16,

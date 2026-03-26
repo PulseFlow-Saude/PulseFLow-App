@@ -89,7 +89,7 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
   Future<void> _resendCode() async {
     if (_patientId.isEmpty) {
       setState(() {
-        _error = 'Dados de sessão inválidos';
+        _error = 'auth_2fa_invalid_session'.tr;
       });
       return;
     }
@@ -102,15 +102,15 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
     try {
       await AuthService.instance.resend2FACode(_patientId, method: 'email');
       Get.snackbar(
-        'Código reenviado!',
-        'Código reenviado com sucesso!',
+        'auth_2fa_code_resent'.tr,
+        'auth_2fa_code_resent_msg'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (e) {
       setState(() {
-        _error = 'Erro ao reenviar código: ${e.toString()}';
+        _error = 'auth_2fa_resend_error'.tr + ': ${e.toString()}';
       });
     } finally {
       setState(() {
@@ -200,7 +200,7 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
                             
                             // Título
                             Text(
-                              'Verificação em duas etapas',
+                              'auth_2fa_title'.tr,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: const Color(0xFF00324A), // Mudança: cor igual ao login
@@ -213,7 +213,7 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
                             
                             // Subtítulo
                             Text(
-                              'Enviamos um código de 6 dígitos para:',
+                              'auth_2fa_sent'.tr,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.grey,
@@ -268,7 +268,7 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
                             const SizedBox(height: 16),
                             
                             Text(
-                              'Insira o código abaixo para continuar',
+                              'auth_2fa_enter_code'.tr,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.grey,
@@ -309,10 +309,10 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Digite o código de verificação';
+                                    return 'auth_2fa_code_hint'.tr;
                                   }
                                   if (value.length != 6) {
-                                    return 'O código deve ter 6 dígitos';
+                                    return 'auth_code_6_digits'.tr;
                                   }
                                   return null;
                                 },
@@ -404,7 +404,7 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
                                         size: isSmallScreen ? 20 : 24,
                                       ),
                                 label: Text(
-                                  _isLoading ? 'Verificando...' : 'Verificar código',
+                                  _isLoading ? 'auth_2fa_verifying'.tr : 'auth_2fa_verify'.tr,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -441,7 +441,7 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
                                       size: isSmallScreen ? 18 : 20,
                                     ),
                               label: Text(
-                                _isResending ? 'Reenviando...' : 'Reenviar código',
+                                _isResending ? 'auth_resending'.tr : 'auth_resend'.tr,
                                 style: TextStyle(
                                   color: const Color(0xFF00324A), // Mudança: cor igual ao login
                                   fontWeight: FontWeight.w600,

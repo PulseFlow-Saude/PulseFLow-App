@@ -67,7 +67,7 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSectionHeader('Históricos Disponíveis'),
+                        _buildSectionHeader('hist_available'.tr),
                         const SizedBox(height: 16),
                         _buildHistoryList(),
                         const SizedBox(height: 32),
@@ -79,7 +79,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
             ),
           ],
         ),
-        bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
+        // bottomNavigationBar removido - tela tem sidebar
+        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
       ),
     );
   }
@@ -111,8 +112,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
             ],
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Históricos',
+          Text(
+            'hist_title'.tr,
             style: TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -236,8 +237,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
       children: [
         _buildHistoryCard(
           icon: Icons.history_rounded,
-          title: 'Histórico Clínico',
-          subtitle: 'Registros médicos da consulta',
+          title: 'hist_clinical'.tr,
+          subtitle: 'hist_clinical_sub'.tr,
           gradientColors: [
             const Color(0xFF00324A),
             const Color(0xFF004A6B),
@@ -250,8 +251,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
         const SizedBox(height: 16),
         _buildHistoryCard(
           icon: Icons.event_available_rounded,
-          title: 'Histórico de Eventos',
-          subtitle: 'Eventos de saúde',
+          title: 'hist_events'.tr,
+          subtitle: 'hist_events_sub'.tr,
           gradientColors: [
             const Color(0xFF00324A),
             const Color(0xFF004A6B),
@@ -264,8 +265,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
         const SizedBox(height: 16),
         _buildHistoryCard(
           icon: Icons.restaurant_menu_rounded,
-          title: 'Histórico de Gastrite',
-          subtitle: 'Crises e sintomas relacionados',
+          title: 'hist_gastrite'.tr,
+          subtitle: 'hist_gastrite_sub'.tr,
           gradientColors: [
             const Color(0xFF00324A),
             const Color(0xFF004A6B),
@@ -278,8 +279,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
         const SizedBox(height: 16),
         _buildHistoryCard(
           icon: Icons.timeline_rounded,
-          title: 'Histórico Menstrual',
-          subtitle: 'Ciclos e acompanhamento',
+          title: 'hist_menstrual'.tr,
+          subtitle: 'hist_menstrual_sub'.tr,
           gradientColors: [
             const Color(0xFF00324A),
             const Color(0xFF004A6B),
@@ -292,8 +293,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
         const SizedBox(height: 16),
         _buildHistoryCard(
           icon: Icons.favorite_rounded,
-          title: 'Frequência Cardíaca',
-          subtitle: 'Histórico de batimentos cardíacos',
+          title: 'hist_heart_rate'.tr,
+          subtitle: 'hist_heart_rate_sub'.tr,
           gradientColors: [
             const Color(0xFF00324A),
             const Color(0xFF004A6B),
@@ -306,8 +307,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
         const SizedBox(height: 16),
         _buildHistoryCard(
           icon: Icons.directions_walk_rounded,
-          title: 'Passos',
-          subtitle: 'Histórico de passos diários',
+          title: 'hist_steps'.tr,
+          subtitle: 'hist_steps_sub'.tr,
           gradientColors: [
             const Color(0xFF00324A),
             const Color(0xFF004A6B),
@@ -320,8 +321,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
         const SizedBox(height: 16),
         _buildHistoryCard(
           icon: Icons.bedtime_rounded,
-          title: 'Insônia / Sono',
-          subtitle: 'Histórico de tempo na cama',
+          title: 'hist_sleep'.tr,
+          subtitle: 'hist_sleep_sub'.tr,
           gradientColors: [
             const Color(0xFF00324A),
             const Color(0xFF004A6B),
@@ -334,8 +335,8 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
         const SizedBox(height: 16),
         _buildHistoryCard(
           icon: Icons.security_rounded,
-          title: 'Histórico de Acessos',
-          subtitle: 'Veja quem acessou seu prontuário',
+          title: 'hist_access'.tr,
+          subtitle: 'hist_access_sub'.tr,
           gradientColors: [
             const Color(0xFF4CAF50),
             const Color(0xFF66BB6A),
@@ -359,7 +360,7 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
     return Semantics(
       button: true,
       label: title,
-      hint: 'Toque para acessar $title',
+      hint: '${'hist_tap_to_access'.tr} $title',
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

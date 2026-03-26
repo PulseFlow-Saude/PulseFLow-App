@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import '../diabetes/diabetes_screen.dart' show formatarData, formatarMes, formatarMesAno; // reuse helpers
+import '../diabetes/diabetes_screen.dart' show formatarData, formatarMes, formatarMesAno, formatarMesAnoShort; // reuse helpers
 import 'pressao_controller.dart';
 import '../../models/pressao_arterial.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
@@ -29,7 +29,7 @@ class PressaoScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF00324A),
         elevation: 0,
-        title: const Text('Registro de Pressão', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        title: Text('press_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
         leading: const PulseDrawerButton(iconSize: 22),
         centerTitle: true,
       ),
@@ -59,16 +59,16 @@ class PressaoScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Novo registro', style: TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600)),
+                            Text('common_new_record'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 16),
                             TextField(
                               controller: pressaoController,
-                              decoration: const InputDecoration(labelText: 'Pressão (mmHg)', hintText: 'Ex: 120/80'),
+                              decoration: InputDecoration(labelText: 'press_label'.tr, hintText: 'press_hint'.tr),
                               keyboardType: TextInputType.text,
                             ),
                             const SizedBox(height: 16),
                             Obx(() {
-                              final dataText = dataSelecionada.value == null ? 'Selecione a data' : formatarData(dataSelecionada.value!);
+                              final dataText = dataSelecionada.value == null ? 'common_select_date'.tr : formatarData(dataSelecionada.value!);
                               return InkWell(
                                 onTap: () async {
                                   final hoje = DateTime.now();
@@ -77,9 +77,9 @@ class PressaoScreen extends StatelessWidget {
                                     initialDate: dataSelecionada.value ?? hoje,
                                     firstDate: DateTime(2000),
                                     lastDate: DateTime(hoje.year, hoje.month, hoje.day),
-                                    helpText: 'Selecione a data da medição',
-                                    cancelText: 'Cancelar',
-                                    confirmText: 'Confirmar',
+                                    helpText: 'common_date_measurement'.tr,
+                                    cancelText: 'common_cancel'.tr,
+                                    confirmText: 'common_confirm'.tr,
                                   );
                                   if (picked != null) {
                                     dataSelecionada.value = DateTime(picked.year, picked.month, picked.day);
@@ -100,19 +100,19 @@ class PressaoScreen extends StatelessWidget {
                                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                                     onPressed: () async {
                                       if (dataSelecionada.value == null) {
-                                        Get.snackbar('Data obrigatória', 'Selecione a data da medição');
+                                        Get.snackbar('common_data_required'.tr, 'common_date_measurement'.tr);
                                         return;
                                       }
                                       final raw = pressaoController.text.trim();
                                       final match = RegExp(r'^(\d{2,3})\s*/\s*(\d{2,3})$').firstMatch(raw);
                                       if (match == null) {
-                                        Get.snackbar('Formato inválido', 'Use o formato 120/80');
+                                        Get.snackbar('press_format_invalid'.tr, 'press_format_msg'.tr);
                                         return;
                                       }
                                       final sis = double.tryParse(match.group(1)!);
                                       final dia = double.tryParse(match.group(2)!);
                                       if (sis == null || dia == null) {
-                                        Get.snackbar('Valores inválidos', 'Digite uma pressão válida, ex: 120/80');
+                                        Get.snackbar('press_values_invalid'.tr, 'press_values_msg'.tr);
                                         return;
                                       }
                                       await controller.adicionarRegistro(
@@ -123,9 +123,9 @@ class PressaoScreen extends StatelessWidget {
                                       );
                                       pressaoController.clear();
                                       dataSelecionada.value = null;
-                                      Get.snackbar('Sucesso', 'Registro de pressão salvo com sucesso');
+                                      Get.snackbar('common_success'.tr, 'press_saved'.tr);
                                     },
-                                    child: const Text('Registrar', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                                    child: Text('common_register'.tr, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -133,7 +133,7 @@ class PressaoScreen extends StatelessWidget {
                                   child: OutlinedButton(
                                     style: OutlinedButton.styleFrom(side: const BorderSide(color: Color(0xFF00324A), width: 2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                                     onPressed: () => mostrarGrafico.value = !mostrarGrafico.value,
-                                    child: Obx(() => Text(mostrarGrafico.value ? 'Visualizar registros' : 'Visualizar dados', style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
+                                    child: Obx(() => Text(mostrarGrafico.value ? 'common_view_records'.tr : 'common_view_data'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
                                   ),
                                 ),
                               ],
@@ -202,10 +202,10 @@ class PressaoScreen extends StatelessWidget {
                                 await launchUrlString(url);
                               }
                             },
-                            child: const Text(
-                              'Referência: Classificação da pressão arterial em adultos (MSD)',
+                            child: Text(
+                              'press_ref'.tr,
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
+                              style: const TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
                             ),
                           ),
                         ),
@@ -222,6 +222,16 @@ class PressaoScreen extends StatelessWidget {
     );
   }
 
+  String _pressaoStatusKey(String status) {
+    switch (status) {
+      case 'Normal': return 'pressao_normal';
+      case 'Elevada': return 'pressao_elevada';
+      case 'Hipertensão estágio 1': return 'pressao_ht1';
+      case 'Hipertensão estágio 2': return 'pressao_ht2';
+      default: return 'pressao_indefinido';
+    }
+  }
+
   List<Widget> _buildChips(PressaoArterial p) {
     final status = _classificarPressao(p.sistolica, p.diastolica);
     final Color bg;
@@ -232,12 +242,11 @@ class PressaoScreen extends StatelessWidget {
         fg = Colors.green.shade700;
         break;
       case 'Elevada':
-      case 'HA Estágio 1':
+      case 'Hipertensão estágio 1':
         bg = Colors.amber.withOpacity(0.2);
         fg = Colors.amber.shade800;
         break;
-      case 'HA Estágio 2':
-      case 'Crise hipertensiva':
+      case 'Hipertensão estágio 2':
         bg = Colors.red.withOpacity(0.15);
         fg = Colors.red.shade700;
         break;
@@ -245,8 +254,9 @@ class PressaoScreen extends StatelessWidget {
         bg = const Color(0xFF00324A).withOpacity(0.10);
         fg = const Color(0xFF00324A);
     }
+    final statusKey = status == 'Normal' ? 'press_status_normal' : status == 'Elevada' ? 'press_status_elevated' : status == 'Hipertensão estágio 1' ? 'press_status_ha1' : status == 'Hipertensão estágio 2' ? 'press_status_ha2' : 'press_status_undefined';
     return [
-      Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)), child: Text(status, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600))),
+      Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16)), child: Text(statusKey.tr, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600))),
     ];
   }
 
@@ -272,7 +282,7 @@ class _GraficoPressao extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = registros.toList()..sort((a, b) => a.data.compareTo(b.data));
-    final mes = formatarMesAno(mesSelecionado);
+    final mes = formatarMesAnoShort(mesSelecionado);
 
     return Card(
       color: const Color(0xFFFFFFFF),
@@ -281,16 +291,16 @@ class _GraficoPressao extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Registro de Pressão Arterial', overflow: TextOverflow.ellipsis, maxLines: 1, style: TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)), const SizedBox(height: 4), Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))])), IconButton(onPressed: onClose, icon: const Icon(Icons.close, color: Color(0xFF00324A), size: 20))]),
+          Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('press_chart_title'.tr, overflow: TextOverflow.ellipsis, maxLines: 1, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)), const SizedBox(height: 4), Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))])), IconButton(onPressed: onClose, icon: const Icon(Icons.close, color: Color(0xFF00324A), size: 20))]),
           const SizedBox(height: 20),
           if (data.isEmpty) ...[
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Column(
-                children: const [
-                  Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)),
-                  SizedBox(height: 8),
-                  Text('Sem dados neste mês', style: TextStyle(color: Color(0xFF00324A), fontSize: 14)),
+                children: [
+                  const Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)),
+                  const SizedBox(height: 8),
+                  Text('common_no_data_month'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14)),
                 ],
               ),
             ),
@@ -345,8 +355,8 @@ class _GraficoPressao extends StatelessWidget {
           ],
           const SizedBox(height: 16),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            ElevatedButton.icon(onPressed: onPrevMonth, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16), label: const Text('Anterior', style: TextStyle(color: Colors.white, fontSize: 12))),
-            ElevatedButton.icon(onPressed: onNextMonth, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_right, color: Colors.white, size: 16), label: const Text('Próximo', style: TextStyle(color: Colors.white, fontSize: 12))),
+            ElevatedButton.icon(onPressed: onPrevMonth, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16), label: Text('common_previous'.tr, style: const TextStyle(color: Colors.white, fontSize: 12))),
+            ElevatedButton.icon(onPressed: onNextMonth, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_right, color: Colors.white, size: 16), label: Text('common_next'.tr, style: const TextStyle(color: Colors.white, fontSize: 12))),
           ]),
         ]),
       ),
@@ -385,11 +395,11 @@ class _PressaoAnalysisSection extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15))),
         child: Row(children: [
-          Expanded(child: Column(children: [const Text('Menor', style: TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(menorPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
+          Expanded(child: Column(children: [Text('common_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(menorPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
           ,
-          Expanded(child: Column(children: [const Text('Média', style: TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(mediaPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
+          Expanded(child: Column(children: [Text('common_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(mediaPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
           ,
-          Expanded(child: Column(children: [const Text('Maior', style: TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(maiorPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
+          Expanded(child: Column(children: [Text('common_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(maiorPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
         ]),
       ),
     ]);

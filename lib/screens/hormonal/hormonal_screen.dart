@@ -35,7 +35,7 @@ class HormonalScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF00324A),
         elevation: 0,
-        title: const Text('Registro Hormonal', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        title: Text('horm_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
         leading: const PulseDrawerButton(iconSize: 22),
         centerTitle: true,
       ),
@@ -60,15 +60,15 @@ class HormonalScreen extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(20),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            const Text('Novo registro', style: TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600)),
+                            Text('common_new_record'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 16),
                             SizedBox(
                               width: double.infinity,
                               child: DropdownMenu<String>(
                                 controller: hormonioCtrl,
                                 requestFocusOnTap: true,
-                                label: const Text('Hormônio'),
-                                hintText: 'Selecione ou digite',
+                                label: Text('horm_hormone_label'.tr),
+                                hintText: 'horm_select_hint'.tr,
                                 enableFilter: true,
                                 enableSearch: true,
                                 menuHeight: 300,
@@ -80,12 +80,12 @@ class HormonalScreen extends StatelessWidget {
                             const SizedBox(height: 12),
                             TextField(
                               controller: valorCtrl,
-                              decoration: const InputDecoration(labelText: 'Valor', hintText: 'Ex: 2.3'),
+                              decoration: InputDecoration(labelText: 'horm_value_label'.tr, hintText: 'horm_value_hint'.tr),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             ),
                             const SizedBox(height: 12),
                             Obx(() {
-                              final s = dataSel.value == null ? 'Selecione a data' : _fmtDate(dataSel.value!);
+                              final s = dataSel.value == null ? 'common_select_date'.tr : _fmtDate(dataSel.value!);
                               return InkWell(
                                 onTap: () async {
                                   final now = DateTime.now();
@@ -111,12 +111,12 @@ class HormonalScreen extends StatelessWidget {
                                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                                   onPressed: () async {
                                     if (dataSel.value == null) {
-                                      Get.snackbar('Data obrigatória', 'Selecione a data do exame');
+                                      Get.snackbar('common_data_required'.tr, 'horm_date_exam_msg'.tr);
                                       return;
                                     }
                                     final valor = double.tryParse(valorCtrl.text.replaceAll(',', '.'));
                                     if (valor == null) {
-                                      Get.snackbar('Valor inválido', 'Digite um número válido');
+                                      Get.snackbar('horm_value_invalid'.tr, 'horm_value_invalid_msg'.tr);
                                       return;
                                     }
                                     await controller.adicionarRegistro(
@@ -128,9 +128,9 @@ class HormonalScreen extends StatelessWidget {
                                     hormonioCtrl.clear();
                                     valorCtrl.clear();
                                     dataSel.value = null;
-                                    Get.snackbar('Sucesso', 'Registro hormonal salvo');
+                                    Get.snackbar('common_success'.tr, 'horm_saved'.tr);
                                   },
-                                  child: const Text('Registrar', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+                                  child: Text('common_register'.tr, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -138,7 +138,7 @@ class HormonalScreen extends StatelessWidget {
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(side: const BorderSide(color: Color(0xFF00324A), width: 2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                                   onPressed: () => mostrarGrafico.value = !mostrarGrafico.value,
-                                  child: Obx(() => Text(mostrarGrafico.value ? 'Visualizar registros' : 'Visualizar dados', style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
+                                  child: Obx(() => Text(mostrarGrafico.value ? 'common_view_records'.tr : 'common_view_data'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
                                 ),
                               ),
                             ]),
@@ -204,7 +204,7 @@ class _HormonalChart extends StatelessWidget {
         elevation: 0,
         child: SizedBox(
           height: 220,
-          child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: const [Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)), SizedBox(height: 8), Text('Sem dados neste período', style: TextStyle(color: Color(0xFF00324A)))])),
+          child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)), const SizedBox(height: 8), Text('common_no_data_period'.tr, style: const TextStyle(color: Color(0xFF00324A)))])),
         ),
       );
     }
@@ -293,7 +293,7 @@ class _HormonalSelectionBar extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Hormonios no gráfico', style: TextStyle(color: Color(0xFF00324A), fontWeight: FontWeight.w600)),
+            Text('horm_in_chart'.tr, style: const TextStyle(color: Color(0xFF00324A), fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -317,9 +317,9 @@ class _HormonalSelectionBar extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Row(children: [
-              TextButton(onPressed: () { c.hormoniosSelecionados.assignAll(disponiveis); c.applyFilters(); }, child: const Text('Selecionar todos')),
+              TextButton(onPressed: () { c.hormoniosSelecionados.assignAll(disponiveis); c.applyFilters(); }, child: Text('horm_select_all'.tr)),
               const SizedBox(width: 8),
-              TextButton(onPressed: () { c.hormoniosSelecionados.clear(); c.applyFilters(); }, child: const Text('Limpar seleção')),
+              TextButton(onPressed: () { c.hormoniosSelecionados.clear(); c.applyFilters(); }, child: Text('horm_clear_selection'.tr)),
             ])
           ]),
         ),
@@ -336,10 +336,10 @@ Widget _buildFilters(BuildContext context) {
       Row(children: [
         Expanded(
           child: DropdownMenu<String>(
-            label: const Text('Pesquisar hormônio'),
+            label: Text('horm_search'.tr),
             enableFilter: true,
             enableSearch: true,
-            hintText: 'Digite ou selecione',
+            hintText: 'horm_filter_hint'.tr,
             onSelected: (v) => c.filtroHormonio.value = (v ?? '').trim(),
             dropdownMenuEntries: c.hormoniosDisponiveis
                 .map((h) => DropdownMenuEntry<String>(value: h, label: h))
@@ -347,7 +347,7 @@ Widget _buildFilters(BuildContext context) {
           ),
         ),
         IconButton(
-          tooltip: 'Limpar',
+          tooltip: 'common_clear'.tr,
           onPressed: () {
             c.filtroHormonio.value = '';
             c.filtroInicio.value = null;
@@ -368,7 +368,7 @@ Widget _buildFilters(BuildContext context) {
               if (picked != null) c.filtroInicio.value = picked;
             },
             icon: const Icon(Icons.date_range),
-            label: Obx(() => Text(c.filtroInicio.value == null ? 'Data início' : _fmtDate(c.filtroInicio.value!))),
+            label: Obx(() => Text(c.filtroInicio.value == null ? 'horm_date_start'.tr : _fmtDate(c.filtroInicio.value!))),
           ),
         ),
         const SizedBox(width: 8),
@@ -380,7 +380,7 @@ Widget _buildFilters(BuildContext context) {
               if (picked != null) c.filtroFim.value = picked;
             },
             icon: const Icon(Icons.event),
-            label: Obx(() => Text(c.filtroFim.value == null ? 'Data fim' : _fmtDate(c.filtroFim.value!))),
+            label: Obx(() => Text(c.filtroFim.value == null ? 'horm_date_end'.tr : _fmtDate(c.filtroFim.value!))),
           ),
         ),
       ]),

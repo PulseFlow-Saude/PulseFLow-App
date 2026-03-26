@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +17,7 @@ class SettingsController extends GetxController {
   final accessLogsEmail = false.obs;
 
   final darkTheme = false.obs;
-  final language = 'pt_BR'.obs;
+  final language = 'system'.obs;
 
   static const _criticalAlertsKey = 'settings_critical_alerts';
   static const _dailySummaryKey = 'settings_daily_summary';
@@ -26,13 +29,35 @@ class SettingsController extends GetxController {
   static const _darkThemeKey = 'settings_dark_theme';
   static const _languageKey = 'settings_language';
 
+  Future<void>? _loadFuture;
+
+  /// Idiomas suportados pelo dropdown de configurações.
+  static const supportedLanguages = ['system', 'pt_BR', 'en_US'];
+
   final AuthService _authService = Get.find<AuthService>();
   final isDeletingAccount = false.obs;
+
+  Completer<void>? _prefsLoadedCompleter;
+
+  /// Use em main() antes de runApp() para aplicar o idioma salvo já no primeiro frame.
+  static Future<void> ensureLoaded() async {
+    final c = Get.find<SettingsController>();
+    if (c._prefsLoadedCompleter != null) {
+      await c._prefsLoadedCompleter!.future;
+    }
+  }
 
   @override
   void onInit() {
     super.onInit();
+    _prefsLoadedCompleter = Completer<void>();
     _loadPreferences();
+  }
+
+  /// Garante que as preferências foram carregadas (para uso em main antes de runApp).
+  Future<void> ensurePreferencesLoaded() async {
+    _loadFuture ??= _loadPreferences();
+    await _loadFuture;
   }
 
   Future<void> _loadPreferences() async {
@@ -43,7 +68,29 @@ class SettingsController extends GetxController {
     dataVisibility.value = prefs.getBool(_dataVisibilityKey) ?? true;
     accessLogsEmail.value = prefs.getBool(_accessLogsEmailKey) ?? false;
     darkTheme.value = prefs.getBool(_darkThemeKey) ?? false;
-    language.value = prefs.getString(_languageKey) ?? 'pt_BR';
+    final savedLang = prefs.getString(_languageKey) ?? 'system';
+    language.value = supportedLanguages.contains(savedLang) ? savedLang : 'system';
+    if (!supportedLanguages.contains(savedLang)) {
+      await prefs.setString(_languageKey, 'system');
+    }
+  }
+
+  /// Retorna o locale efetivo: idioma do dispositivo quando 'system', senão o salvo.
+  Locale get effectiveLocale {
+    if (language.value == 'system') {
+      return _deviceLocaleToSupported();
+    }
+    final parts = language.value.split('_');
+    return Locale(parts.first, parts.length > 1 ? parts[1] : '');
+  }
+
+  /// Mapeia o locale do dispositivo para um dos suportados (pt_BR ou en_US).
+  static Locale _deviceLocaleToSupported() {
+    final device = ui.PlatformDispatcher.instance.locale;
+    final lang = device.languageCode.toLowerCase();
+    if (lang.startsWith('pt')) return const Locale('pt', 'BR');
+    if (lang.startsWith('en')) return const Locale('en', 'US');
+    return const Locale('pt', 'BR');
   }
 
   Future<void> toggleCriticalAlerts(bool value) async {
@@ -90,8 +137,16 @@ class SettingsController extends GetxController {
     language.value = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_languageKey, value);
-    final localeParts = value.split('_');
-    Get.updateLocale(Locale(localeParts.first, localeParts.length > 1 ? localeParts[1] : ''));
+    final locale = value == 'system'
+        ? _deviceLocaleToSupported()
+        : Locale(
+            value.split('_').first,
+            value.split('_').length > 1 ? value.split('_')[1] : '',
+          );
+    Get.updateLocale(locale);
+    try {
+      await NotificationService.instance.reregisterChannelsForCurrentLocale();
+    } catch (_) {}
   }
 
   Future<void> _updateTopic(String topic, bool enable) async {

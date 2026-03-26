@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/specialty_translations.dart';
 import 'appointment_scheduler_controller.dart';
 
 class AppointmentDoctorListScreen extends StatelessWidget {
@@ -57,7 +58,7 @@ class AppointmentDoctorListScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          controller.selectedSpecialty?.name ?? 'Especialistas',
+                          controller.selectedSpecialty != null ? SpecialtyTranslations.translate(controller.selectedSpecialty!.name) : 'appt_specialists'.tr,
                           style: AppTheme.titleLarge.copyWith(
                             color: const Color(0xFF1E293B),
                             fontWeight: FontWeight.bold,
@@ -65,7 +66,7 @@ class AppointmentDoctorListScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Escolha um médico para ver a agenda e horários disponíveis.',
+                          'appt_choose_doctor_hint'.tr,
                           style: AppTheme.bodyMedium.copyWith(color: Colors.grey[600]),
                         ),
                         const SizedBox(height: 20),
@@ -73,7 +74,7 @@ class AppointmentDoctorListScreen extends StatelessWidget {
                           controller: controller.doctorSearchController,
                           onChanged: controller.updateDoctorSearch,
                           decoration: InputDecoration(
-                            hintText: 'Pesquisar médico, CRM ou experiência',
+                            hintText: 'appt_search_doctor_crm'.tr,
                             prefixIcon: const Icon(Icons.search_rounded),
                             filled: true,
                             fillColor: Colors.grey[100],
@@ -96,8 +97,8 @@ class AppointmentDoctorListScreen extends StatelessWidget {
                             return _EmptyState(
                               icon: Icons.search_off_rounded,
                               message: doctorQuery.isEmpty
-                                  ? 'Nenhum médico cadastrado para esta especialidade.'
-                                  : 'Não encontramos médicos que contenham "$doctorQuery".',
+                                  ? 'appt_no_doctor_registered'.tr
+                                  : '${'appt_no_doctor_match'.tr} "$doctorQuery".',
                             );
                           }
                           
@@ -108,7 +109,7 @@ class AppointmentDoctorListScreen extends StatelessWidget {
                               doctorName: doctor.name,
                               crm: doctor.crm,
                               experience: doctor.experience,
-                              specialty: doctor.specialtyName,
+                              specialty: SpecialtyTranslations.translate(doctor.specialtyName),
                               suggestions: suggestions,
                               onTap: () {
                                 controller.selectDoctor(doctor.id);
@@ -165,12 +166,12 @@ class _DoctorHeader extends StatelessWidget {
             constraints: const BoxConstraints(),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Escolha o médico',
+                  'appt_choose_doctor'.tr,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -179,7 +180,7 @@ class _DoctorHeader extends StatelessWidget {
                 ),
                 SizedBox(height: 6),
                 Text(
-                  'Veja horários sugeridos para o próximo atendimento.',
+                  'appt_choose_doctor_sub'.tr,
                   style: TextStyle(color: Colors.white70, fontSize: 13),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -275,8 +276,8 @@ class _DoctorCard extends StatelessWidget {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   onPressed: onTap,
-                  child: const Text(
-                    'Ver agenda',
+                  child: Text(
+                    'appt_view_schedule'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -297,7 +298,7 @@ class _DoctorCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Próximos horários sugeridos',
+                  'appt_next_suggested'.tr,
                   style: AppTheme.bodySmall.copyWith(
                     color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w600,
@@ -403,7 +404,7 @@ class _ErrorState extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
             icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Tentar novamente'),
+            label: Text('common_try_again'.tr),
           ),
         ],
       ),

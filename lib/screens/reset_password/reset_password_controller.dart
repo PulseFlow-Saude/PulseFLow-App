@@ -54,8 +54,8 @@ class ResetPasswordController extends GetxController with SafeControllerMixin {
       await _authService.resetPassword(email!, code, newPassword);
       
       Get.snackbar(
-        'Senha redefinida!',
-        'Sua senha foi alterada com sucesso.',
+        'auth_reset_success'.tr,
+        'auth_reset_success_msg'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -67,7 +67,7 @@ class ResetPasswordController extends GetxController with SafeControllerMixin {
       
     } catch (e) {
       Get.snackbar(
-        'Erro',
+        'auth_error'.tr,
         e.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -88,8 +88,8 @@ class ResetPasswordController extends GetxController with SafeControllerMixin {
       await _authService.sendPasswordResetCode(email!);
       
       Get.snackbar(
-        'Código reenviado!',
-        'Verifique seu e-mail novamente.',
+        'auth_code_resent'.tr,
+        'auth_code_resent_msg'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
         snackPosition: SnackPosition.TOP,
@@ -98,7 +98,7 @@ class ResetPasswordController extends GetxController with SafeControllerMixin {
       
     } catch (e) {
       Get.snackbar(
-        'Erro',
+        'auth_error'.tr,
         e.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,

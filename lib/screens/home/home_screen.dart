@@ -6,6 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/specialty_translations.dart';
 import 'home_controller.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
@@ -26,7 +27,7 @@ class HomeScreen extends StatelessWidget {
         body: Column(
           children: [
             // Header com perfil - sem SafeArea para ocupar toda a área superior
-            _buildHeader(controller),
+            _buildHeader(context, controller),
             
             // Conteúdo principal
             Expanded(
@@ -87,12 +88,13 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-        bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.home),
+        // bottomNavigationBar removido - tela tem sidebar
+        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.home),
       ),
     );
   }
 
-  Widget _buildHeader(HomeController controller) {
+  Widget _buildHeader(BuildContext context, HomeController controller) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
@@ -134,21 +136,24 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
               _buildPulseFlowLogo(),
-              Obx(() => IconButton(
-                icon: Stack(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.notifications_outlined,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Obx(() => IconButton(
+                    icon: Stack(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.notifications_outlined,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
                     if (controller.unreadNotificationsCount.value > 0)
                       Positioned(
                         right: 0,
@@ -178,11 +183,13 @@ class HomeScreen extends StatelessWidget {
                       ),
                   ],
                 ),
-                onPressed: () async {
-                  await Get.toNamed(Routes.NOTIFICATIONS);
-                  controller.loadNotificationsCount();
-                },
-              )),
+                    onPressed: () async {
+                      await Get.toNamed(Routes.NOTIFICATIONS);
+                      controller.loadNotificationsCount();
+                    },
+                  )),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -224,7 +231,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      controller.getGreeting(),
+                      controller.getGreeting().tr,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
@@ -278,7 +285,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Favoritos',
+                    'home_favorites'.tr,
                     style: AppTheme.titleLarge.copyWith(
                       color: const Color(0xFF1E293B),
                       fontWeight: FontWeight.bold,
@@ -304,7 +311,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Editar',
+                        'home_edit'.tr,
                         style: TextStyle(
                           fontSize: 12,
                           color: const Color(0xFF00324A),
@@ -344,7 +351,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Ainda não há dados',
+            'home_no_data'.tr,
             style: AppTheme.titleMedium.copyWith(
               color: Colors.grey[600],
               fontWeight: FontWeight.bold,
@@ -352,7 +359,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Comece registrando seus dados de saúde para ver suas informações favoritas aqui.',
+            'home_no_data_sub'.tr,
             style: AppTheme.bodyMedium.copyWith(
               color: Colors.grey[500],
             ),
@@ -381,7 +388,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Configure seus favoritos tocando em "Editar"',
+              'home_configure_favorites'.tr,
               style: TextStyle(
                 color: Colors.blue[700],
                 fontSize: 14,
@@ -454,9 +461,9 @@ class HomeScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.withOpacity(0.2)),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  'Nenhum dado disponível',
+                  'home_no_data_available'.tr,
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 14,
@@ -536,11 +543,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      diasDesdeUltima == 0 
-                          ? 'Hoje' 
-                          : diasDesdeUltima == 1 
-                              ? 'Há 1 dia' 
-                              : 'Há $diasDesdeUltima dias',
+                      diasDesdeUltima == 0 ? 'home_today'.tr : diasDesdeUltima == 1 ? 'home_days_ago'.trParams({'n': '1'}) : 'home_days_ago_plural'.trParams({'n': diasDesdeUltima.toString()}),
                       style: AppTheme.bodySmall.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -555,7 +558,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildInfoBox(
-                  'Última Intensidade',
+                  'home_last_intensity'.tr,
                   '$ultimaIntensidade/10',
                   itemData['color'],
                 ),
@@ -563,19 +566,19 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildInfoBox(
-                  'Últimos 30 dias',
-                  '$frequencia30Dias crises',
+                  'home_last_30_days'.tr,
+                  '$frequencia30Dias ${'home_crises'.tr}',
                   Colors.orange,
                 ),
               ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-              _buildStatItem('Média', '${stats['media'] ?? 0}/10', Colors.blue),
-              _buildStatItem('Total', '${stats['total'] ?? 0}', Colors.grey[600]!),
+            children: [
+              _buildStatItem('common_avg'.tr, '${stats['media'] ?? 0}/10', Colors.blue),
+              _buildStatItem('common_total'.tr, '${stats['total'] ?? 0}', Colors.grey[600]!),
             ],
           ),
         ],
@@ -639,11 +642,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      diasDesdeUltima == 0 
-                          ? 'Hoje' 
-                          : diasDesdeUltima == 1 
-                              ? 'Há 1 dia' 
-                              : 'Há $diasDesdeUltima dias',
+                      diasDesdeUltima == 0 ? 'home_today'.tr : diasDesdeUltima == 1 ? 'home_days_ago'.trParams({'n': '1'}) : 'home_days_ago_plural'.trParams({'n': diasDesdeUltima.toString()}),
                       style: AppTheme.bodySmall.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -689,7 +688,7 @@ class HomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          status,
+                          status == 'Alta' ? 'diab_status_high'.tr : status == 'Baixa' ? 'diab_status_low'.tr : 'diab_status_normal'.tr,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 11,
@@ -705,7 +704,7 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildInfoBox(
-                    'Média 7 dias',
+                    'home_avg_7_days'.tr,
                     '$media7Dias $unidade',
                     Colors.blue,
                   ),
@@ -717,8 +716,8 @@ class HomeScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatItem('Média Geral', '${stats['media'] ?? 0} $unidade', Colors.blue),
-              _buildStatItem('Total', '${stats['total'] ?? 0}', Colors.grey[600]!),
+              _buildStatItem('home_avg_general'.tr, '${stats['media'] ?? 0} $unidade', Colors.blue),
+              _buildStatItem('common_total'.tr, '${stats['total'] ?? 0}', Colors.grey[600]!),
             ],
           ),
         ],
@@ -776,11 +775,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      diasDesdeUltima == 0 
-                          ? 'Hoje' 
-                          : diasDesdeUltima == 1 
-                              ? 'Há 1 dia' 
-                              : 'Há $diasDesdeUltima dias',
+                      diasDesdeUltima == 0 ? 'home_today'.tr : diasDesdeUltima == 1 ? 'home_days_ago'.trParams({'n': '1'}) : 'home_days_ago_plural'.trParams({'n': diasDesdeUltima.toString()}),
                       style: AppTheme.bodySmall.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -795,7 +790,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildInfoBox(
-                  'Última Intensidade',
+                  'home_last_intensity'.tr,
                   '$ultimaIntensidade/10',
                   itemData['color'],
                 ),
@@ -803,8 +798,8 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildInfoBox(
-                  'Últimos 30 dias',
-                  '$frequencia30Dias crises',
+                  'home_last_30_days'.tr,
+                  '$frequencia30Dias ${'home_crises'.tr}',
                   Colors.orange,
                 ),
               ),
@@ -813,9 +808,9 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem('Média', '${stats['media'] ?? 0}/10', Colors.blue),
-              _buildStatItem('Total', '${stats['total'] ?? 0}', Colors.grey[600]!),
+              children: [
+              _buildStatItem('common_avg'.tr, '${stats['media'] ?? 0}/10', Colors.blue),
+              _buildStatItem('common_total'.tr, '${stats['total'] ?? 0}', Colors.grey[600]!),
             ],
           ),
         ],
@@ -876,16 +871,16 @@ class HomeScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildInfoBox(
-                  'Próximos',
-                  '$totalFuturos eventos',
+                  'home_next'.tr,
+                  '$totalFuturos ${'home_events'.tr}',
                   Colors.green,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildInfoBox(
-                  'Este mês',
-                  '${stats['este_mes'] ?? 0} eventos',
+                  'home_this_month'.tr,
+                  '${stats['este_mes'] ?? 0} ${'home_events'.tr}',
                   Colors.blue,
                 ),
               ),
@@ -909,7 +904,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Próximo evento',
+                          'home_next_event'.tr,
                   style: TextStyle(
                             fontSize: 11,
                             color: Colors.grey[600],
@@ -931,7 +926,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 12),
-          _buildStatItem('Total', '${stats['total'] ?? 0}', Colors.grey[600]!),
+          _buildStatItem('common_total'.tr, '${stats['total'] ?? 0}', Colors.grey[600]!),
         ],
       ),
     );
@@ -987,7 +982,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Dia $diasDesdeUltima do ciclo',
+                      'home_day_cycle'.trParams({'n': diasDesdeUltima.toString()}),
                       style: AppTheme.bodySmall.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -1003,7 +998,7 @@ class HomeScreen extends StatelessWidget {
               if (cicloMedio != null)
                 Expanded(
                   child: _buildInfoBox(
-                    'Ciclo médio',
+                    'home_avg_cycle'.tr,
                     '$cicloMedio dias',
                     Colors.purple,
                   ),
@@ -1011,7 +1006,7 @@ class HomeScreen extends StatelessWidget {
               if (cicloMedio != null) const SizedBox(width: 12),
               Expanded(
                 child: _buildInfoBox(
-                  'Duração média',
+                  'home_avg_duration'.tr,
                   '${stats['media'] ?? 0} dias',
                   Colors.pink,
                 ),
@@ -1036,7 +1031,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Próximo ciclo esperado',
+                          'home_next_cycle'.tr,
                           style: TextStyle(
                             fontSize: 11,
                             color: Colors.grey[600],
@@ -1058,7 +1053,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 12),
-          _buildStatItem('Total registros', '${stats['total'] ?? 0}', Colors.grey[600]!),
+          _buildStatItem('home_total_records'.tr, '${stats['total'] ?? 0}', Colors.grey[600]!),
         ],
       ),
     );
@@ -1104,9 +1099,9 @@ class HomeScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem('Maior', stats['maior']?.toString() ?? 'N/A', Colors.red),
-              _buildStatItem('Menor', stats['menor']?.toString() ?? 'N/A', Colors.green),
-              _buildStatItem('Média', stats['media']?.toString() ?? 'N/A', Colors.blue),
+              _buildStatItem('common_max'.tr, stats['maior']?.toString() ?? 'N/A', Colors.red),
+              _buildStatItem('common_min'.tr, stats['menor']?.toString() ?? 'N/A', Colors.green),
+              _buildStatItem('common_avg'.tr, stats['media']?.toString() ?? 'N/A', Colors.blue),
             ],
           ),
         ],
@@ -1150,10 +1145,10 @@ class HomeScreen extends StatelessWidget {
     final now = DateTime.now();
     final difference = date.difference(now).inDays;
     
-    if (difference == 0) return 'Hoje';
-    if (difference == 1) return 'Amanhã';
-    if (difference == -1) return 'Ontem';
-    if (difference > 0 && difference <= 7) return 'Em $difference dias';
+    if (difference == 0) return 'home_today'.tr;
+    if (difference == 1) return 'home_format_tomorrow'.tr;
+    if (difference == -1) return 'home_format_yesterday'.tr;
+    if (difference > 0 && difference <= 7) return 'home_format_in_days'.trParams({'n': difference.toString()});
     
     return '${date.day}/${date.month}/${date.year}';
   }
@@ -1230,7 +1225,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Intensidade da Dor',
+            'home_chart_pain'.tr,
             style: AppTheme.titleSmall.copyWith(
               color: Colors.purple,
               fontWeight: FontWeight.bold,
@@ -1238,7 +1233,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Gráfico de evolução da intensidade das crises de enxaqueca',
+            'home_chart_pain_sub'.tr,
             style: AppTheme.bodySmall.copyWith(
               color: Colors.grey[600],
             ),
@@ -1262,7 +1257,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Níveis de Glicose',
+            'home_chart_glucose'.tr,
             style: AppTheme.titleSmall.copyWith(
               color: Colors.red,
               fontWeight: FontWeight.bold,
@@ -1270,7 +1265,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Gráfico de evolução dos níveis de glicose no sangue',
+            'home_chart_glucose_sub'.tr,
             style: AppTheme.bodySmall.copyWith(
               color: Colors.grey[600],
             ),
@@ -1294,7 +1289,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Crises de Gastrite',
+            'home_chart_gastrite'.tr,
             style: AppTheme.titleSmall.copyWith(
               color: Colors.orange,
               fontWeight: FontWeight.bold,
@@ -1302,7 +1297,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Gráfico de frequência e intensidade das crises',
+            'home_chart_gastrite_sub'.tr,
             style: AppTheme.bodySmall.copyWith(
               color: Colors.grey[600],
             ),
@@ -1326,7 +1321,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Eventos Clínicos',
+            'home_chart_events'.tr,
             style: AppTheme.titleSmall.copyWith(
               color: Colors.blue,
               fontWeight: FontWeight.bold,
@@ -1334,7 +1329,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Gráfico de consultas e exames realizados',
+            'home_chart_events_sub'.tr,
             style: AppTheme.bodySmall.copyWith(
               color: Colors.grey[600],
             ),
@@ -1358,7 +1353,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Ciclo Menstrual',
+            'home_chart_menstruation'.tr,
             style: AppTheme.titleSmall.copyWith(
               color: Colors.pink,
               fontWeight: FontWeight.bold,
@@ -1366,7 +1361,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Gráfico de acompanhamento do ciclo menstrual',
+            'home_chart_menstruation_sub'.tr,
             style: AppTheme.bodySmall.copyWith(
               color: Colors.grey[600],
             ),
@@ -1390,7 +1385,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Gráfico',
+            'home_chart_default'.tr,
             style: AppTheme.titleSmall.copyWith(
               color: Colors.grey,
               fontWeight: FontWeight.bold,
@@ -1398,7 +1393,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Visualização dos dados',
+            'home_chart_default_sub'.tr,
             style: AppTheme.bodySmall.copyWith(
               color: Colors.grey[600],
             ),
@@ -1472,43 +1467,43 @@ class HomeScreen extends StatelessWidget {
       case 'enxaqueca':
         return {
           'icon': Icons.psychology,
-          'title': 'Enxaqueca',
-          'subtitle': 'Registros de dor',
+          'title': 'home_enxaqueca'.tr,
+          'subtitle': 'home_enxaqueca_sub'.tr,
           'color': Colors.purple,
         };
       case 'diabetes':
         return {
           'icon': Icons.bloodtype,
-          'title': 'Diabetes',
-          'subtitle': 'Níveis de glicose',
+          'title': 'home_diabetes'.tr,
+          'subtitle': 'home_diabetes_sub'.tr,
           'color': Colors.red,
         };
       case 'crise_gastrite':
         return {
           'icon': Icons.sick,
-          'title': 'Gastrite',
-          'subtitle': 'Crises registradas',
+          'title': 'home_gastrite'.tr,
+          'subtitle': 'home_gastrite_sub'.tr,
           'color': Colors.orange,
         };
       case 'evento_clinico':
         return {
           'icon': Icons.medical_services,
-          'title': 'Eventos Clínicos',
-          'subtitle': 'Consultas e exames',
+          'title': 'home_eventos'.tr,
+          'subtitle': 'home_eventos_sub'.tr,
           'color': Colors.blue,
         };
       case 'menstruacao':
         return {
           'icon': Icons.woman,
-          'title': 'Menstruação',
-          'subtitle': 'Ciclo menstrual',
+          'title': 'home_menstruacao'.tr,
+          'subtitle': 'home_menstruacao_sub'.tr,
           'color': Colors.pink,
         };
       default:
         return {
           'icon': Icons.help,
-          'title': 'Desconhecido',
-          'subtitle': 'Item não reconhecido',
+          'title': 'home_unknown'.tr,
+          'subtitle': 'home_unknown_sub'.tr,
           'color': Colors.grey,
         };
     }
@@ -1543,7 +1538,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Configurar Favoritos',
+              'home_config_favorites'.tr,
               style: AppTheme.titleLarge.copyWith(
                 color: const Color(0xFF1E293B),
                 fontWeight: FontWeight.bold,
@@ -1551,7 +1546,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Escolha até 4 itens para exibir nos favoritos:',
+              'home_config_favorites_sub'.tr,
               style: AppTheme.bodyMedium.copyWith(
                 color: Colors.grey[600],
               ),
@@ -1562,11 +1557,11 @@ class HomeScreen extends StatelessWidget {
               child: Obx(() => ListView(
                 shrinkWrap: true,
                 children: [
-                  _buildFavoriteOption('enxaqueca', 'Enxaqueca', controller),
-                  _buildFavoriteOption('diabetes', 'Diabetes', controller),
-                  _buildFavoriteOption('crise_gastrite', 'Gastrite', controller),
-                  _buildFavoriteOption('evento_clinico', 'Eventos Clínicos', controller),
-                  _buildFavoriteOption('menstruacao', 'Menstruação', controller),
+                  _buildFavoriteOption('enxaqueca', 'home_enxaqueca'.tr, controller),
+                  _buildFavoriteOption('diabetes', 'home_diabetes'.tr, controller),
+                  _buildFavoriteOption('crise_gastrite', 'home_gastrite'.tr, controller),
+                  _buildFavoriteOption('evento_clinico', 'home_eventos'.tr, controller),
+                  _buildFavoriteOption('menstruacao', 'home_menstruacao'.tr, controller),
                 ],
               )),
             ),
@@ -1577,7 +1572,7 @@ class HomeScreen extends StatelessWidget {
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
-                      'Cancelar',
+                      'common_cancel'.tr,
                       style: AppTheme.bodyLarge.copyWith(
                         color: Colors.grey[700],
                         fontWeight: FontWeight.w600,
@@ -1597,7 +1592,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Salvar',
+                      'common_save'.tr,
                       style: AppTheme.bodyLarge.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -1639,7 +1634,7 @@ class HomeScreen extends StatelessWidget {
         subtitle: isAvailable 
             ? null 
             : Text(
-                'Nenhum dado disponível',
+                'home_no_data_available'.tr,
                 style: AppTheme.bodySmall.copyWith(
                   color: Colors.grey,
                   fontSize: 12,
@@ -1928,7 +1923,7 @@ class HomeScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Agende sua consulta',
+                      'home_schedule_title'.tr,
                       style: AppTheme.titleLarge.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -1938,7 +1933,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Verifique disponibilidade dos especialistas e escolha o melhor horário para você.',
+                      'home_schedule_sub'.tr,
                       style: AppTheme.bodyMedium.copyWith(
                         color: Colors.white.withOpacity(0.8),
                       ),
@@ -1975,9 +1970,9 @@ class HomeScreen extends StatelessWidget {
                       shadowColor: Colors.transparent,
                     ),
                     icon: const Icon(Icons.medical_services_rounded),
-                    label: const Text(
-                      'Agendar consulta',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    label: Text(
+                      'home_schedule_btn'.tr,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -2029,28 +2024,34 @@ class HomeScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.event_note,
-                    color: Color(0xFF00324A),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Próximas Consultas',
-                    style: AppTheme.titleLarge.copyWith(
-                      color: const Color(0xFF1E293B),
-                      fontWeight: FontWeight.bold,
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.event_note,
+                      color: Color(0xFF00324A),
+                      size: 20,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'home_appointments_section'.tr,
+                        style: AppTheme.titleLarge.copyWith(
+                          color: const Color(0xFF1E293B),
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (allAppointments.length > 3)
                 TextButton(
                   onPressed: () => Get.toNamed(Routes.UPCOMING_APPOINTMENTS),
                   child: Text(
-                    'Ver todas',
+                    'home_see_all'.tr,
                     style: TextStyle(
                       color: const Color(0xFF00324A),
                       fontWeight: FontWeight.w600,
@@ -2079,7 +2080,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Você não possui consultas agendadas',
+                      'home_no_appointments'.tr,
                       style: AppTheme.bodyMedium.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -2162,7 +2163,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    appointment.specialtyName,
+                    SpecialtyTranslations.translate(appointment.specialtyName),
                     style: AppTheme.bodySmall.copyWith(
                       color: Colors.grey[600],
                       fontSize: 13,
@@ -2181,7 +2182,7 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         isToday 
-                            ? 'Hoje às ${timeFormat.format(appointment.startTime)}'
+                            ? '${'home_today_at'.tr} ${timeFormat.format(appointment.startTime)}'
                             : '${dateFormat.format(appointment.startTime)} às ${timeFormat.format(appointment.startTime)}',
                         style: AppTheme.bodySmall.copyWith(
                           color: Colors.grey[600],
@@ -2222,7 +2223,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Atalhos',
+                'home_shortcuts'.tr,
                 style: AppTheme.titleLarge.copyWith(
                   color: const Color(0xFF1E293B),
                   fontWeight: FontWeight.bold,
@@ -2254,7 +2255,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Nenhum exame disponível',
+            'home_no_exams'.tr,
             style: AppTheme.titleMedium.copyWith(
               color: Colors.grey[600],
               fontWeight: FontWeight.bold,
@@ -2279,8 +2280,8 @@ class HomeScreen extends StatelessWidget {
     if (controller.hasEnxaqueca) {
       shortcuts.add(_buildShortcutCard(
         icon: Icons.psychology,
-        title: 'Enxaqueca',
-        subtitle: 'Registros de dor',
+        title: 'home_enxaqueca'.tr,
+        subtitle: 'home_enxaqueca_sub'.tr,
         color: Colors.purple,
         onTap: () => Get.toNamed(Routes.ENXAQUECA),
       ));
@@ -2289,8 +2290,8 @@ class HomeScreen extends StatelessWidget {
     if (controller.hasDiabetes) {
       shortcuts.add(_buildShortcutCard(
         icon: Icons.bloodtype,
-        title: 'Diabetes',
-        subtitle: 'Níveis de glicose',
+        title: 'home_diabetes'.tr,
+        subtitle: 'home_diabetes_sub'.tr,
         color: Colors.red,
         onTap: () => Get.toNamed(Routes.DIABETES),
       ));
@@ -2299,8 +2300,8 @@ class HomeScreen extends StatelessWidget {
     if (controller.hasCriseGastrite) {
       shortcuts.add(_buildShortcutCard(
         icon: Icons.sick,
-        title: 'Gastrite',
-        subtitle: 'Crises registradas',
+        title: 'home_gastrite'.tr,
+        subtitle: 'home_gastrite_sub'.tr,
         color: Colors.orange,
         onTap: () => Get.toNamed(Routes.CRISE_GASTRITE_HISTORY),
       ));
@@ -2309,8 +2310,8 @@ class HomeScreen extends StatelessWidget {
     if (controller.hasEventoClinico) {
       shortcuts.add(_buildShortcutCard(
         icon: Icons.medical_services,
-        title: 'Eventos Clínicos',
-        subtitle: 'Consultas e exames',
+        title: 'home_eventos'.tr,
+        subtitle: 'home_eventos_sub'.tr,
         color: Colors.blue,
         onTap: () => Get.toNamed(Routes.EVENTO_CLINICO_HISTORY),
       ));
@@ -2319,8 +2320,8 @@ class HomeScreen extends StatelessWidget {
     if (controller.hasMenstruacao) {
       shortcuts.add(_buildShortcutCard(
         icon: Icons.woman,
-        title: 'Menstruação',
-        subtitle: 'Ciclo menstrual',
+        title: 'home_menstruacao'.tr,
+        subtitle: 'home_menstruacao_sub'.tr,
         color: Colors.pink,
         onTap: () => Get.toNamed(Routes.MENSTRUACAO_HISTORY),
       ));
@@ -2329,8 +2330,8 @@ class HomeScreen extends StatelessWidget {
     // Sempre incluir notas médicas
     shortcuts.add(_buildShortcutCard(
       icon: Icons.note_add,
-      title: 'Notas Médicas',
-      subtitle: 'Anotações pessoais',
+      title: 'home_notas'.tr,
+      subtitle: 'home_notas_sub'.tr,
       color: Colors.green,
       onTap: () => Get.toNamed(Routes.MEDICAL_RECORDS),
     ));
@@ -2431,26 +2432,27 @@ class HomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[200]!),
       ),
-      child: const Column(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             Icons.folder_open,
             color: Colors.grey,
             size: 48,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
-            'Sem atalhos',
-            style: TextStyle(
+            'home_no_shortcuts'.tr,
+            style: const TextStyle(
               color: Colors.grey,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
-            'Nenhum exame recente encontrado',
-            style: TextStyle(
+            'home_no_shortcuts_sub'.tr,
+            style: const TextStyle(
               color: Colors.grey,
               fontSize: 12,
             ),
@@ -2604,11 +2606,12 @@ class HomeScreen extends StatelessWidget {
       );
     }
 
-    // Se é base64
+    // Se é base64 (data:image/... ou base64 puro)
     if (controller.isBase64Photo(photo)) {
-      try {
+      final bytes = controller.decodeProfilePhoto(photo);
+      if (bytes != null && bytes.isNotEmpty) {
         return Image.memory(
-          base64Decode(photo.split(',')[1]), // Remove o prefixo data:image/jpeg;base64,
+          bytes,
           width: 70,
           height: 70,
           fit: BoxFit.cover,
@@ -2619,12 +2622,6 @@ class HomeScreen extends StatelessWidget {
               size: 40,
             );
           },
-        );
-      } catch (e) {
-        return const Icon(
-          Icons.person,
-          color: Colors.white,
-          size: 40,
         );
       }
     }
