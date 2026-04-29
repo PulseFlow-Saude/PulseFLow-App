@@ -80,11 +80,11 @@ class HealthService {
         if (dailyData[dateKey] != null && dailyData[dateKey]!.isNotEmpty) {
           // Calcula média dos valores do dia
           final average = dailyData[dateKey]!.reduce((a, b) => a + b) / dailyData[dateKey]!.length;
-          print('📊 [HealthService] Dia ${dateKey}: média de ${average.toStringAsFixed(1)} bpm');
+          print('📊 [HealthService] Dia $dateKey: média de ${average.toStringAsFixed(1)} bpm');
           spots.add(FlSpot(i.toDouble(), average));
         } else {
           // Se não há dados, usa valor padrão
-          print('⚠️ [HealthService] Dia ${dateKey}: sem dados, usando valor padrão');
+          print('⚠️ [HealthService] Dia $dateKey: sem dados, usando valor padrão');
           spots.add(FlSpot(i.toDouble(), 70.0));
         }
       }
@@ -229,11 +229,11 @@ class HealthService {
         final dateKey = '${date.year}-${date.month}-${date.day}';
         
         if (dailySleep[dateKey] != null && dailySleep[dateKey]! > 0) {
-          print('✅ [HealthService] Dia ${dateKey}: ${dailySleep[dateKey]!.toStringAsFixed(2)} horas de sono total');
+          print('✅ [HealthService] Dia $dateKey: ${dailySleep[dateKey]!.toStringAsFixed(2)} horas de sono total');
           spots.add(FlSpot(i.toDouble(), dailySleep[dateKey]!));
         } else {
           // Se não há dados, usa valor padrão
-          print('⚠️ [HealthService] Dia ${dateKey}: sem dados de sono, usando valor padrão (7.5h)');
+          print('⚠️ [HealthService] Dia $dateKey: sem dados de sono, usando valor padrão (7.5h)');
           spots.add(FlSpot(i.toDouble(), 7.5));
         }
       }
@@ -290,11 +290,11 @@ class HealthService {
         final dateKey = '${date.year}-${date.month}-${date.day}';
         
         if (dailySteps[dateKey] != null && dailySteps[dateKey]! > 0) {
-          print('📊 [HealthService] Dia ${dateKey}: ${dailySteps[dateKey]!.toStringAsFixed(0)} passos');
+          print('📊 [HealthService] Dia $dateKey: ${dailySteps[dateKey]!.toStringAsFixed(0)} passos');
           spots.add(FlSpot(i.toDouble(), dailySteps[dateKey]!));
         } else {
           // Se não há dados, usa valor padrão
-          print('⚠️ [HealthService] Dia ${dateKey}: sem dados de passos, usando valor padrão');
+          print('⚠️ [HealthService] Dia $dateKey: sem dados de passos, usando valor padrão');
           spots.add(FlSpot(i.toDouble(), 8000.0));
         }
       }
@@ -489,7 +489,7 @@ class HealthService {
           for (var i = 0; i < sleepAsleepData.length && i < 5; i++) {
             final data = sleepAsleepData[i];
             final duration = data.dateTo.difference(data.dateFrom).inHours;
-            print('  - Período ${i + 1}: ${data.dateFrom} até ${data.dateTo} = ${duration} horas dormindo');
+            print('  - Período ${i + 1}: ${data.dateFrom} até ${data.dateTo} = $duration horas dormindo');
           }
         } else {
           print('⚠️ [HealthService] Nenhum dado de SLEEP_ASLEEP encontrado nos últimos 30 dias');
@@ -506,7 +506,7 @@ class HealthService {
             for (var i = 0; i < sleepInBedData.length && i < 5; i++) {
               final data = sleepInBedData[i];
               final duration = data.dateTo.difference(data.dateFrom).inHours;
-              print('  - Período ${i + 1}: ${data.dateFrom} até ${data.dateTo} = ${duration} horas na cama');
+              print('  - Período ${i + 1}: ${data.dateFrom} até ${data.dateTo} = $duration horas na cama');
             }
           } else {
             print('⚠️ [HealthService] Nenhum dado de sono encontrado nos últimos 30 dias');

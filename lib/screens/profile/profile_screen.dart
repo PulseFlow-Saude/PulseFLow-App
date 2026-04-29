@@ -142,7 +142,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildPulseFlowLogo() {
-    return Container(
+    return SizedBox(
       width: 140,
       height: 45,
       child: Image.asset(
@@ -701,7 +701,7 @@ class ProfileScreen extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 640;
-        final spacing = 16.0;
+        const spacing = 16.0;
         final itemWidth = isWide ? (constraints.maxWidth - spacing) / 2 : constraints.maxWidth;
 
         return Wrap(
@@ -988,7 +988,7 @@ class ProfileScreen extends StatelessWidget {
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
@@ -996,10 +996,10 @@ class ProfileScreen extends StatelessWidget {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Text(
                           'profile_saving'.tr,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -1010,15 +1010,15 @@ class ProfileScreen extends StatelessWidget {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.save,
                           color: Colors.white,
                           size: 20,
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
                           'profile_save_changes'.tr,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -1057,7 +1057,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             title: Text(
               'profile_access_history'.tr,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF212121),
@@ -1065,7 +1065,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             subtitle: Text(
               'profile_access_history_sub'.tr,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
                 color: Color(0xFF757575),
               ),
@@ -1096,15 +1096,15 @@ class ProfileScreen extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(8),
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.logout, color: Colors.red, size: 18),
-              SizedBox(width: 8),
+              const Icon(Icons.logout, color: Colors.red, size: 18),
+              const SizedBox(width: 8),
               Text(
                 'profile_logout'.tr,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.red,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,

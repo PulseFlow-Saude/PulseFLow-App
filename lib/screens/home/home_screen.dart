@@ -304,17 +304,17 @@ class HomeScreen extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.edit,
                         size: 16,
-                        color: const Color(0xFF00324A),
+                        color: Color(0xFF00324A),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'home_edit'.tr,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
-                          color: const Color(0xFF00324A),
+                          color: Color(0xFF00324A),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -464,7 +464,7 @@ class HomeScreen extends StatelessWidget {
               child: Center(
                 child: Text(
                   'home_no_data_available'.tr,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.grey,
                     fontSize: 14,
                   ),
@@ -897,7 +897,7 @@ class HomeScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today, color: Colors.orange, size: 18),
+                  const Icon(Icons.calendar_today, color: Colors.orange, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -1024,7 +1024,7 @@ class HomeScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today, color: Colors.pink, size: 18),
+                  const Icon(Icons.calendar_today, color: Colors.pink, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -1730,10 +1730,10 @@ class HomeScreen extends StatelessWidget {
         ),
         titlesData: FlTitlesData(
           show: true,
-          rightTitles: AxisTitles(
+          rightTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
-          topTitles: AxisTitles(
+          topTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
           bottomTitles: AxisTitles(
@@ -1827,7 +1827,7 @@ class HomeScreen extends StatelessWidget {
             ),
             barWidth: 3,
             isStrokeCapRound: true,
-            dotData: FlDotData(show: false),
+            dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(
               show: true,
               gradient: LinearGradient(
@@ -1855,7 +1855,7 @@ class HomeScreen extends StatelessWidget {
             color: const Color(0xFFFFA726),
             barWidth: 3,
             isStrokeCapRound: true,
-            dotData: FlDotData(show: false),
+            dotData: const FlDotData(show: false),
           ),
           LineChartBarData(
             spots: [
@@ -1872,7 +1872,7 @@ class HomeScreen extends StatelessWidget {
             color: const Color(0xFF1976D2),
             barWidth: 3,
             isStrokeCapRound: true,
-            dotData: FlDotData(show: false),
+            dotData: const FlDotData(show: false),
           ),
         ],
       ),
@@ -1882,7 +1882,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildScheduleConsultationCard() {
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(
+      constraints: const BoxConstraints(
         minHeight: 180, // Altura mínima para garantir que não seja cortado
       ),
       padding: const EdgeInsets.all(20),
@@ -2052,8 +2052,8 @@ class HomeScreen extends StatelessWidget {
                   onPressed: () => Get.toNamed(Routes.UPCOMING_APPOINTMENTS),
                   child: Text(
                     'home_see_all'.tr,
-                    style: TextStyle(
-                      color: const Color(0xFF00324A),
+                    style: const TextStyle(
+                      color: Color(0xFF00324A),
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -2565,7 +2565,7 @@ class HomeScreen extends StatelessWidget {
 
   // Widget personalizado para a logo do PulseFlow
   Widget _buildPulseFlowLogo() {
-    return Container(
+    return SizedBox(
       width: 140,
       height: 45,
       child: Image.asset(

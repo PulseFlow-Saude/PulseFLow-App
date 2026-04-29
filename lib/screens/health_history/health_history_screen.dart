@@ -153,7 +153,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
         ),
         title: Text(
           'health_title'.tr,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -372,7 +372,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
                     children: [
                       Text(
                         'common_period'.tr,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF64748B),
                         ),
@@ -609,7 +609,7 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
           const SizedBox(height: 16),
           Text(
             'common_no_data'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Color(0xFF1E293B),

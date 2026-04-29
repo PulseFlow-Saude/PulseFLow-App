@@ -114,7 +114,7 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
           const SizedBox(height: 20),
           Text(
             'hist_title'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.bold,

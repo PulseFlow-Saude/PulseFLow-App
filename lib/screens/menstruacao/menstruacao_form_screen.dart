@@ -177,9 +177,9 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppTheme.primaryBlue,
-                    borderRadius: const BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
                     ),
@@ -201,7 +201,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'menst_registered'.tr,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -218,7 +218,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                     children: [
                       Text(
                         'menst_registered_msg'.tr,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           color: AppTheme.textSecondary,
                           height: 1.4,
@@ -246,7 +246,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                           ),
                           child: Text(
                             'menst_view_calendar'.tr,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -574,7 +574,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                           Container(
                             width: 1,
                           height: 50,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
@@ -685,7 +685,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                             _selectedEndDate = null;
                           });
                         },
-                        icon: Icon(Icons.edit_rounded, color: AppTheme.primaryBlue, size: 16),
+                        icon: const Icon(Icons.edit_rounded, color: AppTheme.primaryBlue, size: 16),
                         label: Text(
                           'menst_change'.tr,
                           style: AppTheme.bodyMedium.copyWith(
@@ -818,9 +818,9 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                   ),
                   child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                         Icons.info_outline,
-                        color: const Color(0xFF6B7280),
+                        color: Color(0xFF6B7280),
                             size: 20,
                           ),
                           const SizedBox(width: 12),
@@ -1045,7 +1045,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                         ),
                         child: Container(
                           padding: const EdgeInsets.all(10),
-                          child: Icon(
+                          child: const Icon(
                             Icons.chevron_left_rounded,
                             color: AppTheme.primaryBlue,
                             size: 22,
@@ -1072,7 +1072,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                         ),
                         child: Container(
                           padding: const EdgeInsets.all(10),
-                          child: Icon(
+                          child: const Icon(
                             Icons.chevron_right_rounded,
                             color: AppTheme.primaryBlue,
                             size: 22,
@@ -1344,7 +1344,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                 color: AppTheme.primaryBlue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.arrow_forward_ios_rounded,
                 color: AppTheme.primaryBlue,
                 size: 14,
@@ -1539,7 +1539,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                   color: AppTheme.primaryBlue.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: const Icon(
                                   Icons.edit_calendar_rounded,
                                   color: AppTheme.primaryBlue,
                                   size: 20,
@@ -1581,7 +1581,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                       color: AppTheme.primaryBlue.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.water_drop_rounded,
                                       color: AppTheme.primaryBlue,
                                       size: 20,
@@ -1628,7 +1628,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                       color: AppTheme.primaryBlue.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.favorite_rounded,
                                       color: AppTheme.primaryBlue,
                                       size: 20,
@@ -1671,7 +1671,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                               child: OutlinedButton(
                                 onPressed: () => Navigator.pop(context),
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: AppTheme.secondaryBlue),
+                                  side: const BorderSide(color: AppTheme.secondaryBlue),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -1705,7 +1705,7 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
                                     SnackBar(
                                       content: Row(
                                         children: [
-                                          Icon(
+                                          const Icon(
                                             Icons.check_circle_rounded,
                                             color: Colors.white,
                                             size: 20,
@@ -1928,9 +1928,9 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
             ),
             isExpanded: true,
             underline: Container(),
-            icon: Icon(
+            icon: const Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: const Color(0xFF6B7280),
+              color: Color(0xFF6B7280),
               size: 18,
             ),
             items: humorOptions.map((option) {

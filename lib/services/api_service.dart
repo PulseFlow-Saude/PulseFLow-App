@@ -51,7 +51,7 @@ class ApiService {
       String token = authService.token;
       
       if (token.isEmpty) {
-        final storage = const FlutterSecureStorage();
+        const storage = FlutterSecureStorage();
         token = await storage.read(key: 'auth_token') ?? '';
       }
       

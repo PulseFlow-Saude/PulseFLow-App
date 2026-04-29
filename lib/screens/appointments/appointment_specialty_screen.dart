@@ -156,7 +156,7 @@ class _Header extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'appt_book'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.w700,
@@ -165,7 +165,7 @@ class _Header extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'appt_book_sub'.tr,
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
         ],
       ),

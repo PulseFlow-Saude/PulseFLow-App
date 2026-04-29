@@ -57,11 +57,11 @@ class AuthMiddleware extends GetMiddleware {
     try {
       final authService = Get.find<AuthService>();
       if (!authService.isAuthenticated) {
-        return RouteSettings(name: Routes.LOGIN);
+        return const RouteSettings(name: Routes.LOGIN);
       }
     } catch (e) {
       // Se não conseguir encontrar o AuthService, redireciona para login
-      return RouteSettings(name: Routes.LOGIN);
+      return const RouteSettings(name: Routes.LOGIN);
     }
     return null;
   }
@@ -87,7 +87,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.REGISTRATION,
-      page: () => ProfessionalRegistrationScreen(),
+      page: () => const ProfessionalRegistrationScreen(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 400),
       curve: Curves.fastOutSlowIn,

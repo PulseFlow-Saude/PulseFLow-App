@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import '../../models/patient.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';

@@ -447,7 +447,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
             ),
             child: Text(
               'common_clear'.tr,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -537,7 +537,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'crise_success'.tr,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -638,9 +638,9 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
             children: [
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.healing_rounded,
-                    color: const Color(0xFF00324A),
+                    color: Color(0xFF00324A),
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -674,7 +674,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                         _alivioMedicacao = value;
                       });
                     },
-                    activeColor: const Color(0xFF00324A),
+                    activeThumbColor: const Color(0xFF00324A),
                   ),
                   const SizedBox(width: 16),
                   Text(
@@ -774,7 +774,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '${_getIntensidadeLabelKey(_intensidadeDor).tr} (${_intensidadeDor}/10)',
+                      '${_getIntensidadeLabelKey(_intensidadeDor).tr} ($_intensidadeDor/10)',
                       style: TextStyle(
                         color: _getIntensidadeColor(_intensidadeDor),
                         fontWeight: FontWeight.w700,

@@ -104,10 +104,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             fit: BoxFit.contain,
           ),
         ),
-        Positioned(
+        const Positioned(
           top: 8,
           right: 8,
-          child: const LanguageIconButton(),
+          child: LanguageIconButton(),
         ),
       ],
     );
@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     return Container(
       width: double.infinity,
       height: double.infinity, // Garante que ocupe todo o espaço disponível
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(30),
@@ -168,10 +168,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         Text(
           'auth_welcome'.tr,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF00324A),
+            color: Color(0xFF00324A),
             letterSpacing: 0.5,
           ),
         ),
@@ -198,11 +198,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       child: TextFormField(
         controller: Get.find<LoginController>().emailController,
         keyboardType: TextInputType.emailAddress,
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           labelText: 'auth_email'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
-          prefixIcon: Icon(Icons.email_outlined, color: const Color(0xFF00324A)),
+          prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF00324A)),
           filled: true,
           fillColor: Colors.grey[50],
           border: OutlineInputBorder(
@@ -215,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -225,7 +225,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.red[400]!, width: 2),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -249,11 +249,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       child: TextFormField(
         controller: Get.find<LoginController>().passwordController,
         obscureText: Get.find<LoginController>().obscurePassword.value,
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           labelText: 'auth_password'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
-          prefixIcon: Icon(Icons.lock_outlined, color: const Color(0xFF00324A)),
+          prefixIcon: const Icon(Icons.lock_outlined, color: Color(0xFF00324A)),
           suffixIcon: IconButton(
             icon: Icon(
               Get.find<LoginController>().obscurePassword.value
@@ -275,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -285,7 +285,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.red[400]!, width: 2),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -331,18 +331,18 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         TextButton(
           onPressed: () => Get.toNamed('/forgot-password'),
           style: TextButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             minimumSize: Size.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: Text(
             'auth_forgot_password'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF00324A),
+              color: Color(0xFF00324A),
               decoration: TextDecoration.underline,
-              decorationColor: const Color(0xFF00324A),
+              decorationColor: Color(0xFF00324A),
             ),
           ),
         ),
@@ -383,7 +383,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Get.find<LoginController>().isLoading.value
-            ? SizedBox(
+            ? const SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
@@ -394,11 +394,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.login, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.login, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
                   Text(
                     'auth_login'.tr,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -416,7 +416,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       children: [
         Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'auth_or'.tr,
             style: TextStyle(color: Colors.grey[600], fontSize: 14),
@@ -428,19 +428,19 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   }
 
   Widget _buildRegisterButton(Size size) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: 54,
       child: OutlinedButton(
         onPressed: () => Get.toNamed('/registration'),
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: const Color(0xFF00324A), width: 2),
+          side: const BorderSide(color: Color(0xFF00324A), width: 2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Text(
           'auth_create_account'.tr,
-          style: TextStyle(
-            color: const Color(0xFF00324A),
+          style: const TextStyle(
+            color: Color(0xFF00324A),
             fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,

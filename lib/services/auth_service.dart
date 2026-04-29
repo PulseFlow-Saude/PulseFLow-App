@@ -97,7 +97,7 @@ class AuthService extends GetxController {
     final encodedHeader = base64UrlEncode(utf8.encode(json.encode(header)));
     final encodedPayload = base64UrlEncode(utf8.encode(json.encode(payload)));
     
-    final jwtSecret = AppConfig.jwtSecret;
+    const jwtSecret = AppConfig.jwtSecret;
     
     final signature = Hmac(sha256, utf8.encode(jwtSecret))
         .convert(utf8.encode('$encodedHeader.$encodedPayload'))
@@ -949,14 +949,5 @@ class AuthService extends GetxController {
     }
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-    // Inicialização do serviço, se necessário
-  }
 
-  @override
-  void onClose() {
-    super.onClose();
-  }
 } 

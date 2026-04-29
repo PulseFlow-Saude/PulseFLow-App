@@ -286,10 +286,10 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                     colors: [
-                      const Color(0xFF1E3A8A),
-                      const Color(0xFF3B82F6),
+                      Color(0xFF1E3A8A),
+                      Color(0xFF3B82F6),
                     ],
                     ),
                     borderRadius: BorderRadius.circular(30),
@@ -399,10 +399,10 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 const SizedBox(height: 32),
                 Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                     colors: [
-                      const Color(0xFF1E3A8A),
-                      const Color(0xFF3B82F6),
+                      Color(0xFF1E3A8A),
+                      Color(0xFF3B82F6),
                     ],
                     ),
                     borderRadius: BorderRadius.circular(16),
@@ -463,10 +463,10 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                     colors: [
-                      const Color(0xFF1E3A8A),
-                      const Color(0xFF3B82F6),
+                      Color(0xFF1E3A8A),
+                      Color(0xFF3B82F6),
                     ],
                     ),
                     borderRadius: BorderRadius.circular(50),
@@ -504,10 +504,10 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                 const SizedBox(height: 40),
                 Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                     colors: [
-                      const Color(0xFF1E3A8A),
-                      const Color(0xFF3B82F6),
+                      Color(0xFF1E3A8A),
+                      Color(0xFF3B82F6),
                     ],
                     ),
                     borderRadius: BorderRadius.circular(20),
@@ -900,9 +900,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
           : null;
       
       // Se não há dados específicos, criar dados padrão baseados na posição no ciclo
-      if (dia == null) {
-        dia = _createDefaultDayData(day, menstruacao);
-      }
+      dia ??= _createDefaultDayData(day, menstruacao);
       
       showModalBottomSheet(
         context: context,
@@ -1683,9 +1681,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                           ),
                           child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                                 Icons.info_outline_rounded,
-                            color: const Color(0xFF64748B),
+                            color: Color(0xFF64748B),
                                 size: 20,
                               ),
                               const SizedBox(width: 12),

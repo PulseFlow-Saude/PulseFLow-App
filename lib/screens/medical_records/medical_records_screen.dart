@@ -144,7 +144,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
               Expanded(
                 child: Text(
                   'med_history_title'.tr,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -188,7 +188,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
               const SizedBox(width: 8),
               Text(
                 'common_filters'.tr,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -355,16 +355,16 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                const Color(0xFF0F172A),
-                const Color(0xFF1E293B),
-                const Color(0xFF334155),
+                Color(0xFF0F172A),
+                Color(0xFF1E293B),
+                Color(0xFF334155),
               ],
-              stops: const [0.0, 0.6, 1.0],
+              stops: [0.0, 0.6, 1.0],
             ),
           ),
           child: Container(
@@ -574,12 +574,12 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       width: double.infinity,
       padding: EdgeInsets.all(isTablet ? 32 : 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             Colors.white,
-            const Color(0xFFF0F9FF),
+            Color(0xFFF0F9FF),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
@@ -652,12 +652,12 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             Colors.white,
-            const Color(0xFFFAFBFC),
+            Color(0xFFFAFBFC),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
@@ -732,10 +732,10 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                 const Spacer(),
                 Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [
-                        const Color(0xFF1E3A8A),
-                        const Color(0xFF3B82F6),
+                        Color(0xFF1E3A8A),
+                        Color(0xFF3B82F6),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -840,10 +840,10 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
   }) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [
             Colors.white,
-            const Color(0xFFF8FAFC),
+            Color(0xFFF8FAFC),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
@@ -908,10 +908,10 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [
-                        const Color(0xFF1E3A8A),
-                        const Color(0xFF3B82F6),
+                        Color(0xFF1E3A8A),
+                        Color(0xFF3B82F6),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(30),
@@ -1258,7 +1258,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
               pw.Expanded(
                 child: pw.Text(
                   value.isEmpty ? 'mrec_not_informed'.tr : value,
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     fontSize: 12,
                     color: PdfColors.blueGrey900,
                   ),
@@ -1304,7 +1304,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                           pw.SizedBox(height: 6),
                           pw.Text(
                             'mrec_pdf_generated'.trParams({'date': generatedAt}),
-                            style: pw.TextStyle(
+                            style: const pw.TextStyle(
                               fontSize: 10,
                               color: PdfColors.blueGrey600,
                             ),
@@ -1345,7 +1345,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   pw.SizedBox(height: 6),
                   pw.Text(
                     summaryText,
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 11,
                       height: 1.4,
                       color: PdfColors.blueGrey800,
@@ -1354,7 +1354,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
                   pw.SizedBox(height: 12),
                   pw.Text(
                     'mrec_exported_by'.tr,
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 9,
                       color: PdfColors.blueGrey600,
                     ),
@@ -1542,10 +1542,10 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
           // Footer
           Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF8FAFC),
               border: Border(
-                top: BorderSide(color: const Color(0xFFE2E8F0)),
+                top: BorderSide(color: Color(0xFFE2E8F0)),
               ),
             ),
             child: SafeArea(
@@ -2153,7 +2153,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       text: TextSpan(
         children: [
           TextSpan(
-            text: '$label',
+            text: label,
             style: AppTheme.bodyMedium.copyWith(
               color: color,
               fontWeight: FontWeight.w700,
@@ -2219,7 +2219,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
 
 class _Sidebar extends StatelessWidget {
   final String? name;
-  const _Sidebar({this.name});
+  const _Sidebar();
 
   @override
   Widget build(BuildContext context) {
@@ -2270,7 +2270,7 @@ class _Sidebar extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'mrec_sair'.tr,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.red,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
