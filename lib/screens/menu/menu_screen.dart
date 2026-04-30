@@ -98,7 +98,7 @@ class MenuScreen extends StatelessWidget {
                   );
                 },
               ),
-              _buildPulseFlowLogo(),
+              _buildBrandLogo(),
               _buildNotificationIcon(),
             ],
           ),
@@ -181,12 +181,12 @@ class MenuScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPulseFlowLogo() {
+  Widget _buildBrandLogo() {
     return SizedBox(
       width: 140,
       height: 45,
       child: Image.asset(
-        'assets/images/PulseNegativo.png',
+        'assets/images/oryon_health_logo_negative.png',
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           return Container(
@@ -197,7 +197,7 @@ class MenuScreen extends StatelessWidget {
             ),
             child: const Center(
               child: Text(
-                'PulseFlow',
+                'Oryon Health',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,

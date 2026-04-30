@@ -287,7 +287,7 @@ class _DrawerHeader extends StatelessWidget {
           SizedBox(
             width: 140,
             child: Image.asset(
-              'assets/images/PulseNegativo.png',
+              'assets/images/oryon_health_logo_negative.png',
               fit: BoxFit.contain,
             ),
           ),

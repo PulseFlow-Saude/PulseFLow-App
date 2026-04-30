@@ -71,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen>
               child: Transform.scale(
                 scale: _scaleAnimation.value,
                 child: Image.asset(
-                  'assets/images/PulseNegativo.png',
+                  'assets/images/oryon_health_logo_negative.png',
                   width: 200,
                   height: 200,
                   fit: BoxFit.contain,
@@ -89,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       child: const Center(
                         child: Text(
-                          'PulseFlow',
+                          'Oryon Health',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 32,

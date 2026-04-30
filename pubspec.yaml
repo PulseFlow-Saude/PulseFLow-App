@@ -1,5 +1,5 @@
 name: pulseflow_app
-description: PulseFlow - A Flutter application for patient management with MongoDB integration.
+description: Oryon Health — aplicativo Flutter para gestão de pacientes com integração MongoDB.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -58,21 +58,23 @@ flutter:
     - assets/images/
     - assets/lottie/
 
-# Configuração para gerar ícones do app
+# Ícone na grelha do telemóvel: use uma imagem quadrada (1024×1024 recomendado),
+# depois execute: dart run flutter_launcher_icons
+# (Atualizar só no Xcode sem este comando deixa os PNGs em AppIcon.appiconset desatualizados.)
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/AppIcon.png"
+  image_path: "assets/images/Appicon.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
   web:
     generate: true
-    image_path: "assets/images/AppIcon.png"
+    image_path: "assets/images/Appicon.png"
     background_color: "#hexcode"
     theme_color: "#hexcode"
   windows:
     generate: true
-    image_path: "assets/images/AppIcon.png"
+    image_path: "assets/images/Appicon.png"
     icon_size: 48 # min:48, max:256, default: 48
   macos:
     generate: true
-    image_path: "assets/images/AppIcon.png"
+    image_path: "assets/images/Appicon.png"

@@ -132,7 +132,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(width: 16),
           Expanded(
             child: Center(
-              child: _buildPulseFlowLogo(),
+              child: _buildBrandLogo(),
             ),
           ),
           _buildNotificationIcon(),
@@ -141,12 +141,12 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPulseFlowLogo() {
+  Widget _buildBrandLogo() {
     return Container(
       width: 140,
       height: 45,
       child: Image.asset(
-        'assets/images/PulseNegativo.png',
+        'assets/images/oryon_health_logo_negative.png',
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           return Container(
@@ -157,7 +157,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             child: const Center(
               child: Text(
-                'PulseFlow',
+                'Oryon Health',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,

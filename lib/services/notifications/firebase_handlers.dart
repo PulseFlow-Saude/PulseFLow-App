@@ -15,7 +15,7 @@ class FirebaseHandlers {
   ) {
     _showLocalNotification(
       localNotifications,
-      message.notification?.title ?? 'PulseFlow',
+      message.notification?.title ?? 'Oryon Health',
       message.notification?.body ?? 'notif_new_message'.tr,
       message.data,
     );
@@ -82,7 +82,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Exibir notificação
   await localNotifications.show(
     DateTime.now().millisecondsSinceEpoch.remainder(100000),
-    message.notification?.title ?? 'PulseFlow',
+    message.notification?.title ?? 'Oryon Health',
     message.notification?.body ?? 'Nova mensagem',
     NotificationBuilders.createBackgroundMessageNotification(),
     payload: message.data.toString(),
@@ -95,7 +95,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
   await NotificationStorage.addNotification(
     id: notificationId,
-    title: message.notification?.title ?? 'PulseFlow',
+    title: message.notification?.title ?? 'Oryon Health',
     message: message.notification?.body ?? 'Nova mensagem',
     type: type,
     link: link,

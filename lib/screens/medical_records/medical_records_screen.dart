@@ -1232,7 +1232,7 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
       final now = DateTime.now();
       final pdf = pw.Document();
 
-      final bytes = await rootBundle.load('assets/images/Pulselogo.png');
+      final bytes = await rootBundle.load('assets/images/oryon_health_logo.png');
       final logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
       final patientName =
           Get.find<MedicalRecordsController>().patient.value?.name ?? 'mrec_patient_unknown'.tr;

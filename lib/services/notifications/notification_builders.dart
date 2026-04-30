@@ -17,7 +17,7 @@ class NotificationBuilders {
   }) {
     final title = contentTitle ?? '🩺 Solicitação de acesso';
     final body = bodyFull ??
-        'Dr(a). $doctorName ${specialty.isNotEmpty ? "($specialty)" : ""} solicitou acesso ao seu prontuário médico. Gere o código direto no PulseFlow.';
+        'Dr(a). $doctorName ${specialty.isNotEmpty ? "($specialty)" : ""} solicitou acesso ao seu prontuário médico. Gere o código direto no Oryon Health.';
     final actionLabel = viewRequestLabel ?? 'Ver Solicitação';
 
     final androidDetails = AndroidNotificationDetails(
@@ -39,9 +39,9 @@ class NotificationBuilders {
         htmlFormatBigText: true,
         contentTitle: title,
         htmlFormatContentTitle: true,
-        summaryText: 'PulseFlow',
+        summaryText: 'Oryon Health',
       ),
-      ticker: 'PulseFlow',
+      ticker: 'Oryon Health',
       fullScreenIntent: true,
       category: AndroidNotificationCategory.message,
       visibility: NotificationVisibility.public,
@@ -86,7 +86,7 @@ class NotificationBuilders {
       icon: '@mipmap/ic_launcher',
       category: AndroidNotificationCategory.reminder,
       visibility: NotificationVisibility.public,
-      ticker: 'PulseFlow',
+      ticker: 'Oryon Health',
       audioAttributesUsage: AudioAttributesUsage.notification,
       vibrationPattern: defaultVibrationPattern,
       autoCancel: true,
@@ -118,7 +118,7 @@ class NotificationBuilders {
       icon: '@mipmap/ic_launcher',
       category: AndroidNotificationCategory.alarm,
       visibility: NotificationVisibility.public,
-      ticker: 'PulseFlow',
+      ticker: 'Oryon Health',
       audioAttributesUsage: AudioAttributesUsage.alarm,
       vibrationPattern: defaultVibrationPattern,
       autoCancel: true,
@@ -149,7 +149,7 @@ class NotificationBuilders {
       icon: '@mipmap/ic_launcher',
       category: AndroidNotificationCategory.event,
       visibility: NotificationVisibility.public,
-      ticker: 'PulseFlow',
+      ticker: 'Oryon Health',
       vibrationPattern: defaultVibrationPattern,
       audioAttributesUsage: AudioAttributesUsage.notification,
       autoCancel: true,
@@ -179,7 +179,7 @@ class NotificationBuilders {
       enableVibration: true,
       visibility: NotificationVisibility.public,
       category: AndroidNotificationCategory.message,
-      ticker: 'PulseFlow',
+      ticker: 'Oryon Health',
       vibrationPattern: defaultVibrationPattern,
       icon: '@mipmap/ic_launcher',
       audioAttributesUsage: AudioAttributesUsage.notification,
@@ -202,7 +202,7 @@ class NotificationBuilders {
 
   /// Para uso em background isolate (Get não disponível)
   static NotificationDetails createBackgroundMessageNotification() {
-    const channelName = 'PulseFlow Notifications';
+    const channelName = 'Oryon Health Notifications';
     final androidDetails = AndroidNotificationDetails(
       NotificationChannels.generalChannelId,
       channelName,
@@ -212,7 +212,7 @@ class NotificationBuilders {
       enableVibration: true,
       visibility: NotificationVisibility.public,
       category: AndroidNotificationCategory.message,
-      ticker: 'PulseFlow',
+      ticker: 'Oryon Health',
       vibrationPattern: defaultVibrationPattern,
       audioAttributesUsage: AudioAttributesUsage.notification,
       autoCancel: true,

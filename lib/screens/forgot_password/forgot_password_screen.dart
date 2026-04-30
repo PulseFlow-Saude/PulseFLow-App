@@ -122,7 +122,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  'assets/images/pulseflow2.png',
+                  'assets/images/oryon_health_logo_signin.png',
                   width: logoSize,
                   height: logoSize,
                   fit: BoxFit.contain,

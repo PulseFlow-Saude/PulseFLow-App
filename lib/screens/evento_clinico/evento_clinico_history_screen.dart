@@ -1813,7 +1813,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
     try {
       final now = DateTime.now();
       final pdf = pw.Document();
-      final bytes = await rootBundle.load('assets/images/Pulselogo.png');
+      final bytes = await rootBundle.load('assets/images/oryon_health_logo.png');
       final logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
       final generatedAt = DateFormat('dd/MM/yyyy HH:mm').format(now);
       final atendimentoEm = DateFormat('dd/MM/yyyy HH:mm').format(evento.dataHora);
@@ -1960,7 +1960,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                         ),
                         pw.SizedBox(height: 4),
                         pw.Text(
-                          'Histórico exportado automaticamente pelo aplicativo PulseFlow.',
+                          'Histórico exportado automaticamente pelo aplicativo Oryon Health.',
                           style: pw.TextStyle(
                             fontSize: 10,
                             color: PdfColors.blueGrey700,

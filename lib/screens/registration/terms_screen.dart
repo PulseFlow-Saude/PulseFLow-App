@@ -102,7 +102,7 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
-              'assets/images/pulseflow2.png',
+              'assets/images/oryon_health_logo_signin.png',
               width: logoSize,
               height: logoSize,
               fit: BoxFit.contain,

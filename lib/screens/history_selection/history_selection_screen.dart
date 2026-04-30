@@ -107,7 +107,7 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const PulseDrawerButton(),
-              _buildPulseFlowLogo(),
+              _buildBrandLogo(),
               _buildNotificationIcon(),
             ],
           ),
@@ -125,12 +125,12 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
     );
   }
 
-  Widget _buildPulseFlowLogo() {
+  Widget _buildBrandLogo() {
     return SizedBox(
       width: 140,
       height: 45,
       child: Image.asset(
-        'assets/images/PulseNegativo.png',
+        'assets/images/oryon_health_logo_negative.png',
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           return Container(
@@ -141,7 +141,7 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
             ),
             child: const Center(
               child: Text(
-                'PulseFlow',
+                'Oryon Health',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,

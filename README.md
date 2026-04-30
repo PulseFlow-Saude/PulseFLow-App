@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="assets/images/Pulselogo.png" alt="PulseFlow Logo" width="200"/>
+<img src="assets/images/oryon_health_logo.png" alt="Oryon Health Logo" width="200"/>
 
-# PulseFlow Mobile
+# Oryon Health
 
 **Sistema de Monitoramento de Saúde e Gerenciamento de Pacientes**
 
@@ -33,7 +33,7 @@
 
 ## Sobre o Projeto
 
-O **PulseFlow Mobile** é um aplicativo desenvolvido em Flutter que permite aos pacientes gerenciar seus dados de saúde de forma completa e segura. O aplicativo oferece monitoramento em tempo real de diversas condições médicas, registro de eventos clínicos, compartilhamento seguro de informações com profissionais de saúde através do **Pulse Key**, e integração com dispositivos wearables.
+O **Oryon Health** é um aplicativo desenvolvido em Flutter que permite aos pacientes gerenciar seus dados de saúde de forma completa e segura. O aplicativo oferece monitoramento em tempo real de diversas condições médicas, registro de eventos clínicos, compartilhamento seguro de informações com profissionais de saúde através do **Chave Oryon**, e integração com dispositivos wearables.
 
 ### Objetivo
 
@@ -48,7 +48,7 @@ Facilitar o acompanhamento da saúde do paciente, proporcionando uma interface i
 - Login seguro com autenticação de dois fatores (2FA)
 - Recuperação de senha via email
 - Armazenamento seguro de credenciais com Flutter Secure Storage
-- Pulse Key para compartilhamento seguro e temporário de dados
+- Chave Oryon para compartilhamento seguro e temporário de dados
 
 ### Monitoramento de Saúde
 
@@ -121,7 +121,7 @@ Antes de começar, certifique-se de ter instalado e configurado:
 - **Dart SDK** >= 3.0.0 ([Instalação](https://dart.dev/get-dart))
 - **Android Studio** ou **Xcode** (para desenvolvimento)
 - **Git** ([Instalação](https://git-scm.com/))
-- **Backend PulseFlow** em execução (porta 65432)
+- **Backend Oryon Health** em execução (porta 65432)
 - **MongoDB** configurado e acessível
 - **Firebase** configurado com projeto criado
 
@@ -132,8 +132,8 @@ Antes de começar, certifique-se de ter instalado e configurado:
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/PulseFlow-APP.git
-cd PulseFlow-APP
+git clone https://github.com/seu-usuario/Oryon-Health-App.git
+cd Oryon-Health-App
 ```
 
 ### 2. Instale as dependências
@@ -251,11 +251,11 @@ Adicione as seguintes descrições em `ios/Runner/Info.plist`:
 
 ## Segurança
 
-O PulseFlow Mobile implementa várias camadas de segurança para proteger os dados dos pacientes:
+O Oryon Health Mobile implementa várias camadas de segurança para proteger os dados dos pacientes:
 
 - **Autenticação JWT** - Tokens seguros com expiração automática
 - **Armazenamento Criptografado** - Dados sensíveis protegidos com Flutter Secure Storage
-- **Pulse Key Temporário** - Sistema de compartilhamento seguro e controlado
+- **Chave Oryon temporária** - Sistema de compartilhamento seguro e controlado
 - **Validação de Dados** - Validação tanto no cliente quanto no servidor
 - **HTTPS** - Comunicação criptografada com o backend
 - **Autenticação de Dois Fatores** - Camada adicional de segurança no login

@@ -98,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       children: [
         Center(
           child: Image.asset(
-            'assets/images/pulseflow2.png',
+            'assets/images/oryon_health_logo_signin.png',
             width: size.width * 0.4,
             height: size.width * 0.4,
             fit: BoxFit.contain,

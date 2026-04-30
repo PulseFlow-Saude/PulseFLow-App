@@ -138,7 +138,7 @@ class MyApp extends StatelessWidget {
       );
 
       return GetMaterialApp(
-        title: 'PulseFlow',
+        title: 'Oryon Health',
         theme: themeData,
         darkTheme: themeData.copyWith(
           scaffoldBackgroundColor: const Color(0xFF0F172A),

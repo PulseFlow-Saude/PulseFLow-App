@@ -3,7 +3,7 @@
 # Script para iniciar o túnel ngrok com domínio dinâmico (não expira)
 # Uso: ./start_ngrok_dynamic.sh
 
-echo "🚀 Iniciando túnel ngrok com domínio dinâmico para PulseFlow Backend..."
+echo "🚀 Iniciando túnel ngrok com domínio dinâmico para Oryon Health Backend..."
 
 # Parar qualquer instância anterior do ngrok
 echo "🛑 Parando instâncias anteriores do ngrok..."

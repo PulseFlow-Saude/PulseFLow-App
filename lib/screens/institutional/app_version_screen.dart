@@ -128,7 +128,7 @@ class _VersionHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'PulseFlow',
+                'Oryon Health',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,

@@ -107,7 +107,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
   Widget _buildLogoSection(Size size) {
     return Center(
       child: Image.asset(
-        'assets/images/pulseflow2.png',
+        'assets/images/oryon_health_logo_signin.png',
         width: size.width * 0.4,
         height: size.width * 0.4,
         fit: BoxFit.contain,

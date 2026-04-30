@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Script para iniciar o túnel ngrok para o PulseFlow Backend
+# Script para iniciar o túnel ngrok para o Oryon Health Backend
 # Uso: ./start_ngrok.sh
 
-echo "🚀 Iniciando túnel ngrok para PulseFlow Backend..."
+echo "🚀 Iniciando túnel ngrok para Oryon Health Backend..."
 
 # Parar qualquer instância anterior do ngrok
 echo "🛑 Parando instâncias anteriores do ngrok..."
