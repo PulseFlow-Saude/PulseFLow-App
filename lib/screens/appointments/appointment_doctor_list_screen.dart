@@ -172,16 +172,16 @@ class _DoctorHeader extends StatelessWidget {
               children: [
                 Text(
                   'appt_choose_doctor'.tr,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
                   'appt_choose_doctor_sub'.tr,
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -278,7 +278,7 @@ class _DoctorCard extends StatelessWidget {
                   onPressed: onTap,
                   child: Text(
                     'appt_view_schedule'.tr,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                     ),

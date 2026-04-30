@@ -212,8 +212,8 @@ class _PulseSideMenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = Colors.white;
-    final iconColor = Colors.white;
+    const textColor = Colors.white;
+    const iconColor = Colors.white;
     final indicatorColor = isActive ? Colors.white : Colors.white.withOpacity(0.3);
 
     return InkWell(

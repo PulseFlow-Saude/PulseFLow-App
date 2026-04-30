@@ -694,7 +694,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
         },
         label: Text(
           'appt_confirm'.tr,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),
     );

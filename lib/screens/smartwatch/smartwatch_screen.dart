@@ -161,12 +161,12 @@ class SmartwatchScreen extends StatelessWidget {
           ),
           
           // Botão de escaneamento
-          Container(
+          SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: service.isScanning ? null : () => service.scanForDevices(),
               icon: service.isScanning 
-                ? SizedBox(
+                ? const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
@@ -268,7 +268,7 @@ class SmartwatchScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.watch,
             color: AppTheme.primaryBlue,
             size: 32,
@@ -304,7 +304,7 @@ class SmartwatchScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
             child: service.isConnecting
-                ? SizedBox(
+                ? const SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
@@ -386,7 +386,7 @@ class SmartwatchScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.bluetooth_connected,
             color: Colors.green,
             size: 24,
@@ -416,7 +416,7 @@ class SmartwatchScreen extends StatelessWidget {
           ),
           IconButton(
             onPressed: () => service.disconnect(),
-            icon: Icon(
+            icon: const Icon(
               Icons.bluetooth_disabled,
               color: Colors.red,
             ),
@@ -447,15 +447,15 @@ class SmartwatchScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Icon(
                 Icons.today,
                 color: AppTheme.primaryBlue,
                 size: 24,
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Resumo de Hoje',
                 style: TextStyle(
                   fontSize: 18,
@@ -592,15 +592,15 @@ class SmartwatchScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Icon(
                 Icons.favorite,
                 color: Colors.red,
                 size: 24,
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Frequência Cardíaca',
                 style: TextStyle(
                   fontSize: 18,
@@ -614,8 +614,8 @@ class SmartwatchScreen extends StatelessWidget {
             height: 200,
             child: LineChart(
               LineChartData(
-                gridData: FlGridData(show: false),
-                titlesData: FlTitlesData(show: false),
+                gridData: const FlGridData(show: false),
+                titlesData: const FlTitlesData(show: false),
                 borderData: FlBorderData(show: false),
                 lineBarsData: [
                   LineChartBarData(
@@ -623,7 +623,7 @@ class SmartwatchScreen extends StatelessWidget {
                     isCurved: true,
                     color: Colors.red,
                     barWidth: 3,
-                    dotData: FlDotData(show: false),
+                    dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
                       color: Colors.red.withOpacity(0.1),
@@ -662,15 +662,15 @@ class SmartwatchScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Icon(
                 Icons.directions_walk,
                 color: Colors.green,
                 size: 24,
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Passos Diários',
                 style: TextStyle(
                   fontSize: 18,
@@ -714,8 +714,8 @@ class SmartwatchScreen extends StatelessWidget {
                       },
                     ),
                   ),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
                 borderData: FlBorderData(show: false),
                 barGroups: chartData.map((spot) {
@@ -794,7 +794,7 @@ class SmartwatchScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.sync,
             color: Colors.blue,
             size: 20,

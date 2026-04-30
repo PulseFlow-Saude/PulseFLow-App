@@ -580,29 +580,25 @@ class RegistrationController extends GetxController with SafeControllerMixin {
 
       final createdPatient = await authService.register(patient);
 
-      if (createdPatient != null) {
-        // Mostrar mensagem de sucesso
-        Get.snackbar(
-          'reg_success'.tr,
-          'reg_success_welcome'.trParams({'name': createdPatient.name}),
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-        );
+      // Mostrar mensagem de sucesso
+      Get.snackbar(
+        'reg_success'.tr,
+        'reg_success_welcome'.trParams({'name': createdPatient.name}),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
 
-        // Aguardar a mensagem ser exibida
-        await Future.delayed(const Duration(seconds: 2));
+      // Aguardar a mensagem ser exibida
+      await Future.delayed(const Duration(seconds: 2));
 
-        // Fazer logout para garantir que o usuário precise fazer login
-        await authService.logout();
+      // Fazer logout para garantir que o usuário precise fazer login
+      await authService.logout();
 
-        // Redirecionar para a tela de login
-        Get.offAllNamed('/login');
-      } else {
-        throw 'reg_error_create'.tr;
-      }
-    } catch (e) {
+      // Redirecionar para a tela de login
+      Get.offAllNamed('/login');
+        } catch (e) {
       Get.snackbar(
         'reg_error'.tr,
         e.toString(),

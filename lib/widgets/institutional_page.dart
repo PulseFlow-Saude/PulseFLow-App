@@ -6,7 +6,6 @@ import '../widgets/pulse_drawer_button.dart';
 import '../routes/app_routes.dart';
 import 'package:get/get.dart';
 import '../screens/home/home_controller.dart';
-import '../widgets/institutional_page.dart' as institutional_page;
 
 class InstitutionalPage extends StatelessWidget {
   const InstitutionalPage({

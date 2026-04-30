@@ -62,7 +62,7 @@ class DatabaseService {
             throw 'Falha na verificação da conexão';
           }
         }
-      } catch (e, stack) {
+      } catch (e) {
         if (_db != null) {
           try {
             await _db!.close();
@@ -77,7 +77,7 @@ class DatabaseService {
           await Future.delayed(_retryDelay);
         } else {
           _isConnecting = false;
-          final hint = ' Dica: no celular físico, em lib/config/database_config.dart '
+          const hint = ' Dica: no celular físico, em lib/config/database_config.dart '
               'use o IP do seu PC (ex: mongodb://192.168.1.100:27017). '
               'No emulador use 10.0.2.2. Confirme se o MongoDB está rodando e acessível.';
           throw 'Falha ao conectar ao MongoDB após $_maxRetries tentativas: $e.$hint';
@@ -824,7 +824,7 @@ class DatabaseService {
       }
       
       return Patient.fromJson(patientData);
-    } catch (e, stack) {
+    } catch (e) {
       rethrow;
     }
   }
@@ -854,7 +854,7 @@ class DatabaseService {
         return Patient.fromJson(patientData);
       }
       return null;
-    } catch (e, stack) {
+    } catch (e) {
       rethrow;
     }
   }
@@ -903,7 +903,7 @@ class DatabaseService {
         return Patient.fromJson(patientData);
       }
       return null;
-    } catch (e, stack) {
+    } catch (e) {
       rethrow;
     }
   }
@@ -954,7 +954,7 @@ class DatabaseService {
       }
       
       return Patient.fromJson(patientData);
-    } catch (e, stack) {
+    } catch (e) {
       rethrow;
     }
   }
@@ -976,7 +976,7 @@ class DatabaseService {
         throw 'Paciente não encontrado';
       }
       
-    } catch (e, stack) {
+    } catch (e) {
       rethrow;
     }
   }

@@ -282,7 +282,7 @@ class NotificationsScreen extends StatelessWidget {
               children: [
                 Text(
                   'notif_filters'.tr,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 IconButton(
@@ -570,7 +570,7 @@ class NotificationsScreen extends StatelessWidget {
                                   const SizedBox(width: 4),
                                   Text(
                                     'notif_appointment_warning'.tr,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Color(0xFFF97316),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,

@@ -302,7 +302,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                     child: Column(
                       children: [
                         Text('common_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
-                        Text('${calcularMediaGlicemia(data)}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600)),
+                        Text(calcularMediaGlicemia(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -310,7 +310,7 @@ class _DiabetesAnalysisSection extends StatelessWidget {
                     child: Column(
                       children: [
                         Text('common_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)),
-                        Text('${calcularMaiorGlicemia(data)}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600)),
+                        Text(calcularMaiorGlicemia(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),

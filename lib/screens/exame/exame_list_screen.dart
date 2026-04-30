@@ -249,7 +249,7 @@ class _ExameListScreenState extends State<ExameListScreen> {
           icon: const Icon(Icons.add, color: Colors.white),
           label: Text(
             'exam_new'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),

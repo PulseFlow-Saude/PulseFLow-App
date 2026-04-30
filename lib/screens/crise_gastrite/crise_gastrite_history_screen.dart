@@ -100,7 +100,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     final filtered = _crises.where((crise) {
       if (selectedIntensidade != null && selectedIntensidade.trim().isNotEmpty) {
         final eventKey = _getIntensityFilterLabelKey(crise.intensidadeDor);
-        if (eventKey != selectedIntensidade!.trim()) {
+        if (eventKey != selectedIntensidade.trim()) {
           return false;
         }
       }
@@ -164,7 +164,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
         icon: const Icon(Icons.add, color: Colors.white),
           label: Text(
           'crise_new'.tr,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
@@ -201,7 +201,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
               Expanded(
                 child: Text(
                   'crise_history_title'.tr,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -262,7 +262,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
               Expanded(
                 child: Text(
                   'common_filters'.tr,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -311,7 +311,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     String? value,
   }) {
     final isActive = value != null && value.trim().isNotEmpty;
-    final displayText = isActive ? value!.trim() : hint;
+    final displayText = isActive ? value.trim() : hint;
 
     return GestureDetector(
       onTap: onTap,
@@ -1602,7 +1602,7 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
                     children: [
                       Text(
                         'crise_details'.tr,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Color(0xFF1F2937),
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
@@ -1767,10 +1767,10 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
             top: false,
             child: Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF8FAFC),
                 border: Border(
-                  top: BorderSide(color: const Color(0xFFE2E8F0)),
+                  top: BorderSide(color: Color(0xFFE2E8F0)),
                 ),
               ),
               child: Row(

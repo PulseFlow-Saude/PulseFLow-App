@@ -107,30 +107,30 @@ class MyApp extends StatelessWidget {
         textButtonTheme: TextButtonThemeData(
           style: AppTheme.secondaryButtonStyle,
         ),
-        inputDecorationTheme: InputDecorationTheme(
+        inputDecorationTheme: const InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
-          border: const OutlineInputBorder(
+          border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
             borderSide: BorderSide(color: AppTheme.secondaryBlue),
           ),
-          enabledBorder: const OutlineInputBorder(
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
             borderSide: BorderSide(color: AppTheme.secondaryBlue),
           ),
-          focusedBorder: const OutlineInputBorder(
+          focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
             borderSide: BorderSide(color: AppTheme.primaryBlue, width: 2),
           ),
-          errorBorder: const OutlineInputBorder(
+          errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
             borderSide: BorderSide(color: AppTheme.error),
           ),
-          focusedErrorBorder: const OutlineInputBorder(
+          focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
             borderSide: BorderSide(color: AppTheme.error, width: 2),
           ),
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 16,
           ),

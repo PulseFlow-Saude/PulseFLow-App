@@ -110,7 +110,7 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
       );
     } catch (e) {
       setState(() {
-        _error = 'auth_2fa_resend_error'.tr + ': ${e.toString()}';
+        _error = '${'auth_2fa_resend_error'.tr}: ${e.toString()}';
       });
     } finally {
       setState(() {

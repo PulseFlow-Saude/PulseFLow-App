@@ -160,8 +160,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       ),
       child: Container(
         width: double.infinity,
-        constraints: BoxConstraints.expand(),
-        decoration: BoxDecoration(
+        constraints: const BoxConstraints.expand(),
+        decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(30),
@@ -205,14 +205,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         Text(
           'auth_recover_password'.tr,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF00324A),
+            color: Color(0xFF00324A),
             letterSpacing: 0.5,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           'auth_code_sent_email'.tr,
           textAlign: TextAlign.center,
@@ -235,12 +235,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       child: TextFormField(
         controller: Get.find<ForgotPasswordController>().emailController,
         keyboardType: TextInputType.emailAddress,
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           labelText: 'auth_email'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
           hintText: 'auth_email_hint'.tr,
-          prefixIcon: Icon(Icons.email_outlined, color: const Color(0xFF00324A)),
+          prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF00324A)),
           filled: true,
           fillColor: Colors.grey[50],
           border: OutlineInputBorder(
@@ -253,7 +253,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -263,7 +263,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.red[400]!, width: 2),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -308,7 +308,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Get.find<ForgotPasswordController>().isLoading.value
-            ? SizedBox(
+            ? const SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
@@ -319,11 +319,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.send, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.send, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
                   Text(
                     'auth_send_code'.tr,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -337,24 +337,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
   }
 
   Widget _buildBackButton(Size size) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: 54,
       child: OutlinedButton(
         onPressed: () => Get.back(),
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: const Color(0xFF00324A), width: 2),
+          side: const BorderSide(color: Color(0xFF00324A), width: 2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.arrow_back, color: const Color(0xFF00324A), size: 20),
-            SizedBox(width: 8),
+            const Icon(Icons.arrow_back, color: Color(0xFF00324A), size: 20),
+            const SizedBox(width: 8),
             Text(
               'auth_back_login'.tr,
-              style: TextStyle(
-                color: const Color(0xFF00324A),
+              style: const TextStyle(
+                color: Color(0xFF00324A),
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,

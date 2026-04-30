@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../login/paciente_controller.dart';
 import 'hormonal_controller.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';

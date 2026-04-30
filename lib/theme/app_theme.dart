@@ -71,7 +71,7 @@ class AppTheme {
     backgroundColor: primaryBlue,
     foregroundColor: textLight,
     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12)),
     ),
   );
@@ -79,7 +79,7 @@ class AppTheme {
   static final ButtonStyle secondaryButtonStyle = TextButton.styleFrom(
     foregroundColor: primaryBlue,
     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(12)),
     ),
   );

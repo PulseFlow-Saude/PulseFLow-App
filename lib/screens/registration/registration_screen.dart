@@ -127,8 +127,8 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
       ),
       child: Container(
         width: double.infinity,
-        constraints: BoxConstraints.expand(),
-        decoration: BoxDecoration(
+        constraints: const BoxConstraints.expand(),
+        decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(30),
@@ -371,11 +371,11 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
             }
           },
           suffixIcon: Obx(() => isCepLoading.value
-            ? Padding(
+            ? const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: CircularProgressIndicator(strokeWidth: 2)
               )
-            : SizedBox.shrink()
+            : const SizedBox.shrink()
           ),
         ),
         SizedBox(height: size.height * 0.02),
@@ -477,7 +477,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           BoxShadow(
             color: const Color(0xFF00324A).withValues(alpha: 0.2),
             blurRadius: 8,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -504,7 +504,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   subtitle,
                   style: TextStyle(
@@ -577,7 +577,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -657,7 +657,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -698,7 +698,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonFormField<String>(
-        value: value,
+        initialValue: value,
         isExpanded: true,
         decoration: InputDecoration(
           labelText: label,
@@ -723,7 +723,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -761,7 +761,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
         validator: validator,
         dropdownColor: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        icon: Icon(Icons.arrow_drop_down, color: const Color(0xFF00324A)),
+        icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF00324A)),
       ),
     );
   }
@@ -878,7 +878,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
                   overflow: TextOverflow.visible,
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               Flexible(
                 child: Text(
                   'reg_photo_optional'.tr,
@@ -936,7 +936,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
               BoxShadow(
                 color: const Color(0xFF00324A).withValues(alpha: 0.3),
                 blurRadius: 8,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -1069,7 +1069,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           BoxShadow(
             color: const Color(0xFF00324A).withValues(alpha: 0.3),
             blurRadius: 8,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1084,7 +1084,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
             ? SizedBox(
                 width: size.width * 0.06,
                 height: size.width * 0.06,
-                child: CircularProgressIndicator(
+                child: const CircularProgressIndicator(
                   strokeWidth: 2.5,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),

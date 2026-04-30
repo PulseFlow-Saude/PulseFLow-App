@@ -122,7 +122,7 @@ class LanguageIconButton extends StatelessWidget {
                 }),
               ),
             ),
-            SafeArea(child: const SizedBox(height: 8)),
+            const SafeArea(child: SizedBox(height: 8)),
           ],
         ),
       ),
@@ -168,7 +168,7 @@ class _LanguageChip extends StatelessWidget {
                 : Colors.grey.shade50,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? const Color(0xFF00324A) : Colors.grey.shade200!,
+              color: selected ? const Color(0xFF00324A) : Colors.grey.shade200,
               width: selected ? 2 : 1,
             ),
           ),
@@ -190,7 +190,7 @@ class _LanguageChip extends StatelessWidget {
               ),
               if (selected) ...[
                 const SizedBox(height: 4),
-                Icon(Icons.check_circle_rounded, size: 16, color: const Color(0xFF00324A)),
+                const Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFF00324A)),
               ],
             ],
           ),

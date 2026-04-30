@@ -112,12 +112,12 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                 fontWeight: FontWeight.w700,
               ),
               markersMaxCount: 3,
-              markerDecoration: BoxDecoration(
-                color: const Color(0xFFEC4899),
+              markerDecoration: const BoxDecoration(
+                color: Color(0xFFEC4899),
                 shape: BoxShape.circle,
               ),
-              selectedDecoration: BoxDecoration(
-                color: const Color(0xFF00324A),
+              selectedDecoration: const BoxDecoration(
+                color: Color(0xFF00324A),
                 shape: BoxShape.circle,
               ),
               todayDecoration: BoxDecoration(

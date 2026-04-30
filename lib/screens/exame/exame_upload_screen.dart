@@ -550,7 +550,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
       children: [
         Row(
           children: [
-            Icon(Icons.calendar_today_outlined, size: 18, color: const Color(0xFF00324A)),
+            const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF00324A)),
             const SizedBox(width: 6),
             Text(
               'exam_date_label'.tr,
@@ -624,7 +624,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
       children: [
         Row(
           children: [
-            Icon(Icons.attach_file_outlined, size: 18, color: const Color(0xFF00324A)),
+            const Icon(Icons.attach_file_outlined, size: 18, color: Color(0xFF00324A)),
             const SizedBox(width: 6),
             Text(
               'exam_file_label'.tr,
@@ -756,26 +756,26 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  if (_selectedFile!.size != null) ...[
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.description_outlined,
-                                          size: isSmallScreen ? 12 : 14,
+                                  ...[
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.description_outlined,
+                                        size: isSmallScreen ? 12 : 14,
+                                        color: Colors.grey[600],
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _formatFileSize(_selectedFile!.size),
+                                        style: TextStyle(
+                                          fontSize: isSmallScreen ? 12 : 13,
                                           color: Colors.grey[600],
                                         ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          _formatFileSize(_selectedFile!.size),
-                                          style: TextStyle(
-                                            fontSize: isSmallScreen ? 12 : 13,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
                                 ],
                               ),
                             ),
@@ -828,7 +828,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
           child: ElevatedButton.icon(
             onPressed: _isSaving ? null : _save,
             icon: _isSaving
-                ? SizedBox(
+                ? const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(

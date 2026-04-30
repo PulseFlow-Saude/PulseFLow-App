@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'app_translations_extra.dart';
 
 /// Traduções do app (i18n). Funciona em Android e iOS.
 ///
