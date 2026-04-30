@@ -6,7 +6,7 @@ class CustomButton extends StatelessWidget {
   final Widget child;
   final bool isSecondary;
 
-  CustomButton({
+  const CustomButton({
     super.key,
     required this.onPressed,
     required this.child,

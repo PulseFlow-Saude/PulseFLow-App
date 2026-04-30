@@ -152,8 +152,8 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
       ),
       child: Container(
         width: double.infinity,
-        constraints: BoxConstraints.expand(),
-        decoration: BoxDecoration(
+        constraints: const BoxConstraints.expand(),
+        decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(30),
@@ -302,7 +302,7 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -355,7 +355,7 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
           BoxShadow(
             color: const Color(0xFF00324A).withValues(alpha: 0.3),
             blurRadius: 8,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),

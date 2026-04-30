@@ -213,7 +213,7 @@ class _StepsHistoryScreenState extends State<StepsHistoryScreen> {
                 child: Center(
                   child: Text(
                     'health_steps'.tr,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -293,7 +293,7 @@ class _StepsHistoryScreenState extends State<StepsHistoryScreen> {
                       children: [
                         Text(
                           'common_period'.tr,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF64748B),
                           ),
@@ -404,7 +404,7 @@ class _StepsHistoryScreenState extends State<StepsHistoryScreen> {
               const SizedBox(width: 8),
               Text(
                 'common_period_stats'.tr,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1E293B),
@@ -452,7 +452,7 @@ class _StepsHistoryScreenState extends State<StepsHistoryScreen> {
           const SizedBox(height: 6),
           Flexible(
             child: Text(
-              '$value',
+              value,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -696,7 +696,7 @@ class _StepsHistoryScreenState extends State<StepsHistoryScreen> {
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
             'health_daily_records'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1E293B),
@@ -797,13 +797,13 @@ class _StepsHistoryScreenState extends State<StepsHistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
+          const CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'health_loading'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xFF64748B),
               fontSize: 16,
             ),
@@ -826,7 +826,7 @@ class _StepsHistoryScreenState extends State<StepsHistoryScreen> {
           const SizedBox(height: 16),
           Text(
             'common_error_load'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Color(0xFF1E293B),
@@ -868,7 +868,7 @@ class _StepsHistoryScreenState extends State<StepsHistoryScreen> {
           const SizedBox(height: 16),
           Text(
             'common_no_data'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Color(0xFF1E293B),
@@ -877,7 +877,7 @@ class _StepsHistoryScreenState extends State<StepsHistoryScreen> {
           const SizedBox(height: 8),
           Text(
             'common_no_records_steps'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
             ),

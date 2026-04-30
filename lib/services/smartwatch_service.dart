@@ -126,11 +126,11 @@ class SmartwatchService extends GetxService {
     // Gera dados de sono
     for (int i = 0; i < 7; i++) {
       final date = now.subtract(Duration(days: i));
-      final sleepTime = date.add(Duration(hours: 22)); // 22h
+      final sleepTime = date.add(const Duration(hours: 22)); // 22h
       
       _sleepData.add(SleepData(
         timestamp: sleepTime,
-        duration: Duration(hours: 9), // 9 horas de sono
+        duration: const Duration(hours: 9), // 9 horas de sono
         type: SleepType.inBed,
       ));
     }

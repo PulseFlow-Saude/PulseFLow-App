@@ -196,7 +196,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text(
           'evt_new_event'.tr,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
@@ -233,7 +233,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
               Expanded(
                 child: Text(
                   'evt_history_title'.tr,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -297,7 +297,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                   children: [
                     Text(
                       'common_filters'.tr,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -363,7 +363,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
     String? value,
   }) {
     final isActive = value != null && value.trim().isNotEmpty;
-    final displayText = isActive ? value!.trim() : hint;
+    final displayText = isActive ? value.trim() : hint;
 
     return GestureDetector(
       onTap: onTap,
@@ -976,7 +976,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
           const SizedBox(height: 24),
           Text(
             'evt_loading'.tr,
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xFF64748B),
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -1021,7 +1021,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             const SizedBox(height: 24),
             Text(
               'evt_error_load'.tr,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1E293B),
@@ -1091,7 +1091,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             const SizedBox(height: 24),
             Text(
               'evt_empty'.tr,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1E293B),
@@ -1101,7 +1101,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             Text(
               'evt_empty_sub'.tr,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Color(0xFF64748B),
                 fontSize: 14,
                 height: 1.5,
@@ -1365,7 +1365,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                   children: [
                     Text(
                       'common_tap_details'.tr,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 13,
                         color: Color(0xFF666666),
                         fontWeight: FontWeight.w500,
@@ -1392,14 +1392,14 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                         children: [
                             Text(
                             'common_view_details'.tr,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
                           ),
-                          SizedBox(width: 6),
-                          Icon(
+                          const SizedBox(width: 6),
+                          const Icon(
                             Icons.arrow_forward_ios,
                             size: 12,
                             color: Colors.white,
@@ -1667,10 +1667,10 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             top: false,
             child: Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF8FAFC),
                 border: Border(
-                  top: BorderSide(color: const Color(0xFFE2E8F0)),
+                  top: BorderSide(color: Color(0xFFE2E8F0)),
                 ),
               ),
               child: Row(
@@ -1847,7 +1847,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                           pw.SizedBox(height: 6),
                           pw.Text(
                             'Documento gerado em $generatedAt',
-                            style: pw.TextStyle(
+                            style: const pw.TextStyle(
                               fontSize: 10,
                               color: PdfColors.blueGrey600,
                             ),
@@ -1893,7 +1893,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                   pw.SizedBox(height: 8),
                   pw.Text(
                     _formatLongText(evento.descricao, fallback: 'Sem descrição registrada.'),
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 11,
                       height: 1.4,
                       color: PdfColors.blueGrey800,
@@ -1912,7 +1912,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                     pw.SizedBox(height: 6),
                     pw.Text(
                       evento.sintomas,
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 11,
                         height: 1.4,
                         color: PdfColors.blueGrey800,
@@ -1932,7 +1932,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                     pw.SizedBox(height: 6),
                     pw.Text(
                       evento.alivio,
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 11,
                         height: 1.4,
                         color: PdfColors.blueGrey800,
@@ -1961,7 +1961,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                         pw.SizedBox(height: 4),
                         pw.Text(
                           'Histórico exportado automaticamente pelo aplicativo PulseFlow.',
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                             fontSize: 10,
                             color: PdfColors.blueGrey700,
                           ),
@@ -2039,7 +2039,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
           pw.Expanded(
             child: pw.Text(
               value.isEmpty ? 'Não informado' : value,
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 fontSize: 12,
                 color: PdfColors.blueGrey900,
               ),

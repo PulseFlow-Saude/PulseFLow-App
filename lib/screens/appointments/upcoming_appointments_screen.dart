@@ -173,16 +173,16 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
                 children: [
                   Text(
                     'appt_upcoming_header'.tr,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'appt_upcoming_sub'.tr,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
                     ),
@@ -242,7 +242,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
               ),
               label: Text(
                 'appt_book_appointment'.tr,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -677,7 +677,7 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
         ),
         label: Text(
           'appt_book_new'.tr,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),

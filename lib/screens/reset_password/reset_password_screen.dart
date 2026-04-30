@@ -178,8 +178,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
       ),
       child: Container(
         width: double.infinity,
-        constraints: BoxConstraints.expand(),
-        decoration: BoxDecoration(
+        constraints: const BoxConstraints.expand(),
+        decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(30),
@@ -199,7 +199,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
             children: [
               Flexible(
                 flex: isSmallHeight ? 1 : 2,
-                child: SizedBox.shrink(),
+                child: const SizedBox.shrink(),
               ),
               _buildHeader(size),
               SizedBox(height: spacing),
@@ -216,7 +216,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
               _buildBackButton(size),
               Flexible(
                 flex: isSmallHeight ? 1 : 2,
-                child: SizedBox.shrink(),
+                child: const SizedBox.shrink(),
               ),
             ],
           ),
@@ -279,7 +279,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           labelText: 'auth_verification_code'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
           hintText: 'auth_code_hint'.tr,
-          prefixIcon: Icon(Icons.security, color: const Color(0xFF00324A)),
+          prefixIcon: const Icon(Icons.security, color: Color(0xFF00324A)),
           filled: true,
           fillColor: Colors.grey[50],
           border: OutlineInputBorder(
@@ -292,7 +292,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -341,7 +341,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           labelText: 'auth_new_password'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
           hintText: 'auth_new_password_placeholder'.tr,
-          prefixIcon: Icon(Icons.lock_outlined, color: const Color(0xFF00324A)),
+          prefixIcon: const Icon(Icons.lock_outlined, color: Color(0xFF00324A)),
           suffixIcon: IconButton(
             icon: Icon(
               Get.find<ResetPasswordController>().obscurePassword.value
@@ -363,7 +363,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -411,7 +411,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           labelText: 'auth_confirm_password'.tr,
           labelStyle: TextStyle(color: Colors.grey[600]),
           hintText: 'auth_confirm_password_hint'.tr,
-          prefixIcon: Icon(Icons.lock_outlined, color: const Color(0xFF00324A)),
+          prefixIcon: const Icon(Icons.lock_outlined, color: Color(0xFF00324A)),
           suffixIcon: IconButton(
             icon: Icon(
               Get.find<ResetPasswordController>().obscureConfirmPassword.value
@@ -433,7 +433,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A), width: 2),
+            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -496,7 +496,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
             ? SizedBox(
                 width: isSmallHeight ? 20 : 24,
                 height: isSmallHeight ? 20 : 24,
-                child: CircularProgressIndicator(
+                child: const CircularProgressIndicator(
                   strokeWidth: 2.5,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
@@ -505,7 +505,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.lock_reset, color: Colors.white, size: isSmallHeight ? 18 : 20),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
                     'auth_reset_btn'.tr,
                     style: TextStyle(
@@ -524,7 +524,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
   Widget _buildResendCodeButton(Size size) {
     final isSmallHeight = size.height < 700;
     
-    return Obx(() => Container(
+    return Obx(() => SizedBox(
       width: double.infinity,
       height: isSmallHeight ? 48 : 54,
       child: OutlinedButton.icon(
@@ -532,16 +532,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
             ? null
             : Get.find<ResetPasswordController>().resendCode,
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: const Color(0xFF00324A), width: 2),
+          side: const BorderSide(color: Color(0xFF00324A), width: 2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         icon: Get.find<ResetPasswordController>().isResending.value
             ? SizedBox(
                 width: isSmallHeight ? 18 : 20,
                 height: isSmallHeight ? 18 : 20,
-                child: CircularProgressIndicator(
+                child: const CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF00324A)),
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)),
                 ),
               )
             : Icon(Icons.refresh, color: const Color(0xFF00324A), size: isSmallHeight ? 18 : 20),
@@ -563,20 +563,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
   Widget _buildBackButton(Size size) {
     final isSmallHeight = size.height < 700;
     
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: isSmallHeight ? 48 : 54,
       child: OutlinedButton(
         onPressed: () => Get.back(),
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: const Color(0xFF00324A), width: 2),
+          side: const BorderSide(color: Color(0xFF00324A), width: 2),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.arrow_back, color: const Color(0xFF00324A), size: isSmallHeight ? 18 : 20),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
               'auth_back'.tr,
               style: TextStyle(

@@ -19,7 +19,7 @@ class PulseKeyScreen extends StatefulWidget {
 class _PulseKeyScreenState extends State<PulseKeyScreen> {
   String _currentCode = '';
   int _timeRemaining = 120;
-  bool _isActive = true;
+  final bool _isActive = true;
   DateTime? _lastCodeGeneration;
   Timer? _timer;
   Timer? _connectionTimer;
@@ -1033,7 +1033,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
                   fontSize: isSmallScreen ? 15 : 17,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 subtitle,
                 style: AppTheme.bodySmall.copyWith(

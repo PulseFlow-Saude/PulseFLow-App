@@ -70,16 +70,16 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                const Color(0xFF0F172A),
-                const Color(0xFF1E293B),
-                const Color(0xFF334155),
+                Color(0xFF0F172A),
+                Color(0xFF1E293B),
+                Color(0xFF334155),
               ],
-              stops: const [0.0, 0.6, 1.0],
+              stops: [0.0, 0.6, 1.0],
             ),
           ),
           child: Container(
@@ -186,12 +186,12 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             Colors.white,
-            const Color(0xFFFAFBFC),
+            Color(0xFFFAFBFC),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
@@ -401,12 +401,12 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             Colors.white,
-            const Color(0xFFFAFBFC),
+            Color(0xFFFAFBFC),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
@@ -573,9 +573,9 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
       ).copyWith(
-        elevation: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.pressed)) return 4;
-          if (states.contains(MaterialState.hovered)) return 2;
+        elevation: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) return 4;
+          if (states.contains(WidgetState.hovered)) return 2;
           return 0;
         }),
       ),

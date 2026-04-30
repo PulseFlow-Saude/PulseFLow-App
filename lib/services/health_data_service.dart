@@ -382,7 +382,7 @@ class HealthDataService {
     try {
       final today = DateTime.now();
       final startOfDay = DateTime(today.year, today.month, today.day);
-      final endOfDay = startOfDay.add(Duration(days: 1));
+      final endOfDay = startOfDay.add(const Duration(days: 1));
       
       return await getHealthDataByPeriod(patientId, startOfDay, endOfDay);
     } catch (e) {
@@ -396,7 +396,7 @@ class HealthDataService {
       final now = DateTime.now();
       final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
       final startOfDay = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-      final endOfWeek = startOfDay.add(Duration(days: 7));
+      final endOfWeek = startOfDay.add(const Duration(days: 7));
       
       return await getHealthDataByPeriod(patientId, startOfDay, endOfWeek);
     } catch (e) {

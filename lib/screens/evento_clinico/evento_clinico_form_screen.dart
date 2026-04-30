@@ -269,7 +269,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
               children: [
                 Text(
                   'evt_form_title'.tr,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
                     fontSize: 20,
@@ -323,7 +323,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '${_getIntensidadeLabelKey(_intensidadeDor).tr} (${_intensidadeDor}/10)',
+                      '${_getIntensidadeLabelKey(_intensidadeDor).tr} ($_intensidadeDor/10)',
                       style: TextStyle(
                         color: _getIntensidadeColor(_intensidadeDor),
                         fontWeight: FontWeight.w700,
@@ -470,7 +470,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           onChanged: onChanged,
           isExpanded: true,
           validator: (value) {
@@ -532,7 +532,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
       children: [
         Text(
           'evt_date'.tr,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
                 fontWeight: FontWeight.w600,
             color: Color(0xFF00324A),
@@ -587,7 +587,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
             ),
             child: Text(
               'common_clear'.tr,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -608,7 +608,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
             ),
             child: Text(
               'common_save'.tr,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -706,7 +706,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'evt_registered'.tr,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -723,9 +723,9 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                     children: [
                       Text(
                         'evt_registered_msg'.tr,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
-                          color: const Color(0xFF64748B),
+                          color: Color(0xFF64748B),
                           height: 1.4,
                         ),
                         textAlign: TextAlign.center,
@@ -750,7 +750,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                           ),
                           child: Text(
                             'common_continue'.tr,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                   ),
