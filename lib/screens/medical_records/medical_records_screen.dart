@@ -2219,7 +2219,8 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
 
 class _Sidebar extends StatelessWidget {
   final String? name;
-  const _Sidebar();
+
+  const _Sidebar({this.name});
 
   @override
   Widget build(BuildContext context) {
