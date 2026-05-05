@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/specialty_translations.dart';
 import 'appointment_scheduler_controller.dart';
-import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
+import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_drawer_button.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
 
 class AppointmentSpecialtyScreen extends StatefulWidget {
   const AppointmentSpecialtyScreen({super.key});
@@ -32,141 +32,101 @@ class _AppointmentSpecialtyScreenState extends State<AppointmentSpecialtyScreen>
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: AppTheme.blueSystemOverlayStyle,
-      child: Scaffold(
-      backgroundColor: const Color(0xFF00324A),
-      drawer: const PulseSideMenu(activeItem: PulseNavItem.appointments),
-      body: Column(
-        children: [
-          _Header(),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+    return PulseBlueScaffold(
+      drawer: PulseSideMenu(activeItem: PulseNavItem.appointments),
+      header: const _Header(),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppTheme.primaryBlue),
+          );
+        }
+
+        if (controller.loadError.value.isNotEmpty) {
+          return Center(
+            child: _ErrorState(
+              message: controller.loadError.value,
+              onRetry: () => controller.ensureDataLoaded(force: true),
+            ),
+          );
+        }
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'appt_choose_specialty'.tr,
+                style: AppTheme.titleLarge.copyWith(
+                  color: const Color(0xFF1E293B),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF00324A)),
-                  );
-                }
-
-                if (controller.loadError.value.isNotEmpty) {
-                  return Center(
-                    child: _ErrorState(
-                      message: controller.loadError.value,
-                      onRetry: () => controller.ensureDataLoaded(force: true),
-                    ),
-                  );
-                }
-
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'appt_choose_specialty'.tr,
-                        style: AppTheme.titleLarge.copyWith(
-                          color: const Color(0xFF1E293B),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: controller.specialtySearchController,
-                        onChanged: controller.updateSpecialtySearch,
-                        decoration: InputDecoration(
-                          hintText: 'appt_search_name_desc'.tr,
-                          prefixIcon: const Icon(Icons.search_rounded),
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: Color(0xFF00324A), width: 1.5),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      if (controller.filteredSpecialties.isEmpty)
-                        _EmptyState(
-                          icon: Icons.search_off_rounded,
-                          message: controller.specialtyQuery.value.isEmpty
-                              ? 'appt_no_specialty_registered'.tr
-                              : '${'appt_no_specialty_match'.tr} "${controller.specialtyQuery.value}".',
-                        )
-                      else
-                        ...controller.filteredSpecialties.map(
-                          (specialty) => _SpecialtyCard(
-                            specialtyName: SpecialtyTranslations.translate(specialty.name),
-                            description: specialty.description,
-                            color: const Color(0xFF00324A),
-                            onTap: () {
-                              controller.selectSpecialty(specialty.id);
-                              Get.toNamed(Routes.APPOINTMENTS_DOCTORS);
-                            },
-                          ),
-                        ),
-                    ],
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller.specialtySearchController,
+                onChanged: controller.updateSpecialtySearch,
+                decoration: InputDecoration(
+                  hintText: 'appt_search_name_desc'.tr,
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
                   ),
-                );
-              }),
-            ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (controller.filteredSpecialties.isEmpty)
+                _EmptyState(
+                  icon: Icons.search_off_rounded,
+                  message: controller.specialtyQuery.value.isEmpty
+                      ? 'appt_no_specialty_registered'.tr
+                      : '${'appt_no_specialty_match'.tr} "${controller.specialtyQuery.value}".',
+                )
+              else
+                ...controller.filteredSpecialties.map(
+                  (specialty) => _SpecialtyCard(
+                    specialtyName: SpecialtyTranslations.translate(specialty.name),
+                    description: specialty.description,
+                    color: AppTheme.primaryBlue,
+                    onTap: () {
+                      controller.selectSpecialty(specialty.id);
+                      Get.toNamed(Routes.APPOINTMENTS_DOCTORS);
+                    },
+                  ),
+                ),
+            ],
           ),
-        ],
-      ),
+        );
+      }),
       // bottomNavigationBar removido - tela tem sidebar
       // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
-    ));
+    );
   }
 }
 
 class _Header extends StatelessWidget {
+  const _Header();
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        left: 20,
-        right: 20,
-        bottom: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 20, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const PulseDrawerButton(iconSize: 22),
           const SizedBox(height: 12),
-          Text(
-            'appt_book'.tr,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          Text('appt_book'.tr, style: PulseBlueHeaderStyles.title),
           const SizedBox(height: 6),
-          Text(
-            'appt_book_sub'.tr,
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
-          ),
+          Text('appt_book_sub'.tr, style: PulseBlueHeaderStyles.subtitle),
         ],
       ),
     );

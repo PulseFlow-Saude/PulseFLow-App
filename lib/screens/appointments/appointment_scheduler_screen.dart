@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
 import '../../utils/specialty_translations.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
+import '../../widgets/pulse_drawer_button.dart';
 import '../home/home_controller.dart';
 import '../institutional/settings_controller.dart';
 import 'appointment_scheduler_controller.dart';
@@ -19,120 +21,76 @@ class AppointmentSchedulerScreen extends StatelessWidget {
         ? Get.find<HomeController>()
         : Get.put(HomeController());
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF00324A),
-      body: Column(
-        children: [
-          _buildHeader(context),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              child: Obx(
-                () => SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionTitle('appt_step_specialty'.tr),
-                      const SizedBox(height: 12),
-                      _buildSpecialtySection(controller),
-                      const SizedBox(height: 28),
-
-                      _buildSectionTitle('appt_step_doctor'.tr),
-                      const SizedBox(height: 12),
-                      _buildDoctorSection(controller),
-                      const SizedBox(height: 28),
-
-                      _buildSectionTitle('appt_step_date'.tr),
-                      const SizedBox(height: 12),
-                      _buildDateSelector(controller),
-                      const SizedBox(height: 28),
-
-                      _buildSectionTitle('appt_step_slot'.tr),
-                      const SizedBox(height: 12),
-                      _buildSlotsGrid(controller),
-                      const SizedBox(height: 28),
-
-                      _buildSummaryCard(controller, homeController),
-                      const SizedBox(height: 16),
-                      _buildConfirmButton(controller),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+    return PulseBlueScaffold(
+      header: _buildHeader(context),
+      body: Obx(
+        () => SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionTitle('appt_step_specialty'.tr),
+              const SizedBox(height: 12),
+              _buildSpecialtySection(controller),
+              const SizedBox(height: 28),
+              _buildSectionTitle('appt_step_doctor'.tr),
+              const SizedBox(height: 12),
+              _buildDoctorSection(controller),
+              const SizedBox(height: 28),
+              _buildSectionTitle('appt_step_date'.tr),
+              const SizedBox(height: 12),
+              _buildDateSelector(controller),
+              const SizedBox(height: 28),
+              _buildSectionTitle('appt_step_slot'.tr),
+              const SizedBox(height: 12),
+              _buildSlotsGrid(controller),
+              const SizedBox(height: 28),
+              _buildSummaryCard(controller, homeController),
+              const SizedBox(height: 16),
+              _buildConfirmButton(controller),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        bottom: 20,
-        left: 20,
-        right: 20,
-      ),
-    decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 20, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IconButton(
-                onPressed: Get.back,
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                color: Colors.white,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'appt_scheduling_title'.tr,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
+              PulseBlueBackButton(onPressed: Get.back),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'appt_scheduling_title'.tr,
+                      style: PulseBlueHeaderStyles.titleCompact,
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'appt_scheduling_sub'.tr,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
+                    const SizedBox(height: 4),
+                    Text(
+                      'appt_scheduling_sub'.tr,
+                      style: PulseBlueHeaderStyles.subtitleCompact,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white24),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
             ),
             child: Row(
               children: [
@@ -141,8 +99,8 @@ class AppointmentSchedulerScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'appt_schedule_hint'.tr,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: PulseBlueHeaderStyles.subtitleCompact.copyWith(
+                      color: Colors.white.withValues(alpha: 0.95),
                       fontSize: 13,
                     ),
                   ),

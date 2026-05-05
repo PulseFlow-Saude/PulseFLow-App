@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../../data/world_nationalities.dart';
+import '../../data/world_nationality_display.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/language_icon_button.dart';
 import 'registration_controller.dart';
@@ -455,6 +456,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           constraints: const BoxConstraints(maxWidth: 440),
           child: Form(
             key: controller.accountFormKey,
+            autovalidateMode: AutovalidateMode.disabled,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -506,47 +508,108 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           constraints: const BoxConstraints(maxWidth: 440),
           child: Form(
             key: controller.personalFormKey,
+            autovalidateMode: AutovalidateMode.disabled,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildMiniStepTitle('reg_personal_info'.tr, 'reg_personal_sub'.tr),
-                _buildTextField(
-                  context,
-                  controller: controller.cpfController,
-                  label: 'profile_cpf'.tr,
-                  icon: Icons.badge_outlined,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [controller.cpfMask],
-                  validator: controller.validateCPF,
+                Text(
+                  'reg_residence_question'.tr,
+                  style: AppTheme.titleSmall.copyWith(color: AppTheme.primaryBlue),
                 ),
+                const SizedBox(height: 10),
+                Obx(() => Row(
+                      children: [
+                        Expanded(
+                          child: ChoiceChip(
+                            label: Text('reg_country_br'.tr),
+                            selected: controller.residenceCountry.value == RegistrationController.kResidenceBrazil,
+                            onSelected: (_) => controller.setResidenceCountry(RegistrationController.kResidenceBrazil),
+                            selectedColor: AppTheme.lightBlue,
+                            labelStyle: TextStyle(
+                              color: controller.residenceCountry.value == RegistrationController.kResidenceBrazil
+                                  ? AppTheme.primaryBlue
+                                  : AppTheme.textSecondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ChoiceChip(
+                            label: Text('reg_country_us'.tr),
+                            selected: controller.residenceCountry.value == RegistrationController.kResidenceUs,
+                            onSelected: (_) => controller.setResidenceCountry(RegistrationController.kResidenceUs),
+                            selectedColor: AppTheme.lightBlue,
+                            labelStyle: TextStyle(
+                              color: controller.residenceCountry.value == RegistrationController.kResidenceUs
+                                  ? AppTheme.primaryBlue
+                                  : AppTheme.textSecondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )),
+                const SizedBox(height: 20),
+                Obx(() {
+                  if (controller.residenceCountry.value == RegistrationController.kResidenceBrazil) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildTextField(
+                          context,
+                          controller: controller.cpfController,
+                          label: 'profile_cpf'.tr,
+                          icon: Icons.badge_outlined,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [controller.cpfMask],
+                          validator: controller.validateCPF,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          context,
+                          controller: controller.rgController,
+                          label: 'profile_rg'.tr,
+                          icon: Icons.credit_card_outlined,
+                          keyboardType: TextInputType.text,
+                          inputFormatters: [controller.rgMask],
+                          validator: controller.validateRG,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildTextField(
+                        context,
+                        controller: controller.socialSecurityController,
+                        label: 'profile_ssn_us'.tr,
+                        icon: Icons.numbers_outlined,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [controller.ssnMask],
+                        validator: controller.validateSSN,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }),
+                Obx(() {
+                  final isBr = controller.residenceCountry.value == RegistrationController.kResidenceBrazil;
+                  return _buildTextField(
+                    context,
+                    controller: controller.phoneController,
+                    label: isBr ? 'profile_phone'.tr : 'reg_phone_us_label'.tr,
+                    icon: Icons.phone_iphone_outlined,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [isBr ? controller.phoneMask : controller.usPhoneMask],
+                    validator: controller.validatePhone,
+                  );
+                }),
                 const SizedBox(height: 16),
-                _buildTextField(
-                  context,
-                  controller: controller.rgController,
-                  label: 'profile_rg'.tr,
-                  icon: Icons.credit_card_outlined,
-                  keyboardType: TextInputType.text,
-                  inputFormatters: [controller.rgMask],
-                  validator: controller.validateRG,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  context,
-                  controller: controller.phoneController,
-                  label: 'profile_phone'.tr,
-                  icon: Icons.phone_iphone_outlined,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [controller.phoneMask],
-                  validator: controller.validatePhone,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  context,
-                  controller: controller.nationalityController,
-                  label: 'reg_nationality'.tr,
-                  icon: Icons.flag_outlined,
-                  validator: (value) => controller.validateRequired(value, 'reg_nationality'.tr),
-                ),
+                _buildNationalityDropdown(context),
                 const SizedBox(height: 16),
                 _buildTextField(
                   context,
@@ -582,6 +645,24 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
                       validator: (v) => controller.validateDropdown(v, 'reg_marital_status'.tr),
                     )),
                 const SizedBox(height: 16),
+                Obx(() {
+                  final items = controller.macroProfessionKeys;
+                  final sel = controller.professionMacro.value;
+                  final safeValue =
+                      sel != null && items.contains(sel) ? sel : null;
+                  return _buildDropdownField(
+                    context,
+                    value: safeValue,
+                    label: 'reg_profession'.tr,
+                    icon: Icons.work_outline,
+                    items: items,
+                    onChanged: (String? newValue) {
+                      controller.professionMacro.value = newValue;
+                    },
+                    validator: controller.validateProfessionMacro,
+                  );
+                }),
+                const SizedBox(height: 16),
                 _buildTextField(
                   context,
                   controller: controller.heightController,
@@ -599,19 +680,74 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   validator: controller.validateWeight,
                 ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  context,
-                  controller: controller.professionController,
-                  label: 'reg_profession'.tr,
-                  icon: Icons.work_outline,
-                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildNationalityDropdown(BuildContext context) {
+    final borderColor = AppTheme.primaryBlue.withValues(alpha: 0.22);
+    final usePortuguese = Localizations.localeOf(context).languageCode == 'pt';
+    return Obx(() {
+      return DropdownButtonFormField<String>(
+        value: controller.nationalityCountry.value != null &&
+                kWorldNationalities.contains(controller.nationalityCountry.value)
+            ? controller.nationalityCountry.value
+            : null,
+        isExpanded: true,
+        autovalidateMode: AutovalidateMode.disabled,
+        menuMaxHeight: 360,
+        decoration: InputDecoration(
+          labelText: 'reg_nationality'.tr,
+          labelStyle: AppTheme.bodyMedium,
+          prefixIcon: Icon(Icons.flag_outlined, color: AppTheme.primaryBlue.withValues(alpha: 0.9)),
+          hintText: 'reg_nationality_hint'.tr,
+          filled: true,
+          fillColor: const Color(0xFFF8FAFB),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: borderColor),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: borderColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: AppTheme.error.withValues(alpha: 0.85)),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: AppTheme.error.withValues(alpha: 0.95), width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
+        items: kWorldNationalities
+            .map(
+              (n) => DropdownMenuItem<String>(
+                value: n,
+                child: Text(
+                  nationalityDisplayLabel(n, usePortuguese: usePortuguese),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ),
+            )
+            .toList(),
+        onChanged: (v) => controller.nationalityCountry.value = v,
+        validator: (_) => controller.validateNationalitySelection(null),
+        dropdownColor: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        icon: Icon(Icons.arrow_drop_down, color: AppTheme.primaryBlue.withValues(alpha: 0.9)),
+      );
+    });
   }
 
   Widget _buildAddressStep(BuildContext context, Size size, double horizontalPad, double bottomPad) {
@@ -623,32 +759,60 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           constraints: const BoxConstraints(maxWidth: 440),
           child: Form(
             key: controller.addressFormKey,
+            autovalidateMode: AutovalidateMode.disabled,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildMiniStepTitle('reg_address'.tr, 'reg_address_sub'.tr),
-                _buildTextField(
-                  context,
-                  controller: controller.cepController,
-                  label: 'reg_cep'.tr,
-                  icon: Icons.location_on_outlined,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [controller.cepMask],
-                  validator: controller.validateCEP,
-                  onChanged: (value) {
-                    if (value.length == 9) {
-                      _buscarEnderecoPorCep(value);
-                    } else {
-                      cepError.value = '';
-                    }
-                  },
-                  suffixIcon: Obx(() => isCepLoading.value
-                      ? const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const SizedBox.shrink()),
-                ),
+                Obx(() => _buildMiniStepTitle(
+                      'reg_address'.tr,
+                      controller.residenceCountry.value == RegistrationController.kResidenceBrazil
+                          ? 'reg_address_hint_br'.tr
+                          : 'reg_address_hint_us'.tr,
+                    )),
+                Obx(() {
+                  final isBr =
+                      controller.residenceCountry.value == RegistrationController.kResidenceBrazil;
+                  return _buildTextField(
+                    context,
+                    controller: controller.cepController,
+                    label: isBr ? 'reg_cep'.tr : 'reg_zip_label'.tr,
+                    icon: Icons.location_on_outlined,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [isBr ? controller.cepMask : controller.usZipMask],
+                    validator: (v) => isBr ? controller.validateCEP(v) : controller.validateUSZip(v),
+                    onChanged: (value) {
+                      if (isBr) {
+                        if (value.length == 9) {
+                          _buscarEnderecoPorCep(value);
+                        } else {
+                          cepError.value = '';
+                        }
+                      } else {
+                        final d = value.replaceAll(RegExp(r'\D'), '');
+                        if (d.length == 5 || d.length == 9) {
+                          _buscarEnderecoPorZip(value);
+                        } else {
+                          cepError.value = '';
+                        }
+                      }
+                    },
+                    suffixIcon: Obx(() => isCepLoading.value
+                        ? const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const SizedBox.shrink()),
+                  );
+                }),
+                Obx(() => cepError.value.isEmpty
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          cepError.value,
+                          style: TextStyle(color: AppTheme.error, fontSize: 12),
+                        ),
+                      )),
                 const SizedBox(height: 16),
                 _buildTextField(
                   context,
@@ -674,13 +838,18 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
                   icon: Icons.add_location_alt_outlined,
                 ),
                 const SizedBox(height: 16),
-                _buildTextField(
-                  context,
-                  controller: controller.neighborhoodController,
-                  label: 'reg_neighborhood'.tr,
-                  icon: Icons.location_city_outlined,
-                  validator: (value) => controller.validateRequired(value, 'reg_neighborhood'.tr),
-                ),
+                Obx(() {
+                  final isBr =
+                      controller.residenceCountry.value == RegistrationController.kResidenceBrazil;
+                  return _buildTextField(
+                    context,
+                    controller: controller.neighborhoodController,
+                    label: isBr ? 'reg_neighborhood'.tr : 'reg_district_optional'.tr,
+                    icon: Icons.location_city_outlined,
+                    validator:
+                        isBr ? controller.validateNeighborhoodAddress : (_) => null,
+                  );
+                }),
                 const SizedBox(height: 16),
                 _buildTextField(
                   context,
@@ -693,13 +862,22 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
                 Obx(() => _buildDropdownField(
                       context,
                       value: controller.state.value,
-                      label: 'reg_state'.tr,
+                      label: controller.residenceCountry.value ==
+                              RegistrationController.kResidenceBrazil
+                          ? 'reg_state'.tr
+                          : 'reg_state_us'.tr,
                       icon: Icons.map_outlined,
-                      items: controller.states,
+                      items: controller.addressStateOptions,
                       onChanged: (String? newValue) {
                         controller.state.value = newValue;
                       },
-                      validator: (v) => controller.validateDropdown(v, 'reg_state'.tr),
+                      validator: (v) => controller.validateDropdown(
+                        v,
+                        controller.residenceCountry.value ==
+                                RegistrationController.kResidenceBrazil
+                            ? 'reg_state'
+                            : 'reg_state_us',
+                      ),
                     )),
                 const SizedBox(height: 24),
                 _buildMiniStepTitle('reg_terms'.tr, 'reg_terms_sub'.tr),
@@ -708,7 +886,13 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
                   value: controller.acceptTerms,
                   title: 'reg_accept_terms'.tr,
                   linkText: 'reg_terms_link'.tr,
-                  onLinkTap: () => Get.to(() => const TermsScreen()),
+                  onLinkTap: () async {
+                    final accepted = await Get.to<bool>(() => const TermsScreen());
+                    if (!mounted) return;
+                    if (accepted == true) {
+                      controller.acceptTerms.value = true;
+                    }
+                  },
                 ),
               ],
             ),
@@ -734,6 +918,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
     final borderColor = AppTheme.primaryBlue.withValues(alpha: 0.22);
     return TextFormField(
       controller: controller,
+      autovalidateMode: AutovalidateMode.disabled,
       keyboardType: keyboardType,
       style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
       decoration: InputDecoration(
@@ -784,6 +969,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
     final borderColor = AppTheme.primaryBlue.withValues(alpha: 0.22);
     return Obx(() => TextFormField(
           controller: controller,
+          autovalidateMode: AutovalidateMode.disabled,
           obscureText: obscure.value,
           style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
           decoration: InputDecoration(
@@ -838,6 +1024,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
     return DropdownButtonFormField<String>(
       value: value,
       isExpanded: true,
+      autovalidateMode: AutovalidateMode.disabled,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: AppTheme.bodyMedium,
@@ -896,11 +1083,23 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
     required RxBool value,
     required String title,
     String? linkText,
-    Function()? onLinkTap,
+    Future<void> Function()? onLinkTap,
   }) {
-    final size = MediaQuery.of(context).size;
+    final baseStyle = AppTheme.bodyMedium.copyWith(
+      color: AppTheme.textPrimary,
+      fontWeight: FontWeight.w500,
+      height: 1.35,
+    );
+    final linkStyle = AppTheme.bodyMedium.copyWith(
+      color: AppTheme.primaryBlue,
+      fontWeight: FontWeight.bold,
+      decoration: TextDecoration.underline,
+      decorationColor: AppTheme.primaryBlue,
+      height: 1.35,
+    );
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: AppTheme.primaryBlue.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
@@ -909,56 +1108,51 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
           width: 1,
         ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Obx(() => Checkbox(
-                value: value.value,
-                onChanged: (bool? newValue) {
-                  if (newValue != null) {
-                    value.value = newValue;
-                  }
-                },
-                activeColor: AppTheme.primaryBlue,
-                checkColor: Colors.white,
-                side: BorderSide(color: AppTheme.primaryBlue.withValues(alpha: 0.45)),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                visualDensity: VisualDensity.compact,
-              )),
-          SizedBox(width: size.width * 0.02),
-          Expanded(
-            child: linkText != null
-                ? RichText(
-                    text: TextSpan(
-                      text: title,
-                      style: AppTheme.bodyMedium.copyWith(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: linkText,
-                          style: AppTheme.bodyMedium.copyWith(
-                            color: AppTheme.primaryBlue,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                            decorationColor: AppTheme.primaryBlue,
-                          ),
-                          recognizer: TapGestureRecognizer()..onTap = onLinkTap,
-                        ),
-                      ],
-                    ),
-                  )
-                : Text(
-                    title,
-                    style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textPrimary,
-                      fontWeight: FontWeight.w500,
-                    ),
+      child: Obx(() => Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Theme(
+                data: Theme.of(context).copyWith(
+                  checkboxTheme: CheckboxThemeData(
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    side: BorderSide(color: AppTheme.primaryBlue.withValues(alpha: 0.45)),
                   ),
-          ),
-        ],
-      ),
+                ),
+                child: Checkbox(
+                  value: value.value,
+                  onChanged: (bool? newValue) {
+                    if (newValue != null) {
+                      value.value = newValue;
+                    }
+                  },
+                  activeColor: AppTheme.primaryBlue,
+                  checkColor: Colors.white,
+                  side: BorderSide(color: AppTheme.primaryBlue.withValues(alpha: 0.45)),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: linkText != null && onLinkTap != null
+                    ? Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: [
+                          Text(title, style: baseStyle),
+                          GestureDetector(
+                            onTap: onLinkTap,
+                            behavior: HitTestBehavior.opaque,
+                            child: Text(linkText!, style: linkStyle),
+                          ),
+                        ],
+                      )
+                    : Text(title, style: baseStyle),
+              ),
+            ],
+          )),
     );
   }
 
@@ -1196,6 +1390,41 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
       }
     } catch (e) {
       cepError.value = 'reg_cep_error'.tr;
+    } finally {
+      isCepLoading.value = false;
+    }
+  }
+
+  Future<void> _buscarEnderecoPorZip(String zipRaw) async {
+    final cleaned = zipRaw.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleaned.length < 5) return;
+    final zip5 = cleaned.length >= 5 ? cleaned.substring(0, 5) : cleaned;
+
+    isCepLoading.value = true;
+    cepError.value = '';
+    try {
+      final response = await http.get(
+        Uri.parse('https://api.zippopotam.us/us/$zip5'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final places = data['places'] as List<dynamic>?;
+        if (places != null && places.isNotEmpty) {
+          final p = places.first as Map<String, dynamic>;
+          controller.cityController.text = (p['place name'] ?? '').toString();
+          final abbr = (p['state abbreviation'] ?? '').toString();
+          controller.state.value =
+              controller.usStates.contains(abbr) ? abbr : null;
+          cepError.value = '';
+        } else {
+          cepError.value = 'reg_zip_not_found'.tr;
+        }
+      } else {
+        cepError.value = 'reg_zip_not_found'.tr;
+      }
+    } catch (e) {
+      cepError.value = 'reg_zip_error'.tr;
     } finally {
       isCepLoading.value = false;
     }

@@ -12,9 +12,9 @@ import '../login/paciente_controller.dart';
 import 'exame_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
-import '../../widgets/pulse_drawer_button.dart';
 
 class ExameUploadScreen extends StatefulWidget {
   const ExameUploadScreen({super.key});
@@ -211,7 +211,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFF00324A),
+              primary: AppTheme.primaryBlue,
               onPrimary: Colors.white,
               surface: Colors.white,
               onSurface: Colors.black,
@@ -258,29 +258,31 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
     final isSmallScreen = screenSize.height < 700;
     final isPhone = screenSize.width < 420;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: AppTheme.blueSystemOverlayStyle,
-      child: Scaffold(
-        backgroundColor: const Color(0xFF00324A),
-        drawer: const PulseSideMenu(activeItem: PulseNavItem.menu),
-        resizeToAvoidBottomInset: true,
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              _buildHeader(isSmallScreen),
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24),
-                    ),
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: LayoutBuilder(
+    return PulseBlueScaffold(
+      resizeToAvoidBottomInset: true,
+      drawer: PulseSideMenu(activeItem: PulseNavItem.menu),
+      header: PulseBlueLeadTitleHeader(
+        title: 'exam_attach_title'.tr,
+        subtitle: 'exam_attach_sub'.tr,
+        drawerIconSize: 20,
+        trailing: IconButton(
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Get.toNamed(Routes.EXAME_LIST);
+          },
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.visibility_outlined, color: Colors.white, size: 20),
+          ),
+        ),
+      ),
+      body: Form(
+        key: _formKey,
+        child: LayoutBuilder(
                       builder: (context, constraints) {
                         final maxWidth = constraints.maxWidth > 800 ? 800.0 : constraints.maxWidth;
                         return Center(
@@ -335,78 +337,6 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                       },
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // bottomNavigationBar removido - tela tem sidebar
-        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
-      ),
-    );
-  }
-
-  Widget _buildHeader(bool isSmallScreen) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: isSmallScreen ? 16 : 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: Row(
-        children: [
-          const PulseDrawerButton(iconSize: 20),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'exam_attach_title'.tr,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: isSmallScreen ? 20 : 24,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'exam_attach_sub'.tr,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: isSmallScreen ? 12 : 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              Get.toNamed(Routes.EXAME_LIST);
-            },
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.visibility_outlined,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -424,7 +354,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
           Container(
             padding: EdgeInsets.all(isSmallScreen ? 10 : 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF00324A),
+              color: AppTheme.primaryBlue,
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -443,7 +373,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                   style: TextStyle(
                     fontSize: isSmallScreen ? 18 : 20,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF00324A),
+                    color: AppTheme.primaryBlue,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -451,7 +381,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                   'exam_info_sub'.tr,
                   style: TextStyle(
                     fontSize: isSmallScreen ? 12 : 14,
-                    color: const Color(0xFF00324A).withOpacity(0.7),
+                    color: AppTheme.primaryBlue.withOpacity(0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -476,7 +406,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
       children: [
         Row(
           children: [
-            Icon(icon, size: 18, color: const Color(0xFF00324A)),
+            Icon(icon, size: 18, color: AppTheme.primaryBlue),
             const SizedBox(width: 6),
             Text(
               label,
@@ -521,7 +451,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
+              borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -550,7 +480,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
       children: [
         Row(
           children: [
-            const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF00324A)),
+            const Icon(Icons.calendar_today_outlined, size: 18, color: AppTheme.primaryBlue),
             const SizedBox(width: 6),
             Text(
               'exam_date_label'.tr,
@@ -624,7 +554,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
       children: [
         Row(
           children: [
-            const Icon(Icons.attach_file_outlined, size: 18, color: Color(0xFF00324A)),
+            const Icon(Icons.attach_file_outlined, size: 18, color: AppTheme.primaryBlue),
             const SizedBox(width: 6),
             Text(
               'exam_file_label'.tr,
@@ -676,12 +606,12 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00324A).withOpacity(0.1),
+                          color: AppTheme.primaryBlue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
                           Icons.cloud_upload_outlined,
-                          color: Color(0xFF00324A),
+                          color: AppTheme.primaryBlue,
                           size: 40,
                         ),
                       ),
@@ -691,7 +621,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                         style: TextStyle(
                           fontSize: isSmallScreen ? 14 : 16,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF00324A),
+                          color: AppTheme.primaryBlue,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -801,8 +731,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
                           icon: const Icon(Icons.refresh_outlined, size: 18),
                           label: Text('exam_change_file'.tr),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF00324A),
-                            side: const BorderSide(color: Color(0xFF00324A), width: 1.5),
+                            foregroundColor: AppTheme.primaryBlue,
+                            side: const BorderSide(color: AppTheme.primaryBlue, width: 1.5),
                             padding: EdgeInsets.symmetric(
                               vertical: isSmallScreen ? 12 : 14,
                             ),
@@ -845,7 +775,7 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00324A),
+              backgroundColor: AppTheme.primaryBlue,
               foregroundColor: Colors.white,
               padding: EdgeInsets.symmetric(
                 vertical: isSmallScreen ? 14 : 16,
@@ -874,8 +804,8 @@ class _ExameUploadScreenState extends State<ExameUploadScreen> {
               ),
             ),
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF00324A),
-              side: const BorderSide(color: Color(0xFF00324A), width: 1.5),
+              foregroundColor: AppTheme.primaryBlue,
+              side: const BorderSide(color: AppTheme.primaryBlue, width: 1.5),
               padding: EdgeInsets.symmetric(
                 vertical: isSmallScreen ? 14 : 16,
               ),

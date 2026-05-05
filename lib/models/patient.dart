@@ -1,3 +1,5 @@
+import '../utils/patient_catalog_normalize.dart';
+
 class Patient {
   final String? id;
   final String name;
@@ -11,6 +13,10 @@ class Patient {
   final String gender;
   final String maritalStatus;
   final String nationality;
+  /// País de residência no cadastro: `BR` ou `US` (ISO3166-1 alpha-2).
+  final String? residenceCountry;
+  /// EUA: SSN apenas dígitos. Brasil: usar [cpf]/[rg].
+  final String? socialSecurityNumber;
   final String address;
   final double? height; // Altura em cm
   final double? weight; // Peso em kg
@@ -42,6 +48,8 @@ class Patient {
     required this.gender,
     required this.maritalStatus,
     required this.nationality,
+    this.residenceCountry,
+    this.socialSecurityNumber,
     required this.address,
     this.height, // Campo opcional para altura
     this.weight, // Campo opcional para peso
@@ -76,6 +84,8 @@ class Patient {
       'gender': gender,
       'maritalStatus': maritalStatus,
       'nationality': nationality,
+      'residenceCountry': residenceCountry,
+      'socialSecurityNumber': socialSecurityNumber,
       'address': address,
       'height': height, // Incluir altura no JSON
       'weight': weight, // Incluir peso no JSON
@@ -107,23 +117,41 @@ class Patient {
     final birthDateStr = json['birthDate'] ?? json['dataNascimento'];
     final createdAtStr = json['createdAt'];
     final updatedAtStr = json['updatedAt'];
+
+    var cpfVal = (json['cpf'] ?? '').toString();
+    var ssnVal = json['socialSecurityNumber']?.toString();
+    final rc = json['residenceCountry']?.toString();
+    final cpfDigitsOnly = cpfVal.replaceAll(RegExp(r'\D'), '');
+    // EUA antigo: SSN só em `cpf` (9 dígitos) → passa para socialSecurityNumber.
+    if ((ssnVal == null || ssnVal.isEmpty) &&
+        rc == 'US' &&
+        cpfDigitsOnly.length == 9) {
+      ssnVal = cpfDigitsOnly;
+      cpfVal = '';
+    }
+
     return Patient(
       id: json['_id']?.toString(),
       name: json['name'] ?? json['nome'] ?? '',
       email: json['email'] ?? '',
       password: json['password'] ?? json['senha'] ?? '',
-      cpf: json['cpf'] ?? '',
+      cpf: cpfVal,
       rg: json['rg'] ?? '',
       phone: json['phone'] ?? json['telefone'] ?? '',
       secondaryPhone: json['secondaryPhone'],
       birthDate: birthDateStr != null ? DateTime.tryParse(birthDateStr.toString()) ?? DateTime.now() : DateTime.now(),
-      gender: json['gender'] ?? json['genero'] ?? '',
-      maritalStatus: json['maritalStatus'] ?? '',
+      gender: PatientCatalogNormalize.gender(
+          (json['gender'] ?? json['genero'] ?? '').toString()),
+      maritalStatus: PatientCatalogNormalize.marital(
+          (json['maritalStatus'] ?? '').toString()),
       nationality: json['nationality'] ?? json['nacionalidade'] ?? '',
+      residenceCountry: json['residenceCountry']?.toString(),
+      socialSecurityNumber: ssnVal,
       address: json['address'] ?? '',
       height: json['height'] != null ? (json['height'] as num).toDouble() : (json['altura'] != null ? double.tryParse(json['altura'].toString()) : null),
       weight: json['weight'] != null ? (json['weight'] as num).toDouble() : (json['peso'] != null ? double.tryParse(json['peso'].toString()) : null),
-      profession: json['profession'] ?? json['profissao'],
+      profession: PatientCatalogNormalize.profession(
+          json['profession']?.toString() ?? json['profissao']?.toString()),
       acceptedTerms: json['acceptedTerms'] ?? false,
       profilePhoto: _parseProfilePhoto(json),
       emergencyContact: json['emergencyContact'],

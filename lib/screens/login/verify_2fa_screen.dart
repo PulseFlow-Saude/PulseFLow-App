@@ -25,6 +25,8 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
   String? _error;
   late String _patientId;
   String? _patientEmail;
+  /// Modo EMAIL_2FA_SKIP_SMTP: código visível na UI (sem SMTP).
+  String? _plaintextCode;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -54,7 +56,9 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
     
     // Extrair parâmetros dos argumentos
     _extractParameters();
-    
+    _plaintextCode ??=
+        AuthService.instance.plaintext2FACodeForTesting;
+
     // Carregar email do paciente
     _loadPatientEmail();
   }
@@ -64,6 +68,10 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
     
     if (arguments != null && arguments is Map) {
       _patientId = arguments['patientId'] as String? ?? '';
+      final pc = arguments['plaintextCode'];
+      if (pc is String && pc.isNotEmpty) {
+        _plaintextCode = pc;
+      }
     }
     
     if (_patientId.isEmpty) {
@@ -101,12 +109,19 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
     
     try {
       await AuthService.instance.resend2FACode(_patientId, method: 'email');
+      final plain = AuthService.instance.plaintext2FACodeForTesting;
+      setState(() {
+        _plaintextCode = plain ?? _plaintextCode;
+      });
       Get.snackbar(
         'auth_2fa_code_resent'.tr,
-        'auth_2fa_code_resent_msg'.tr,
+        plain != null
+            ? 'auth_2fa_skip_smtp_resend_snackbar'.trParams({'code': plain})
+            : 'auth_2fa_code_resent_msg'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: plain != null ? 12 : 3),
       );
     } catch (e) {
       setState(() {
@@ -266,7 +281,49 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
                               ),
                             
                             const SizedBox(height: 16),
-                            
+
+                            if (_plaintextCode != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Material(
+                                  color: Colors.amber.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(14),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          'auth_2fa_skip_smtp_title'.tr,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'auth_2fa_skip_smtp_hint'.tr,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade900,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        SelectableText(
+                                          _plaintextCode!,
+                                          style: const TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 6,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+
                             Text(
                               'auth_2fa_enter_code'.tr,
                               textAlign: TextAlign.center,

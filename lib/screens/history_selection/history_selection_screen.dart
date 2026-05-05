@@ -1,125 +1,137 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/pulse_bottom_navigation.dart';
-import '../../widgets/pulse_side_menu.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
+import '../../widgets/pulse_bottom_navigation.dart' show PulseNavItem;
 import '../../widgets/pulse_drawer_button.dart';
+import '../../widgets/pulse_side_menu.dart';
 import '../home/home_controller.dart';
 
-class HistorySelectionScreen extends StatefulWidget {
+/// Hub de históricos — mesmo padrão visual do [MenuScreen] (área de Registros).
+class HistorySelectionScreen extends StatelessWidget {
   const HistorySelectionScreen({Key? key}) : super(key: key);
 
   @override
-  State<HistorySelectionScreen> createState() => _HistorySelectionScreenState();
-}
-
-class _HistorySelectionScreenState extends State<HistorySelectionScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-    );
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: AppTheme.blueSystemOverlayStyle,
-      child: Scaffold(
-        backgroundColor: const Color(0xFF00324A),
-        drawer: const PulseSideMenu(activeItem: PulseNavItem.history),
-        body: Column(
-          children: [
-            // Header
-            _buildHeader(),
-            
-            // Conteúdo principal
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20.0),
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader('hist_available'.tr),
-                        const SizedBox(height: 16),
-                        _buildHistoryList(),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+    final horizontalPad = math.max(16.0, MediaQuery.sizeOf(context).width * 0.055);
+    final bottomPad = math.max(MediaQuery.paddingOf(context).bottom, 16.0) + 16;
+
+    return PulseBlueScaffold(
+      drawer: const PulseSideMenu(activeItem: PulseNavItem.history),
+      header: _buildHeader(context),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(horizontalPad, 20, horizontalPad, bottomPad),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildSectionIntro(context),
+                _buildHistoryCardsList(),
+              ],
             ),
-          ],
+          ),
         ),
-        // bottomNavigationBar removido - tela tem sidebar
-        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(Get.context!).padding.top + 16,
-        left: 16,
-        right: 16,
-        bottom: 16,
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 10),
+      child: Row(
+        children: [
+          const PulseDrawerButton(iconSize: 22),
+          Expanded(
+            child: Center(child: _buildBrandLogo()),
+          ),
+          _buildNotificationIcon(),
+        ],
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
+    );
+  }
+
+  Widget _buildSectionIntro(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const PulseDrawerButton(),
-              _buildBrandLogo(),
-              _buildNotificationIcon(),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.07),
+                      blurRadius: 14,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.history_rounded,
+                  color: AppTheme.primaryBlue,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'hist_section_title'.tr,
+                      style: AppTheme.titleLarge.copyWith(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                        height: 1.15,
+                        letterSpacing: 0.2,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'hist_section_sub'.tr,
+                      style: AppTheme.bodyMedium.copyWith(
+                        color: AppTheme.textSecondary.withValues(alpha: 0.95),
+                        height: 1.45,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            'hist_title'.tr,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          const SizedBox(height: 18),
+          Container(
+            height: 1.2,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(2),
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryBlue.withValues(alpha: 0.28),
+                  AppTheme.primaryBlue.withValues(alpha: 0.08),
+                  AppTheme.primaryBlue.withValues(alpha: 0.02),
+                ],
+              ),
             ),
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -135,18 +147,14 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
         errorBuilder: (context, error, stackTrace) {
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.3)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
             ),
-            child: const Center(
+            child: Center(
               child: Text(
                 'Oryon Health',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTheme.titleSmall.copyWith(color: Colors.white),
               ),
             ),
           );
@@ -178,12 +186,13 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
 
   Widget _notificationBadge(int? count) {
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: const Icon(
             Icons.notifications_outlined,
@@ -193,18 +202,15 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
         ),
         if (count != null && count > 0)
           Positioned(
-            right: 0,
-            top: 0,
+            right: -2,
+            top: -2,
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: const BoxDecoration(
                 color: Colors.red,
                 shape: BoxShape.circle,
               ),
-              constraints: const BoxConstraints(
-                minWidth: 16,
-                minHeight: 16,
-              ),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(
                 count > 9 ? '9+' : count.toString(),
                 style: const TextStyle(
@@ -220,241 +226,166 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF1E293B),
+  Widget _buildHistoryCardsList() {
+    final cards = [
+      _HistoryCardData(
+        accent: AppTheme.primaryBlue,
+        icon: Icons.history_rounded,
+        title: 'hist_clinical'.tr,
+        subtitle: 'hist_clinical_sub'.tr,
+        onTap: () => Get.toNamed(Routes.MEDICAL_RECORDS),
       ),
-    );
-  }
+      _HistoryCardData(
+        accent: const Color(0xFF1565C0),
+        icon: Icons.event_available_rounded,
+        title: 'hist_events'.tr,
+        subtitle: 'hist_events_sub'.tr,
+        onTap: () => Get.toNamed(Routes.EVENTO_CLINICO_HISTORY),
+      ),
+      _HistoryCardData(
+        accent: Colors.orange.shade800,
+        icon: Icons.restaurant_menu_rounded,
+        title: 'hist_gastrite'.tr,
+        subtitle: 'hist_gastrite_sub'.tr,
+        onTap: () => Get.toNamed(Routes.CRISE_GASTRITE_HISTORY),
+      ),
+      _HistoryCardData(
+        accent: Colors.pink.shade400,
+        icon: Icons.timeline_rounded,
+        title: 'hist_menstrual'.tr,
+        subtitle: 'hist_menstrual_sub'.tr,
+        onTap: () => Get.toNamed(Routes.MENSTRUACAO_HISTORY),
+      ),
+      _HistoryCardData(
+        accent: Colors.red.shade700,
+        icon: Icons.favorite_rounded,
+        title: 'hist_heart_rate'.tr,
+        subtitle: 'hist_heart_rate_sub'.tr,
+        onTap: () => Get.toNamed(Routes.HEART_RATE_HISTORY),
+      ),
+      _HistoryCardData(
+        accent: Colors.blueGrey.shade600,
+        icon: Icons.directions_walk_rounded,
+        title: 'hist_steps'.tr,
+        subtitle: 'hist_steps_sub'.tr,
+        onTap: () => Get.toNamed(Routes.STEPS_HISTORY),
+      ),
+      _HistoryCardData(
+        accent: Colors.indigo.shade600,
+        icon: Icons.bedtime_rounded,
+        title: 'hist_sleep'.tr,
+        subtitle: 'hist_sleep_sub'.tr,
+        onTap: () => Get.toNamed(Routes.SLEEP_HISTORY),
+      ),
+      _HistoryCardData(
+        accent: Colors.green.shade700,
+        icon: Icons.security_rounded,
+        title: 'hist_access'.tr,
+        subtitle: 'hist_access_sub'.tr,
+        onTap: () => Get.toNamed(Routes.ACCESS_HISTORY),
+      ),
+    ];
 
-  // Lista de históricos
-  Widget _buildHistoryList() {
     return Column(
       children: [
-        _buildHistoryCard(
-          icon: Icons.history_rounded,
-          title: 'hist_clinical'.tr,
-          subtitle: 'hist_clinical_sub'.tr,
-          gradientColors: [
-            const Color(0xFF00324A),
-            const Color(0xFF004A6B),
-          ],
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            Get.toNamed(Routes.MEDICAL_RECORDS);
-          },
-        ),
-        const SizedBox(height: 16),
-        _buildHistoryCard(
-          icon: Icons.event_available_rounded,
-          title: 'hist_events'.tr,
-          subtitle: 'hist_events_sub'.tr,
-          gradientColors: [
-            const Color(0xFF00324A),
-            const Color(0xFF004A6B),
-          ],
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            Get.toNamed(Routes.EVENTO_CLINICO_HISTORY);
-          },
-        ),
-        const SizedBox(height: 16),
-        _buildHistoryCard(
-          icon: Icons.restaurant_menu_rounded,
-          title: 'hist_gastrite'.tr,
-          subtitle: 'hist_gastrite_sub'.tr,
-          gradientColors: [
-            const Color(0xFF00324A),
-            const Color(0xFF004A6B),
-          ],
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            Get.toNamed(Routes.CRISE_GASTRITE_HISTORY);
-          },
-        ),
-        const SizedBox(height: 16),
-        _buildHistoryCard(
-          icon: Icons.timeline_rounded,
-          title: 'hist_menstrual'.tr,
-          subtitle: 'hist_menstrual_sub'.tr,
-          gradientColors: [
-            const Color(0xFF00324A),
-            const Color(0xFF004A6B),
-          ],
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            Get.toNamed(Routes.MENSTRUACAO_HISTORY);
-          },
-        ),
-        const SizedBox(height: 16),
-        _buildHistoryCard(
-          icon: Icons.favorite_rounded,
-          title: 'hist_heart_rate'.tr,
-          subtitle: 'hist_heart_rate_sub'.tr,
-          gradientColors: [
-            const Color(0xFF00324A),
-            const Color(0xFF004A6B),
-          ],
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            Get.toNamed(Routes.HEART_RATE_HISTORY);
-          },
-        ),
-        const SizedBox(height: 16),
-        _buildHistoryCard(
-          icon: Icons.directions_walk_rounded,
-          title: 'hist_steps'.tr,
-          subtitle: 'hist_steps_sub'.tr,
-          gradientColors: [
-            const Color(0xFF00324A),
-            const Color(0xFF004A6B),
-          ],
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            Get.toNamed(Routes.STEPS_HISTORY);
-          },
-        ),
-        const SizedBox(height: 16),
-        _buildHistoryCard(
-          icon: Icons.bedtime_rounded,
-          title: 'hist_sleep'.tr,
-          subtitle: 'hist_sleep_sub'.tr,
-          gradientColors: [
-            const Color(0xFF00324A),
-            const Color(0xFF004A6B),
-          ],
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            Get.toNamed(Routes.SLEEP_HISTORY);
-          },
-        ),
-        const SizedBox(height: 16),
-        _buildHistoryCard(
-          icon: Icons.security_rounded,
-          title: 'hist_access'.tr,
-          subtitle: 'hist_access_sub'.tr,
-          gradientColors: [
-            const Color(0xFF4CAF50),
-            const Color(0xFF66BB6A),
-          ],
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            Get.toNamed(Routes.ACCESS_HISTORY);
-          },
-        ),
+        for (int i = 0; i < cards.length; i++) ...[
+          _HistoryCard(data: cards[i]),
+          if (i < cards.length - 1) const SizedBox(height: 12),
+        ],
       ],
     );
   }
+}
 
-  Widget _buildHistoryCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required List<Color> gradientColors,
-    required VoidCallback onPressed,
-  }) {
+class _HistoryCardData {
+  final Color accent;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _HistoryCardData({
+    required this.accent,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+}
+
+class _HistoryCard extends StatelessWidget {
+  final _HistoryCardData data;
+
+  const _HistoryCard({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: title,
-      hint: '${'hist_tap_to_access'.tr} $title',
+      label: data.title,
+      hint: '${'hist_tap_to_access'.tr} ${data.title}',
       child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradientColors,
-          ),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: gradientColors[0].withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-              spreadRadius: 0,
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
+        decoration: AppTheme.surfaceListCardDecoration(),
         child: Material(
           color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          clipBehavior: Clip.antiAlias,
           child: InkWell(
-            borderRadius: BorderRadius.circular(24),
-            onTap: onPressed,
-            splashColor: Colors.white.withOpacity(0.2),
-            highlightColor: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              data.onTap();
+            },
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
               child: Row(
                 children: [
-                  // Ícone com fundo decorativo
                   Container(
-                    width: 64,
-                    height: 64,
+                    width: 52,
+                    height: 52,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1.5,
+                      color: data.accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        data.icon,
+                        size: 26,
+                        color: data.accent,
                       ),
                     ),
-                    child: Icon(
-                      icon,
-                      size: 32,
-                      color: Colors.white,
-                    ),
                   ),
-                  const SizedBox(width: 20),
-                  
-                  // Textos
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.5,
+                          data.title,
+                          style: AppTheme.titleMedium.copyWith(
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            height: 1.25,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          subtitle,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
+                          data.subtitle,
+                          style: AppTheme.bodySmall.copyWith(
+                            color: AppTheme.textSecondary,
+                            height: 1.35,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
-                  
-                  // Ícone de seta
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 16,
-                      color: Colors.white,
-                    ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 24,
+                    color: AppTheme.textSecondary.withValues(alpha: 0.55),
                   ),
                 ],
               ),
@@ -464,6 +395,4 @@ class _HistorySelectionScreenState extends State<HistorySelectionScreen> with Si
       ),
     );
   }
-
 }
-

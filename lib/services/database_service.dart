@@ -1009,6 +1009,21 @@ class DatabaseService {
     }
   }
 
+  /// Remove código 2FA (ex.: falha ao enviar e-mail — evita código órfão na conta).
+  Future<void> clearTwoFactorCode(String patientId) async {
+    try {
+      await _ensureConnection();
+      final collection = _db!.collection(DatabaseConfig.patientsCollection);
+      final objectId = ObjectId.parse(patientId);
+      await collection.update(
+        where.eq('_id', objectId),
+        modify.unset('twoFactorCode').unset('twoFactorExpires'),
+      );
+    } catch (_) {
+      // não bloquear fluxo de erro original
+    }
+  }
+
   Future<bool> validateTwoFactorCode(String patientId, String code) async {
     try {
       await _ensureConnection();
@@ -1076,6 +1091,18 @@ class DatabaseService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> clearPasswordResetCode(String patientId) async {
+    try {
+      await _ensureConnection();
+      final collection = _db!.collection(DatabaseConfig.patientsCollection);
+      final objectId = ObjectId.parse(patientId);
+      await collection.update(
+        where.eq('_id', objectId),
+        modify.unset('passwordResetCode').unset('passwordResetExpires'),
+      );
+    } catch (_) {}
   }
 
   Future<bool> validatePasswordResetCode(String patientId, String code) async {

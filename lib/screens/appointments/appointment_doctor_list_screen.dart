@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/specialty_translations.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
+import '../../widgets/pulse_drawer_button.dart';
 import 'appointment_scheduler_controller.dart';
 
 class AppointmentDoctorListScreen extends StatelessWidget {
@@ -20,113 +22,96 @@ class AppointmentDoctorListScreen extends StatelessWidget {
       Future.microtask(() => Get.offAllNamed(Routes.APPOINTMENTS_SPECIALTY));
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF00324A),
-      body: Column(
-        children: [
-          _DoctorHeader(),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+    return PulseBlueScaffold(
+      header: const _DoctorHeader(),
+      body: Obx(
+        () {
+          if (controller.isLoading.value) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppTheme.primaryBlue),
+            );
+          }
+
+          if (controller.loadError.value.isNotEmpty) {
+            return Center(
+              child: _ErrorState(
+                message: controller.loadError.value,
+                onRetry: () => controller.ensureDataLoaded(force: true),
+              ),
+            );
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  controller.selectedSpecialty != null ? SpecialtyTranslations.translate(controller.selectedSpecialty!.name) : 'appt_specialists'.tr,
+                  style: AppTheme.titleLarge.copyWith(
+                    color: const Color(0xFF1E293B),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              child: Obx(
-                () {
-                  if (controller.isLoading.value) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: Color(0xFF00324A)),
-                    );
-                  }
-
-                  if (controller.loadError.value.isNotEmpty) {
-                    return Center(
-                      child: _ErrorState(
-                        message: controller.loadError.value,
-                        onRetry: () => controller.ensureDataLoaded(force: true),
-                      ),
-                    );
-                  }
-
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          controller.selectedSpecialty != null ? SpecialtyTranslations.translate(controller.selectedSpecialty!.name) : 'appt_specialists'.tr,
-                          style: AppTheme.titleLarge.copyWith(
-                            color: const Color(0xFF1E293B),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'appt_choose_doctor_hint'.tr,
-                          style: AppTheme.bodyMedium.copyWith(color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 20),
-                        TextField(
-                          controller: controller.doctorSearchController,
-                          onChanged: controller.updateDoctorSearch,
-                          decoration: InputDecoration(
-                            hintText: 'appt_search_doctor_crm'.tr,
-                            prefixIcon: const Icon(Icons.search_rounded),
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Color(0xFF00324A), width: 1.5),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Obx(() {
-                          final filteredDoctors = controller.filteredDoctors;
-                          final doctorQuery = controller.doctorQuery.value;
-                          
-                          if (filteredDoctors.isEmpty) {
-                            return _EmptyState(
-                              icon: Icons.search_off_rounded,
-                              message: doctorQuery.isEmpty
-                                  ? 'appt_no_doctor_registered'.tr
-                                  : '${'appt_no_doctor_match'.tr} "$doctorQuery".',
-                            );
-                          }
-                          
-                          return Column(
-                            children: filteredDoctors.map((doctor) {
-                            final suggestions = _nextAvailableThreeSlots(controller, doctor.id);
-                            return _DoctorCard(
-                              doctorName: doctor.name,
-                              crm: doctor.crm,
-                              experience: doctor.experience,
-                              specialty: SpecialtyTranslations.translate(doctor.specialtyName),
-                              suggestions: suggestions,
-                              onTap: () {
-                                controller.selectDoctor(doctor.id);
-                                Get.toNamed(Routes.APPOINTMENT_SCHEDULER);
-                              },
-                            );
-                            }).toList(),
-                          );
-                        }),
-                      ],
+                const SizedBox(height: 6),
+                Text(
+                  'appt_choose_doctor_hint'.tr,
+                  style: AppTheme.bodyMedium.copyWith(color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: controller.doctorSearchController,
+                  onChanged: controller.updateDoctorSearch,
+                  decoration: InputDecoration(
+                    hintText: 'appt_search_doctor_crm'.tr,
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
                     ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Obx(() {
+                  final filteredDoctors = controller.filteredDoctors;
+                  final doctorQuery = controller.doctorQuery.value;
+
+                  if (filteredDoctors.isEmpty) {
+                    return _EmptyState(
+                      icon: Icons.search_off_rounded,
+                      message: doctorQuery.isEmpty
+                          ? 'appt_no_doctor_registered'.tr
+                          : '${'appt_no_doctor_match'.tr} "$doctorQuery".',
+                    );
+                  }
+
+                  return Column(
+                    children: filteredDoctors.map((doctor) {
+                      final suggestions = _nextAvailableThreeSlots(controller, doctor.id);
+                      return _DoctorCard(
+                        doctorName: doctor.name,
+                        crm: doctor.crm,
+                        experience: doctor.experience,
+                        specialty: SpecialtyTranslations.translate(doctor.specialtyName),
+                        suggestions: suggestions,
+                        onTap: () {
+                          controller.selectDoctor(doctor.id);
+                          Get.toNamed(Routes.APPOINTMENT_SCHEDULER);
+                        },
+                      );
+                    }).toList(),
                   );
-                },
-              ),
+                }),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -140,48 +125,29 @@ class AppointmentDoctorListScreen extends StatelessWidget {
 }
 
 class _DoctorHeader extends StatelessWidget {
+  const _DoctorHeader();
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        left: 20,
-        right: 20,
-        bottom: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 20, 14),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(
-            onPressed: Get.back,
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-          const SizedBox(width: 12),
+          PulseBlueBackButton(onPressed: Get.back),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'appt_choose_doctor'.tr,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: PulseBlueHeaderStyles.titleCompact,
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'appt_choose_doctor_sub'.tr,
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  style: PulseBlueHeaderStyles.subtitleCompact,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

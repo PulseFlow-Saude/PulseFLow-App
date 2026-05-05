@@ -64,54 +64,52 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.blueSystemOverlayStyle,
       child: Scaffold(
-      backgroundColor: const Color(0xFF00324A),
+      backgroundColor: Colors.transparent,
       drawer: const PulseSideMenu(activeItem: PulseNavItem.history),
-      body: Column(
-        children: [
-          // Header moderno com gradiente
-          _buildModernHeader(),
-          
-          // Conteúdo (mesmo layout do histórico de eventos)
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: AppTheme.blueScreenGradientDecoration,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildModernHeader(),
+            Expanded(
+              child: Container(
+                decoration: AppTheme.blueContentSheetDecoration,
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Obx(() {
+                    if (controller.isLoading.value) {
+                      return _buildLoadingState();
+                    }
+                    final notes = controller.notes.toList();
+                    final filtered = _applyFilters(notes);
+                    final totalCount = notes.length;
+                    final filteredCount = filtered.length;
+                    if (totalCount == 0) {
+                      return _buildEmptyState();
+                    }
+                    if (filtered.isEmpty) {
+                      return _buildNoResultsState();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildCounterCard(totalCount, filteredCount),
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: _buildRecordsList(filtered),
+                        ),
+                      ],
+                    );
+                  }),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Obx(() {
-                  if (controller.isLoading.value) {
-                    return _buildLoadingState();
-                  }
-                  final notes = controller.notes.toList();
-                  final filtered = _applyFilters(notes);
-                  final totalCount = notes.length;
-                  final filteredCount = filtered.length;
-                  if (totalCount == 0) {
-                    return _buildEmptyState();
-                  }
-                  if (filtered.isEmpty) {
-                    return _buildNoResultsState();
-                  }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildCounterCard(totalCount, filteredCount),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: _buildRecordsList(filtered),
-                      ),
-                    ],
-                  );
-                }),
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       // bottomNavigationBar removido - tela tem sidebar
       // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
@@ -126,13 +124,6 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> with Ticker
         left: 16,
         right: 16,
         bottom: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
       ),
       child: Column(
         children: [

@@ -93,7 +93,15 @@ class LoginController extends GetxController with SafeControllerMixin {
         await _authService.verify2FACode(patientId, '');
         Get.offAllNamed('/home');
       } else {
-        Get.toNamed('/verify-2fa', arguments: {'patientId': patientId, 'method': 'email'});
+        final args = <String, dynamic>{
+          'patientId': patientId,
+          'method': 'email',
+        };
+        final plain = _authService.plaintext2FACodeForTesting;
+        if (plain != null) {
+          args['plaintextCode'] = plain;
+        }
+        Get.toNamed('/verify-2fa', arguments: args);
       }
     } catch (e) {
       Get.snackbar(

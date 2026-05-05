@@ -13,6 +13,7 @@ import '../../widgets/menstruacao_calendar.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../../widgets/pulse_drawer_button.dart';
+import '../../widgets/pulse_lower_fab_location.dart';
 
 class MenstruacaoHistoryScreen extends StatefulWidget {
   const MenstruacaoHistoryScreen({Key? key}) : super(key: key);
@@ -89,176 +90,284 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
     }
   }
 
+  /// Área livre sob o conteúdo para o FAB extended + margens do Scaffold + safe area.
+  double _fabScrollBottomPadding(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final scaledFab =
+        mq.textScaler.scale(kFloatingActionButtonMargin * 2 + 58.0);
+    return scaledFab + mq.padding.bottom + 24.0;
+  }
+
+  bool get _shouldShowNewCycleFab =>
+      !_isLoading && !_hasError && _menstruacoes.isNotEmpty;
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.blueSystemOverlayStyle,
       child: Scaffold(
-      backgroundColor: const Color(0xFFF1F1F1),
+      backgroundColor: Colors.transparent,
       drawer: const PulseSideMenu(activeItem: PulseNavItem.history),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF00324A),
-        systemOverlayStyle: AppTheme.blueSystemOverlayStyle,
-          elevation: 0,
-        title: Text(
-          'menst_history_title'.tr,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: AppTheme.blueScreenGradientDecoration,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildModernHeader(),
+            Expanded(
+              child: Container(
+                decoration: AppTheme.blueContentSheetDecoration,
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _isLoading
+                      ? _buildLoadingState()
+                      : _hasError
+                          ? _buildErrorState()
+                          : _menstruacoes.isEmpty
+                              ? _buildEmptyState()
+                              : _showCalendar
+                                  ? _buildCalendarView()
+                                  : _buildMenstruacoesList(),
+                ),
+              ),
+            ),
+          ],
         ),
-        leading: const PulseDrawerButton(iconSize: 22),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(
-              _showCalendar ? Icons.list_rounded : Icons.calendar_month_rounded,
-              color: Colors.white,
-            ),
-            onPressed: () => setState(() => _showCalendar = !_showCalendar),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-            onPressed: _loadMenstruacoes,
-          ),
-        ],
       ),
-      body: Column(
-        children: [
-          // Header com estatísticas
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(
-              color: Color(0xFF00324A),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                      padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.favorite_rounded,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                    const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                            'menst_cycles_registered'.tr,
-                                style: AppTheme.titleMedium.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                          const SizedBox(height: 4),
-                              Text(
-                            '${_menstruacoes.length} ${'menst_cycles_tracked'.tr}',
-                            style: AppTheme.bodyMedium.copyWith(
-                                  color: Colors.white.withOpacity(0.9),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Text(
-                            '${_menstruacoes.length}',
-                        style: AppTheme.titleMedium.copyWith(
-                              color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+      floatingActionButton: _shouldShowNewCycleFab
+          ? FloatingActionButton.extended(
+              onPressed: () => Get.toNamed(Routes.MENSTRUACAO_FORM),
+              backgroundColor: AppTheme.primaryBlue,
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: Text(
+                'menst_new_cycle'.tr,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-          
-          // Conteúdo principal
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: _isLoading
-                    ? _buildLoadingState()
-                    : _hasError
-                        ? _buildErrorState()
-                        : _menstruacoes.isEmpty
-                            ? _buildEmptyState()
-                            : _showCalendar
-                                ? _buildCalendarView()
-                                : _buildMenstruacoesList(),
-              ),
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF00324A),
-          borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-              color: const Color(0xFF00324A).withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-            BoxShadow(
-              color: const Color(0xFF00324A).withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-        child: FloatingActionButton.extended(
-          onPressed: () => Get.toNamed(Routes.MENSTRUACAO_FORM),
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          icon: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.add_rounded, size: 20),
-          ),
-          label: Text(
-            'menst_new_cycle'.tr,
-            style: AppTheme.titleMedium.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.3,
-            ),
-          ),
-            ),
-      ),
+            )
+          : null,
+      floatingActionButtonLocation: _shouldShowNewCycleFab
+          ? const PulseLowerEndFloatFabLocation()
+          : FloatingActionButtonLocation.endFloat,
       // bottomNavigationBar removido - tela tem sidebar
       // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
     ));
   }
 
+  Widget _buildModernHeader() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 12,
+        left: 16,
+        right: 16,
+        bottom: 20,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const PulseDrawerButton(),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'menst_history_title'.tr,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          _buildMenstrualToolbar(),
+        ],
+      ),
+    );
+  }
 
+  /// Mesmo padrão visual do painel de filtros em [CriseGastriteHistoryScreen].
+  Widget _buildMenstrualToolbar() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withOpacity(0.1),
+            Colors.white.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.favorite_rounded,
+                  color: Colors.white.withOpacity(0.9),
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'menst_cycles_registered'.tr,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${_menstruacoes.length} ${'menst_cycles_tracked'.tr}',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _loadMenstruacoes,
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(
+                      Icons.refresh_rounded,
+                      color: Colors.white.withOpacity(0.95),
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildViewModeSegment(
+                  selected: _showCalendar,
+                  icon: Icons.calendar_month_rounded,
+                  label: 'menst_tab_calendar'.tr,
+                  onTap: () => setState(() => _showCalendar = true),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildViewModeSegment(
+                  selected: !_showCalendar,
+                  icon: Icons.list_rounded,
+                  label: 'menst_tab_list'.tr,
+                  onTap: () => setState(() => _showCalendar = false),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildViewModeSegment({
+    required bool selected,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: selected
+                ? [
+                    Colors.white.withOpacity(0.2),
+                    Colors.white.withOpacity(0.1),
+                  ]
+                : [
+                    Colors.white.withOpacity(0.08),
+                    Colors.white.withOpacity(0.04),
+                  ],
+          ),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected
+                ? Colors.white.withOpacity(0.38)
+                : Colors.white.withOpacity(0.18),
+            width: selected ? 1.5 : 1,
+          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 15),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(selected ? 1 : 0.82),
+                  fontSize: 11,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildLoadingState() {
     return Container(
@@ -272,7 +381,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
               gradient: LinearGradient(
                 colors: [
                   const Color(0xFF1E3A8A).withOpacity(0.1),
-                  const Color(0xFFF472B6).withOpacity(0.05),
+                  const Color(0xFF3B82F6).withOpacity(0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(24),
@@ -287,10 +396,10 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   height: 60,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF1E3A8A),
-                      Color(0xFF3B82F6),
-                    ],
+                      colors: [
+                        Color(0xFF1E3A8A),
+                        Color(0xFF3B82F6),
+                      ],
                     ),
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
@@ -438,238 +547,239 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
   }
 
   Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(60),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFF1E3A8A).withOpacity(0.1),
-                  const Color(0xFFF472B6).withOpacity(0.05),
-                ],
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryBlue.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryBlue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
               ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: const Color(0xFF1E3A8A).withOpacity(0.2),
+              child: Icon(
+                Icons.favorite_rounded,
+                size: 48,
+                color: AppTheme.primaryBlue,
               ),
             ),
-            child: Column(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF1E3A8A),
-                      Color(0xFF3B82F6),
-                    ],
-                    ),
-                    borderRadius: BorderRadius.circular(50),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1E3A8A).withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.favorite_rounded,
-                    size: 50,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  'menst_no_cycle'.tr,
-                  style: AppTheme.titleLarge.copyWith(
-                    color: const Color(0xFF1E293B),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'menst_no_cycle_sub'.tr,
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: const Color(0xFF64748B),
-                    height: 1.6,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 40),
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF1E3A8A),
-                      Color(0xFF3B82F6),
-                    ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1E3A8A).withOpacity(0.3),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton.icon(
-                    onPressed: () => Get.toNamed(Routes.MENSTRUACAO_FORM),
-                    icon: const Icon(Icons.add_rounded, size: 22),
-                    label: Text('menst_register_first'.tr),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 24),
+            Text(
+              'menst_no_cycle'.tr,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              'menst_no_cycle_sub'.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: () => Get.toNamed(Routes.MENSTRUACAO_FORM),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: Text('menst_register_first'.tr),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryBlue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 2,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
 
   Widget _buildCalendarView() {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 24),
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: MenstruacaoCalendar(
-            menstruacoes: _menstruacoes,
-            onDaySelected: (day) => _showDayDetails(day),
+    final fabGap = _fabScrollBottomPadding(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
           ),
-        ),
-      ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: MenstruacaoCalendar(
+                      menstruacoes: _menstruacoes,
+                      onDaySelected: (day) => _showDayDetails(day),
+                    ),
+                  ),
+                ),
+                SizedBox(height: fabGap),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildMenstruacoesList() {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Column(
-      children: [
-        for (int i = 0; i < _menstruacoes.length; i++) ...[
-            _buildMenstruacaoCard(_menstruacoes[i], i),
-          if (i < _menstruacoes.length - 1) const SizedBox(height: 16),
-        ],
-      ],
-      ),
+    final fabGap = _fabScrollBottomPadding(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (int i = 0; i < _menstruacoes.length; i++) ...[
+                  _buildMenstruacaoCard(_menstruacoes[i], i),
+                  if (i < _menstruacoes.length - 1) const SizedBox(height: 16),
+                ],
+                SizedBox(height: fabGap),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildMenstruacaoCard(Menstruacao menstruacao, int index) {
     final statusColor = _getStatusColor(menstruacao.status);
-    
-    return Card(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 0,
-        child: InkWell(
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.primaryBlue.withValues(alpha: 0.12),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
           onTap: () => _showMenstruacaoDetails(menstruacao),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header com status e data
                 Row(
                   children: [
-                  Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: statusColor.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _getStatusIcon(menstruacao.status),
-                              size: 14,
-                              color: statusColor,
-                            ),
-                            const SizedBox(width: 6),
-                        Text(
-                                _translateStatus(menstruacao.status),
-                                style: AppTheme.bodySmall.copyWith(
-                                  color: statusColor,
-                                  fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: statusColor.withOpacity(0.3),
                         ),
                       ),
-                  const Spacer(),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _getStatusIcon(menstruacao.status),
+                            size: 14,
+                            color: statusColor,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _translateStatus(menstruacao.status),
+                            style: AppTheme.bodySmall.copyWith(
+                              color: statusColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
                     Text(
                       _formatDate(menstruacao.dataInicio),
                       style: AppTheme.bodySmall.copyWith(
-                      color: const Color(0xFF00324A),
+                        color: AppTheme.primaryBlue,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
-                
-              const SizedBox(height: 16),
-                
-                // Título
+                const SizedBox(height: 16),
                 Text(
                   'menst_cycle_title'.tr,
-                style: AppTheme.titleMedium.copyWith(
-                  color: const Color(0xFF00324A),
-                  fontWeight: FontWeight.w700,
+                  style: AppTheme.titleMedium.copyWith(
+                    color: AppTheme.textPrimary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                
                 const SizedBox(height: 16),
-                
-                // Informações principais
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                  color: const Color(0xFFE3F2FD).withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(12),
+                    color: AppTheme.lightBlue.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                    color: const Color(0xFF64B5F6).withOpacity(0.2),
+                      color: AppTheme.secondaryBlue.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Column(
                     children: [
-                      // Período
                       Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                            color: const Color(0xFF00324A).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
+                              color:
+                                  AppTheme.primaryBlue.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          child: const Icon(
+                            child: Icon(
                               Icons.calendar_today_rounded,
-                            size: 16,
-                            color: Color(0xFF00324A),
+                              size: 16,
+                              color: AppTheme.primaryBlue,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -680,7 +790,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                 Text(
                                   'menst_period'.tr,
                                   style: AppTheme.bodySmall.copyWith(
-                                  color: const Color(0xFF00324A),
+                                    color: AppTheme.primaryBlue,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -688,7 +798,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                 Text(
                                   '${DateFormat('dd/MM').format(menstruacao.dataInicio)} - ${DateFormat('dd/MM').format(menstruacao.dataFim)}',
                                   style: AppTheme.bodyMedium.copyWith(
-                                  color: const Color(0xFF00324A),
+                                    color: AppTheme.primaryBlue,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -697,22 +807,20 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                           ),
                         ],
                       ),
-                      
                       const SizedBox(height: 12),
-                      
-                      // Duração
                       Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                            color: const Color(0xFF64B5F6).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
+                              color: AppTheme.secondaryBlue
+                                  .withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          child: const Icon(
+                            child: Icon(
                               Icons.schedule_rounded,
-                            size: 16,
-                            color: Color(0xFF64B5F6),
+                              size: 16,
+                              color: AppTheme.secondaryBlue,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -723,7 +831,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                 Text(
                                   'menst_duration'.tr,
                                   style: AppTheme.bodySmall.copyWith(
-                                  color: const Color(0xFF00324A),
+                                    color: AppTheme.primaryBlue,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -731,7 +839,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                                 Text(
                                   '${menstruacao.duracaoEmDias} ${'menst_days'.tr}',
                                   style: AppTheme.bodyMedium.copyWith(
-                                  color: const Color(0xFF00324A),
+                                    color: AppTheme.primaryBlue,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -743,25 +851,25 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                     ],
                   ),
                 ),
-                
-              const SizedBox(height: 16),
-                
-                // Footer com data e ação
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Text(
-                      DateFormat('dd/MM/yyyy').format(menstruacao.dataInicio),
+                      DateFormat('dd/MM/yyyy')
+                          .format(menstruacao.dataInicio),
                       style: AppTheme.bodySmall.copyWith(
-                      color: const Color(0xFF00324A).withOpacity(0.7),
+                        color:
+                            AppTheme.primaryBlue.withValues(alpha: 0.65),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const Spacer(),
                     Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                      color: const Color(0xFF00324A),
-                      borderRadius: BorderRadius.circular(8),
+                        color: AppTheme.primaryBlue,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -774,9 +882,9 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                             ),
                           ),
                           const SizedBox(width: 4),
-                        const Icon(
+                          const Icon(
                             Icons.arrow_forward_ios_rounded,
-                          size: 10,
+                            size: 10,
                             color: Colors.white,
                           ),
                         ],
@@ -785,6 +893,7 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
                   ],
                 ),
               ],
+            ),
           ),
         ),
       ),
@@ -1837,5 +1946,4 @@ class _MenstruacaoHistoryScreenState extends State<MenstruacaoHistoryScreen>
   }
 
 }
-
 

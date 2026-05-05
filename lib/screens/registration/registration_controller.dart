@@ -4,7 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'dart:io';
 import 'dart:convert';
+import '../../data/macro_professions.dart';
+import '../../data/us_state_codes.dart';
+import '../../data/world_nationality_display.dart';
 import '../../models/patient.dart';
+import '../../utils/patient_catalog_normalize.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
 import '../institutional/settings_controller.dart';
@@ -34,6 +38,26 @@ class RegistrationController extends GetxController with SafeControllerMixin {
     filter: {"#": RegExp(r'[0-9]')},
   );
 
+  /// ZIP dos EUA: 5 dígitos ou ZIP+4 (#####-####).
+  final usZipMask = MaskTextInputFormatter(
+    mask: '#####-####',
+    filter: {"#": RegExp(r'[0-9]')},
+  );
+
+  final ssnMask = MaskTextInputFormatter(
+    mask: '###-##-####',
+    filter: {"#": RegExp(r'[0-9]')},
+  );
+
+  final usPhoneMask = MaskTextInputFormatter(
+    mask: '(###) ###-####',
+    filter: {"#": RegExp(r'[0-9]')},
+  );
+
+  /// País de residência na etapa pessoal: Brasil (documentos BR) ou EUA (SSN).
+  static const String kResidenceBrazil = 'BR';
+  static const String kResidenceUs = 'US';
+
   // 1. Conta
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -45,15 +69,19 @@ class RegistrationController extends GetxController with SafeControllerMixin {
   final profilePhotoBase64 = RxnString();
 
   // 2. Pessoais
+  final residenceCountry = kResidenceBrazil.obs;
   final cpfController = TextEditingController();
   final rgController = TextEditingController();
+  final socialSecurityController = TextEditingController();
   final birthDateController = TextEditingController();
   final gender = RxnString();
   final maritalStatus = RxnString();
-  final nationalityController = TextEditingController();
+  /// Nacionalidade: nome EN do país (lista ISO em [kWorldNationalities]).
+  final nationalityCountry = RxnString();
+  /// Categoria macro de profissão — chave i18n em [kMacroProfessionKeys].
+  final professionMacro = RxnString();
   final heightController = TextEditingController(); // Altura
   final weightController = TextEditingController(); // Peso
-  final professionController = TextEditingController(); // Profissão
 
   // 3. Contato e Endereço
   final phoneController = TextEditingController();
@@ -103,7 +131,30 @@ class RegistrationController extends GetxController with SafeControllerMixin {
     'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
   ];
 
+  final List<String> usStates = kUsStateCodes;
+
+  List<String> get macroProfessionKeys => kMacroProfessionKeys;
+
+  List<String> get addressStateOptions =>
+      residenceCountry.value == kResidenceBrazil ? states : usStates;
+
   final authService = Get.put(AuthService());
+
+  void setResidenceCountry(String code) {
+    if (residenceCountry.value == code) return;
+    residenceCountry.value = code;
+    cpfController.clear();
+    rgController.clear();
+    socialSecurityController.clear();
+    phoneController.clear();
+    cepController.clear();
+    streetController.clear();
+    numberController.clear();
+    complementController.clear();
+    neighborhoodController.clear();
+    cityController.clear();
+    state.value = null;
+  }
 
   // Validators (usam chaves de tradução via validate*)
   final nameValidator = MultiValidator([
@@ -205,6 +256,7 @@ class RegistrationController extends GetxController with SafeControllerMixin {
   }
 
   String? validateCPF(String? value) {
+    if (residenceCountry.value != kResidenceBrazil) return null;
     if (value == null || value.isEmpty) {
       return 'reg_cpf_required'.tr;
     }
@@ -254,8 +306,28 @@ class RegistrationController extends GetxController with SafeControllerMixin {
   }
 
   String? validateRG(String? value) {
+    if (residenceCountry.value != kResidenceBrazil) return null;
     if (value == null || value.isEmpty) {
       return 'reg_rg_required'.tr;
+    }
+    return null;
+  }
+
+  String? validateSSN(String? value) {
+    if (residenceCountry.value != kResidenceUs) return null;
+    if (value == null || value.isEmpty) {
+      return 'reg_ssn_required'.tr;
+    }
+    final d = value.replaceAll(RegExp(r'[^\d]'), '');
+    if (d.length != 9) {
+      return 'reg_ssn_invalid'.tr;
+    }
+    if (d == '000000000') {
+      return 'reg_ssn_invalid'.tr;
+    }
+    final area = int.tryParse(d.substring(0, 3)) ?? 0;
+    if (area == 0 || area == 666 || area >= 900) {
+      return 'reg_ssn_invalid'.tr;
     }
     return null;
   }
@@ -264,15 +336,29 @@ class RegistrationController extends GetxController with SafeControllerMixin {
     if (value == null || value.isEmpty) {
       return 'reg_phone_required'.tr;
     }
-    
-    // Remove máscara para validação
     final phone = value.replaceAll(RegExp(r'[^\d]'), '');
-    
-    if (phone.length != 11) {
-      return 'reg_phone_digits'.tr;
+    if (residenceCountry.value == kResidenceBrazil) {
+      if (phone.length != 11) {
+        return 'reg_phone_digits'.tr;
+      }
+    } else {
+      if (phone.length != 10) {
+        return 'reg_phone_us_invalid'.tr;
+      }
     }
-    
     return null;
+  }
+
+  String? validateNationalitySelection(String? _) {
+    if (nationalityCountry.value == null || nationalityCountry.value!.isEmpty) {
+      return 'reg_nationality_required'.tr;
+    }
+    return null;
+  }
+
+  /// Usa [professionMacro] diretamente — o valor do FormField pode ficar dessincronizado com Obx/rebuilds.
+  String? validateProfessionMacro([String? _]) {
+    return validateDropdown(professionMacro.value, 'reg_profession'.tr);
   }
 
   String? validateRequired(String? value, String fieldKey) {
@@ -283,18 +369,50 @@ class RegistrationController extends GetxController with SafeControllerMixin {
   }
 
   String? validateCEP(String? value) {
+    if (residenceCountry.value != kResidenceBrazil) return null;
     if (value == null || value.isEmpty) {
       return 'reg_cep_required'.tr;
     }
-    
-    // Remove máscara para validação
+
     final cep = value.replaceAll(RegExp(r'[^\d]'), '');
-    
+
     if (cep.length != 8) {
       return 'reg_cep_digits'.tr;
     }
-    
+
     return null;
+  }
+
+  String? validateUSZip(String? value) {
+    if (residenceCountry.value != kResidenceUs) return null;
+    if (value == null || value.isEmpty) {
+      return 'reg_zip_required'.tr;
+    }
+    final digits = value.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.length != 5 && digits.length != 9) {
+      return 'reg_zip_invalid'.tr;
+    }
+    return null;
+  }
+
+  String? validateNeighborhoodAddress(String? value) {
+    if (residenceCountry.value != kResidenceBrazil) return null;
+    return validateRequired(value, 'reg_neighborhood'.tr);
+  }
+
+  String buildFormattedAddress() {
+    final street = streetController.text.trim();
+    final num = numberController.text.trim();
+    final comp = complementController.text.trim();
+    final nbh = neighborhoodController.text.trim();
+    final city = cityController.text.trim();
+    final st = state.value ?? '';
+    final postal = cepController.text.trim();
+    final compSeg = comp.isEmpty ? '' : ', $comp';
+    if (residenceCountry.value == kResidenceBrazil) {
+      return '$street, $num$compSeg - $nbh, $city - $st';
+    }
+    return '$street, $num$compSeg, $city, $st $postal';
   }
 
   String? validateDropdown(String? value, String fieldKey) {
@@ -382,7 +500,6 @@ class RegistrationController extends GetxController with SafeControllerMixin {
       if (picked != null) {
         selectedDate.value = picked;
         birthDateController.text = DateFormat('dd/MM/yyyy').format(picked);
-        personalFormKey.currentState?.validate();
       }
     } catch (e) {
       Get.snackbar(
@@ -528,19 +645,28 @@ class RegistrationController extends GetxController with SafeControllerMixin {
     if (validateConfirmPassword(confirmPasswordController.text) != null) return false;
     if (validateCPF(cpfController.text) != null) return false;
     if (validateRG(rgController.text) != null) return false;
+    if (validateSSN(socialSecurityController.text) != null) return false;
     if (validatePhone(phoneController.text) != null) return false;
-    if (validateRequired(nationalityController.text, 'reg_nationality'.tr) != null) return false;
+    if (validateNationalitySelection(null) != null) return false;
     if (validateBirthDate(birthDateController.text) != null) return false;
     if (validateDropdown(gender.value, 'reg_gender'.tr) != null) return false;
     if (validateDropdown(maritalStatus.value, 'reg_marital_status'.tr) != null) return false;
+    if (validateDropdown(professionMacro.value, 'reg_profession'.tr) != null) return false;
     if (validateHeight(heightController.text) != null) return false;
     if (validateWeight(weightController.text) != null) return false;
     if (validateCEP(cepController.text) != null) return false;
+    if (validateUSZip(cepController.text) != null) return false;
     if (validateRequired(streetController.text, 'reg_street'.tr) != null) return false;
     if (validateRequired(numberController.text, 'reg_number'.tr) != null) return false;
-    if (validateRequired(neighborhoodController.text, 'reg_neighborhood'.tr) != null) return false;
+    if (validateNeighborhoodAddress(neighborhoodController.text) != null) return false;
     if (validateRequired(cityController.text, 'reg_city'.tr) != null) return false;
-    if (validateDropdown(state.value, 'reg_state'.tr) != null) return false;
+    if (validateDropdown(
+          state.value,
+          residenceCountry.value == kResidenceBrazil ? 'reg_state' : 'reg_state_us',
+        ) !=
+        null) {
+      return false;
+    }
     return true;
   }
 
@@ -599,23 +725,39 @@ class RegistrationController extends GetxController with SafeControllerMixin {
         return;
       }
 
+      final isBr = residenceCountry.value == kResidenceBrazil;
+      final ssnDigits = socialSecurityController.text.replaceAll(RegExp(r'[^\d]'), '');
+      final natEn = nationalityCountry.value!.trim();
+      final usePt = (Get.locale?.languageCode ?? '')
+          .toLowerCase()
+          .startsWith('pt');
+
       // Criar objeto Patient
       final patient = Patient(
         name: nameController.text.trim(),
         email: emailController.text.trim(),
         password: passwordController.text,
-        cpf: cpfController.text.trim(),
-        rg: rgController.text.trim(),
+        cpf: isBr ? cpfController.text.trim() : '',
+        rg: isBr ? rgController.text.trim() : '',
         phone: phoneController.text.trim(),
         secondaryPhone: (() {
           final text = secondaryPhoneController.text.trim();
           return text.isEmpty ? null : text;
         })(),
         birthDate: selectedDate.value!,
-        gender: gender.value!,
-        maritalStatus: maritalStatus.value!,
-        nationality: nationalityController.text.trim(),
-        address: '${streetController.text.trim()}, ${numberController.text.trim()} - ${neighborhoodController.text.trim()}, ${cityController.text.trim()} - ${state.value}',
+        gender: PatientCatalogNormalize.persistGender(
+          gender.value!,
+          gender.value!.tr,
+        ),
+        maritalStatus: PatientCatalogNormalize.persistMarital(
+          maritalStatus.value!,
+          maritalStatus.value!.tr,
+        ),
+        nationality: nationalityDisplayLabel(natEn, usePortuguese: usePt),
+        residenceCountry: residenceCountry.value,
+        socialSecurityNumber:
+            isBr ? null : (ssnDigits.isEmpty ? null : ssnDigits),
+        address: buildFormattedAddress(),
         height: (() {
           final text = heightController.text.trim();
           if (text.isEmpty) return null;
@@ -626,10 +768,10 @@ class RegistrationController extends GetxController with SafeControllerMixin {
           if (text.isEmpty) return null;
           return double.tryParse(text.replaceAll(',', '.'));
         })(), // Incluir peso se preenchido
-        profession: (() {
-          final text = professionController.text.trim();
-          return text.isEmpty ? null : text;
-        })(), // Incluir profissão se preenchida
+        profession: PatientCatalogNormalize.persistProfession(
+          professionMacro.value!,
+          professionMacro.value!.tr,
+        ),
         acceptedTerms: acceptTerms.value,
         profilePhoto: profilePhotoBase64.value, // Incluir foto de perfil se existir
       );
@@ -683,11 +825,10 @@ class RegistrationController extends GetxController with SafeControllerMixin {
       confirmPasswordController,
       cpfController,
       rgController,
+      socialSecurityController,
       birthDateController,
-      nationalityController,
       heightController,
       weightController,
-      professionController,
       phoneController,
       secondaryPhoneController,
       cepController,

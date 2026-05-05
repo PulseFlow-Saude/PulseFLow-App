@@ -5,9 +5,10 @@ import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
 import '../../utils/specialty_translations.dart';
-import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
+import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_drawer_button.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
 import '../institutional/settings_controller.dart';
 import 'upcoming_appointments_controller.dart';
 
@@ -18,178 +19,134 @@ class UpcomingAppointmentsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(UpcomingAppointmentsController());
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF00324A),
-      drawer: const PulseSideMenu(activeItem: PulseNavItem.appointments),
-      body: Column(
-        children: [
-          _buildHeader(context),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
+    return PulseBlueScaffold(
+      drawer: PulseSideMenu(activeItem: PulseNavItem.appointments),
+      header: _buildHeader(context),
+      body: Obx(
+        () {
+          if (controller.isLoading.value) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: CircularProgressIndicator(color: AppTheme.primaryBlue),
               ),
-              child: Obx(
-                () {
-                  if (controller.isLoading.value) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
+            );
+          }
 
-                  if (controller.loadError.value.isNotEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error_outline_rounded,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              controller.loadError.value,
-                              style: AppTheme.bodyMedium.copyWith(
-                                color: Colors.grey[600],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton(
-                              onPressed: controller.loadAppointments,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00324A),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Text('common_try_again'.tr),
-                            ),
-                          ],
+          if (controller.loadError.value.isNotEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 64,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      controller.loadError.value,
+                      style: AppTheme.bodyMedium.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: controller.loadAppointments,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryBlue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    );
-                  }
-
-                  final appointments = controller.upcomingAppointments;
-
-                  if (appointments.isEmpty) {
-                    return _buildEmptyState();
-                  }
-
-                  return RefreshIndicator(
-                    onRefresh: controller.loadAppointments,
-                    color: const Color(0xFF00324A),
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 24,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'appt_upcoming'.tr,
-                            style: AppTheme.titleLarge.copyWith(
-                              color: const Color(0xFF1E293B),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${appointments.length} ${appointments.length == 1 ? 'appt_appointment_singular'.tr : 'appt_appointment_plural'.tr}',
-                            style: AppTheme.bodyMedium.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          _buildFiltersSection(controller),
-                          const SizedBox(height: 24),
-                          ...appointments.map((booking) {
-                            return _buildAppointmentCard(controller, booking);
-                          }).toList(),
-                          const SizedBox(height: 16),
-                          _buildNewAppointmentButton(),
-                        ],
-                      ),
+                      child: Text('common_try_again'.tr),
                     ),
-                  );
-                },
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final appointments = controller.upcomingAppointments;
+
+          if (appointments.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          return RefreshIndicator(
+            onRefresh: controller.loadAppointments,
+            color: AppTheme.primaryBlue,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 24,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'appt_upcoming'.tr,
+                    style: AppTheme.titleLarge.copyWith(
+                      color: const Color(0xFF1E293B),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${appointments.length} ${appointments.length == 1 ? 'appt_appointment_singular'.tr : 'appt_appointment_plural'.tr}',
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildFiltersSection(controller),
+                  const SizedBox(height: 24),
+                  ...appointments.map((booking) {
+                    return _buildAppointmentCard(controller, booking);
+                  }).toList(),
+                  const SizedBox(height: 16),
+                  _buildNewAppointmentButton(),
+                ],
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
-      // bottomNavigationBar removido - tela tem sidebar
-      // bottomNavigationBar: const PulseBottomNavigation(
-      //   activeItem: PulseNavItem.home,
-      // ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        bottom: 20,
-        left: 20,
-        right: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: Column(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 20, 14),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const PulseDrawerButton(iconSize: 22),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'appt_upcoming_header'.tr,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'appt_upcoming_sub'.tr,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          const PulseDrawerButton(iconSize: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'appt_upcoming_header'.tr,
+                  style: PulseBlueHeaderStyles.titleCompact,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'appt_upcoming_sub'.tr,
+                  style: PulseBlueHeaderStyles.subtitleCompact,
+                ),
+              ],
+            ),
           ),
         ],
       ),

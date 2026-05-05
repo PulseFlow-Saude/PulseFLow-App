@@ -5,9 +5,9 @@ import '../../models/crise_gastrite.dart';
 import '../../theme/app_theme.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
-import '../../widgets/pulse_drawer_button.dart';
 
 class CriseGastriteFormScreen extends StatefulWidget {
   final CriseGastrite? criseGastrite;
@@ -221,29 +221,15 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: AppTheme.blueSystemOverlayStyle,
-      child: Scaffold(
-      backgroundColor: const Color(0xFF00324A),
-      drawer: const PulseSideMenu(activeItem: PulseNavItem.history),
-      body: Column(
-        children: [
-          // Header azul como outras telas
-          _buildHeader(),
-          
-          // Conteúdo principal
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
+    return PulseBlueScaffold(
+      drawer: PulseSideMenu(activeItem: PulseNavItem.history),
+      header: PulseBlueLeadTitleHeader(
+        title: _isEditing ? 'crise_form_edit'.tr : 'crise_form_title'.tr,
+        subtitle: 'crise_form_sub'.tr,
+      ),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -263,7 +249,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF00324A),
+                                color: AppTheme.primaryBlue,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
@@ -282,7 +268,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
-                                      color: Color(0xFF00324A),
+                                      color: AppTheme.primaryBlue,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -368,61 +354,6 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                   ),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-      // bottomNavigationBar removido - tela tem sidebar
-      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
-    ));
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        left: 16,
-        right: 16,
-        bottom: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: Row(
-        children: [
-          const PulseDrawerButton(iconSize: 22),
-          const SizedBox(width: 12),
-          
-          // Título
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _isEditing ? 'crise_form_edit'.tr : 'crise_form_title'.tr,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                  ),
-                ),
-                Text(
-                  'crise_form_sub'.tr,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -514,7 +445,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: const BoxDecoration(
-                    color: Color(0xFF00324A),
+                    color: AppTheme.primaryBlue,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
@@ -623,7 +554,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF00324A),
+            color: AppTheme.primaryBlue,
           ),
         ),
         const SizedBox(height: 8),
@@ -640,7 +571,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
                 children: [
                   const Icon(
                     Icons.healing_rounded,
-                    color: Color(0xFF00324A),
+                    color: AppTheme.primaryBlue,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -707,7 +638,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF00324A),
+            color: AppTheme.primaryBlue,
           ),
         ),
         const SizedBox(height: 8),
@@ -751,7 +682,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF00324A),
+            color: AppTheme.primaryBlue,
           ),
         ),
         const SizedBox(height: 8),
@@ -829,7 +760,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
               ),
             ),
             if (isRequired) ...[
@@ -872,7 +803,7 @@ class _CriseGastriteFormScreenState extends State<CriseGastriteFormScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
+              borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

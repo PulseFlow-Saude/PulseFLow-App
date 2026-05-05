@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
@@ -19,6 +20,14 @@ import 'email_translations_helper.dart';
 class AuthService extends GetxController {
   static AuthService get instance => Get.find<AuthService>();
   final _storage = const FlutterSecureStorage();
+
+  /// Quando [AppConfig.email2faSkipSmtp] está ativo: código mostrado na UI em vez de e-mail.
+  String? _plaintext2FACodeForTesting;
+  String? get plaintext2FACodeForTesting => _plaintext2FACodeForTesting;
+
+  void clearPlaintext2FACodeForTesting() {
+    _plaintext2FACodeForTesting = null;
+  }
   final _token = ''.obs;
   final _isAuthenticated = false.obs;
   final _currentUser = Rxn<Patient>();
@@ -115,67 +124,264 @@ class AuthService extends GetxController {
     return List.generate(6, (_) => rand.nextInt(10)).join();
   }
 
-  // Configura servidor SMTP baseado no domínio do email
+  SmtpServer _smtpServer(
+    String host, {
+    int port = 587,
+    bool ssl = false,
+    required String username,
+    required String password,
+  }) {
+    return SmtpServer(
+      host,
+      port: port,
+      ssl: ssl,
+      username: username,
+      password: password,
+      ignoreBadCertificate: AppConfig.smtpIgnoreBadCertificate,
+      allowInsecure: AppConfig.smtpAllowInsecure,
+    );
+  }
+
+  /// SMTP — `SMTP_HOST` recomendado para Workspace/corporativo.
+  /// Para `smtp.gmail.com` usa as mesmas opções que o helper oficial do pacote mailer + flags do .env.
   SmtpServer _getSmtpServer(String user, String pass) {
+    final explicit = AppConfig.smtpHost;
+    if (explicit != null && explicit.isNotEmpty) {
+      final h = explicit.trim().toLowerCase();
+      if (h == 'smtp.gmail.com') {
+        return _smtpServer(
+          'smtp.gmail.com',
+          username: user,
+          password: pass,
+        );
+      }
+      return _smtpServer(
+        explicit.trim(),
+        port: AppConfig.smtpPort,
+        ssl: AppConfig.smtpSsl,
+        username: user,
+        password: pass,
+      );
+    }
+
     final domain = user.split('@').last.toLowerCase();
-    
+
     switch (domain) {
       case 'gmail.com':
-        return gmail(user, pass);
+        return _smtpServer('smtp.gmail.com', username: user, password: pass);
       case 'outlook.com':
       case 'hotmail.com':
       case 'live.com':
-        return SmtpServer('smtp-mail.outlook.com',
-            port: 587,
-            username: user,
-            password: pass,
-            ssl: false,
-            allowInsecure: false);
+        return _smtpServer(
+          'smtp-mail.outlook.com',
+          username: user,
+          password: pass,
+        );
       case 'yahoo.com':
-        return SmtpServer('smtp.mail.yahoo.com',
-            port: 587,
-            username: user,
-            password: pass,
-            ssl: false,
-            allowInsecure: false);
+        return _smtpServer(
+          'smtp.mail.yahoo.com',
+          username: user,
+          password: pass,
+        );
       case 'icloud.com':
-        return SmtpServer('smtp.mail.me.com',
-            port: 587,
-            username: user,
-            password: pass,
-            ssl: false,
-            allowInsecure: false);
+        return _smtpServer(
+          'smtp.mail.me.com',
+          username: user,
+          password: pass,
+        );
       case 'aol.com':
-        return SmtpServer('smtp.aol.com',
-            port: 587,
-            username: user,
-            password: pass,
-            ssl: false,
-            allowInsecure: false);
+        return _smtpServer('smtp.aol.com', username: user, password: pass);
       default:
-        // Para outros domínios, tenta configuração genérica
-        // Muitos provedores usam smtp.[dominio] na porta 587
-        return SmtpServer('smtp.$domain',
-            port: 587,
-            username: user,
-            password: pass,
-            ssl: false,
-            allowInsecure: false);
+        return _smtpServer(
+          'smtp.$domain',
+          username: user,
+          password: pass,
+        );
     }
   }
 
-  // Envia código 2FA por e-mail (traduzido conforme idioma do usuário/dispositivo)
-  Future<void> send2FACodeEmail(String email, String code) async {
+  bool _shouldRetryGmailImplicitSsl(SmtpServer server, Object error) {
+    if (server.host.toLowerCase() != 'smtp.gmail.com') return false;
+    if (server.ssl && server.port == 465) return false;
+    final tn = error.runtimeType.toString();
+    if (tn.contains('SmtpClientAuthenticationException')) return false;
+    return true;
+  }
+
+  Future<void> _sendSmtpMessage(Message message, String credUser, String credPass) async {
+    final primary = _getSmtpServer(credUser, credPass);
+    final timeout = AppConfig.smtpSendTimeout;
+
     try {
+      await send(message, primary, timeout: timeout);
+      return;
+    } catch (e, st) {
+      developer.log(
+        'SMTP falhou (${primary.host}:${primary.port}, ssl=${primary.ssl}): $e',
+        name: 'PulseFlow.Auth',
+        error: e,
+        stackTrace: st,
+      );
+      if (!_shouldRetryGmailImplicitSsl(primary, e)) {
+        rethrow;
+      }
+      developer.log(
+        'SMTP nova tentativa: smtp.gmail.com:465 (SSL implícito)',
+        name: 'PulseFlow.Auth',
+      );
+      final fallback = _smtpServer(
+        'smtp.gmail.com',
+        port: 465,
+        ssl: true,
+        username: credUser,
+        password: credPass,
+      );
+      await send(message, fallback, timeout: timeout);
+    }
+  }
+
+  /// Erros 534/535 e falhas AUTH SMTP — também usado para fallback (mostrar código no ecrã).
+  bool _smtpLooksLikeAuthRejected(Object e) {
+    final s = e.toString().toLowerCase();
+    final tn = e.runtimeType.toString().toLowerCase();
+    return s.contains('534') ||
+        s.contains('535') ||
+        s.contains('5.7.') ||
+        s.contains('authentication failed') ||
+        s.contains('authentication unsuccessful') ||
+        s.contains('credentials') ||
+        s.contains('invalid login') ||
+        s.contains('username and password') ||
+        tn.contains('smtpclientauthenticationexception');
+  }
+
+  /// Gmail/Outlook devolvem 534 ou 535 quando o SMTP não aceita utilizador/senha do REMETENTE.
+  String _smtpAuthFailureHint(Object e) {
+    if (!_smtpLooksLikeAuthRejected(e)) {
+      return '\n\nConfirme rede/VPN, SMTP_HOST e SMTP_TIMEOUT_SECONDS. '
+          'Para testar sem mail: DEV_PRINT_2FA_CODE=true.';
+    }
+    return '\n\n—— O servidor recusou EMAIL_USER / EMAIL_PASS (erro típico 534 ou 535) ——\n'
+        '• Gmail e Google Workspace: na conta desse mesmo e-mail (EMAIL_USER), '
+        'ativa verificação em 2 passos e cria uma "Senha de app" '
+        '(myaccount.google.com/apppasswords). Coloca só essa senha de 16 letras em EMAIL_PASS.\n'
+        '• Não uses a senha normal da conta Google — o SMTP não aceita.\n'
+        '• EMAIL_USER deve ser o e-mail completo da conta onde geraste a senha de app.\n'
+        '• Workspace: o administrador pode desativar SMTP; aí só OAuth2 ou outro provedor.\n'
+        '• Outlook/Hotmail: Microsoft pode bloquear login SMTP por senha; usa Gmail como remetente '
+        'ou SMTP que o teu serviço de e-mail permita.';
+  }
+
+  void _throwSmtpFailure(String prefix, Object e) {
+    throw '$prefix $e${_smtpAuthFailureHint(e)}';
+  }
+
+  Future<void> _sendTwoFactorEmailViaBackend({
+    required String toEmail,
+    required String code,
+    String? patientId,
+  }) async {
+    Future<void> postUri(String endpoint) async {
+      final uri = Uri.parse(endpoint);
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+      final secret = AppConfig.emailApiSecret;
+      if (secret != null && secret.isNotEmpty) {
+        headers['X-PulseFlow-Email-Secret'] = secret;
+      }
+      final resp = await http
+          .post(
+            uri,
+            headers: headers,
+            body: jsonEncode({
+              'to': toEmail,
+              'email': toEmail,
+              'code': code,
+              'patientId': patientId ?? '',
+              'kind': 'login_2fa',
+            }),
+          )
+          .timeout(AppConfig.emailApiTimeout);
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) return;
+
+      var detail = resp.body;
+      try {
+        final j = jsonDecode(resp.body);
+        if (j is Map && j['message'] != null) {
+          detail = j['message'].toString();
+        }
+      } catch (_) {}
+
+      throw 'HTTP ${resp.statusCode}: $detail';
+    }
+
+    try {
+      await postUri(AppConfig.emailSendEndpoint);
+    } catch (e) {
+      final fb = AppConfig.apiFallbackUrl;
+      if (fb != null &&
+          fb.trim().isNotEmpty &&
+          AppConfig.emailSendAbsoluteUrl == null) {
+        await postUri(AppConfig.emailSendEndpointForApiRoot(fb));
+        return;
+      }
+      rethrow;
+    }
+  }
+
+  /// Primeiro tenta envio pelo **backend** ([AppConfig.emailSendViaApi]); depois SMTP no cliente.
+  Future<void> send2FACodeEmail(
+    String email,
+    String code, {
+    String? patientId,
+  }) async {
+    try {
+      if (AppConfig.devPrint2FACode) {
+        developer.log(
+          '2FA código para $email: $code',
+          name: 'PulseFlow.Auth',
+        );
+      }
+
+      if (AppConfig.emailSendViaApi) {
+        try {
+          await _sendTwoFactorEmailViaBackend(
+            toEmail: email,
+            code: code,
+            patientId: patientId,
+          );
+          developer.log(
+            'Código 2FA enviado via API (${AppConfig.emailSendEndpoint}).',
+            name: 'PulseFlow.Auth',
+          );
+          return;
+        } catch (e, st) {
+          developer.log(
+            'Envio 2FA pela API falhou; a tentar SMTP no dispositivo: $e',
+            name: 'PulseFlow.Auth',
+            error: e,
+            stackTrace: st,
+          );
+        }
+      }
+
       final user = AppConfig.emailUser;
       final pass = AppConfig.emailPass;
-      
+
       if (user == null || pass == null || user.isEmpty || pass.isEmpty) {
+        if (AppConfig.emailSendViaApi) {
+          throw 'O servidor não conseguiu enviar o e-mail e não há EMAIL_USER/EMAIL_PASS '
+              'para tentar SMTP neste telemóvel. Confirme EMAIL_SEND_VIA_API / EMAIL_SEND_URL '
+              'e o endpoint no backend, ou configure SMTP.';
+        }
         throw 'Configurações de email não encontradas. Verifique o arquivo .env';
       }
-      
+
       final t = EmailTranslationsHelper.getEmailTranslationsSync();
-      final smtpServer = _getSmtpServer(user, pass);
+
       final message = Message()
         ..from = Address(user, t['email_from_name']!)
         ..recipients.add(email)
@@ -215,10 +421,10 @@ class AuthService extends GetxController {
             </div>
           </div>
         ''';
-      
-      await send(message, smtpServer);
+
+      await _sendSmtpMessage(message, user, pass);
     } catch (e) {
-      throw 'Erro ao enviar email: $e';
+      _throwSmtpFailure('Erro ao enviar email:', e);
     }
   }
 
@@ -307,11 +513,32 @@ class AuthService extends GetxController {
       final patientIdString = patient.id!;
       
       await _databaseService.setTwoFactorCode(patientIdString, code, expires);
-      
-      // Enviar código por email automaticamente
-      await send2FACodeEmail(patient.email, code);
-      
-      // Retorna o ID para o controller fazer o redirecionamento
+
+      if (AppConfig.email2faSkipSmtp) {
+        _plaintext2FACodeForTesting = code;
+        return patientIdString;
+      }
+
+      try {
+        await send2FACodeEmail(
+          patient.email,
+          code,
+          patientId: patientIdString,
+        );
+      } catch (e) {
+        if (_smtpLooksLikeAuthRejected(e)) {
+          _plaintext2FACodeForTesting = code;
+          developer.log(
+            'SMTP AUTH recusado (${e.runtimeType}): código 2FA disponível no ecrã.',
+            name: 'PulseFlow.Auth',
+            error: e,
+          );
+          return patientIdString;
+        }
+        await _databaseService.clearTwoFactorCode(patientIdString);
+        rethrow;
+      }
+
       return patientIdString;
     } catch (e) {
       rethrow;
@@ -344,7 +571,9 @@ class AuthService extends GetxController {
     // Para usuários não-admin, valida o código 2FA
     final isValid = await _databaseService.validateTwoFactorCode(patientId, code);
     if (!isValid) throw 'Código de verificação inválido ou expirado';
-    
+
+    clearPlaintext2FACodeForTesting();
+
     // Gera o token JWT e autentica
     final token = _generateToken(patient);
     await _storage.write(key: 'auth_token', value: token);
@@ -384,6 +613,8 @@ class AuthService extends GetxController {
               gender: patient.gender,
               maritalStatus: patient.maritalStatus,
               nationality: patient.nationality,
+              residenceCountry: patient.residenceCountry,
+              socialSecurityNumber: patient.socialSecurityNumber,
               address: patient.address,
               height: patient.height,
               weight: patient.weight,
@@ -432,9 +663,31 @@ class AuthService extends GetxController {
       final expires = DateTime.now().add(const Duration(minutes: 5));
       
       await _databaseService.setTwoFactorCode(patientId, code, expires);
-      
-      // Sempre enviar por email
-      await send2FACodeEmail(patient.email, code);
+
+      if (AppConfig.email2faSkipSmtp) {
+        _plaintext2FACodeForTesting = code;
+        return;
+      }
+
+      try {
+        await send2FACodeEmail(
+          patient.email,
+          code,
+          patientId: patientId,
+        );
+      } catch (e) {
+        if (_smtpLooksLikeAuthRejected(e)) {
+          _plaintext2FACodeForTesting = code;
+          developer.log(
+            'SMTP AUTH recusado no reenvio 2FA: código no ecrã.',
+            name: 'PulseFlow.Auth',
+            error: e,
+          );
+          return;
+        }
+        await _databaseService.clearTwoFactorCode(patientId);
+        rethrow;
+      }
     } catch (e) {
       rethrow;
     }
@@ -509,6 +762,8 @@ class AuthService extends GetxController {
         gender: patient.gender,
         maritalStatus: patient.maritalStatus,
         nationality: patient.nationality,
+        residenceCountry: patient.residenceCountry,
+        socialSecurityNumber: patient.socialSecurityNumber,
         address: patient.address,
         height: patient.height, // Incluir altura
         weight: patient.weight, // Incluir peso
@@ -565,6 +820,8 @@ class AuthService extends GetxController {
         gender: patient.gender,
         maritalStatus: patient.maritalStatus,
         nationality: patient.nationality,
+        residenceCountry: patient.residenceCountry,
+        socialSecurityNumber: patient.socialSecurityNumber,
         address: patient.address,
         height: patient.height, // Incluir altura
         weight: patient.weight, // Incluir peso
@@ -613,6 +870,7 @@ class AuthService extends GetxController {
   // Logout
   Future<void> logout() async {
     try {
+      clearPlaintext2FACodeForTesting();
       await _storage.delete(key: 'auth_token');
       _token.value = '';
       _isAuthenticated.value = false;
@@ -666,6 +924,8 @@ class AuthService extends GetxController {
         gender: updatedPatient.gender,
         maritalStatus: updatedPatient.maritalStatus,
         nationality: updatedPatient.nationality,
+        residenceCountry: updatedPatient.residenceCountry,
+        socialSecurityNumber: updatedPatient.socialSecurityNumber,
         address: updatedPatient.address,
         height: updatedPatient.height, // Incluir altura
         weight: updatedPatient.weight, // Incluir peso
@@ -751,7 +1011,12 @@ class AuthService extends GetxController {
       final code = _generate2FACode();
       final expires = DateTime.now().add(const Duration(minutes: 10));
       await _databaseService.setPasswordResetCode(patient.id!, code, expires);
-      await sendPasswordResetEmail(email, code);
+      try {
+        await sendPasswordResetEmail(email, code);
+      } catch (e) {
+        await _databaseService.clearPasswordResetCode(patient.id!);
+        rethrow;
+      }
     } catch (e) {
       rethrow;
     }
@@ -805,7 +1070,6 @@ class AuthService extends GetxController {
       }
 
       final t = EmailTranslationsHelper.getEmailTranslationsSync();
-      final smtpServer = _getSmtpServer(user, pass);
       final message = Message()
         ..from = Address(user, t['email_from_name']!)
         ..recipients.add(email)
@@ -848,9 +1112,9 @@ class AuthService extends GetxController {
           </div>
         ''';
 
-      await send(message, smtpServer);
+      await _sendSmtpMessage(message, user, pass);
     } catch (e) {
-      // Silenciosamente falha
+      _throwSmtpFailure('Erro ao enviar email de recuperação:', e);
     }
   }
 
@@ -876,6 +1140,8 @@ class AuthService extends GetxController {
         gender: patient.gender,
         maritalStatus: patient.maritalStatus,
         nationality: patient.nationality,
+        residenceCountry: patient.residenceCountry,
+        socialSecurityNumber: patient.socialSecurityNumber,
         address: patient.address,
         height: patient.height, // Incluir altura
         weight: patient.weight, // Incluir peso
@@ -911,14 +1177,13 @@ class AuthService extends GetxController {
       }
       
       final t = EmailTranslationsHelper.getEmailTranslationsSync();
-      final smtpServer = _getSmtpServer(user, pass);
       final message = Message()
         ..from = Address(user, '${t['email_from_name']} - ${t['email_test_suffix']!}')
         ..recipients.add(user)
         ..subject = t['email_test_subject']!
         ..text = t['email_test_body']!;
-      
-      await send(message, smtpServer);
+
+      await _sendSmtpMessage(message, user, pass);
     } catch (e) {
       // Silenciosamente falha
     }
