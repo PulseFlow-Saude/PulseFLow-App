@@ -71,7 +71,14 @@ class RegistrationController extends GetxController with SafeControllerMixin {
 
   final isLoading = false.obs;
   final selectedDate = Rxn<DateTime>();
-  late final GlobalKey<FormState> formKey;
+
+  /// Etapas: 0 conta, 1 pessoais, 2 endereço (+ termos na UI).
+  final currentStep = 0.obs;
+  static const int totalSteps = 3;
+
+  late final GlobalKey<FormState> accountFormKey;
+  late final GlobalKey<FormState> personalFormKey;
+  late final GlobalKey<FormState> addressFormKey;
 
   // Listas para dropdowns (chaves de tradução)
   final List<String> genders = [
@@ -375,8 +382,7 @@ class RegistrationController extends GetxController with SafeControllerMixin {
       if (picked != null) {
         selectedDate.value = picked;
         birthDateController.text = DateFormat('dd/MM/yyyy').format(picked);
-        // Força a validação do campo
-        formKey.currentState?.validate();
+        personalFormKey.currentState?.validate();
       }
     } catch (e) {
       Get.snackbar(
@@ -514,8 +520,58 @@ class RegistrationController extends GetxController with SafeControllerMixin {
     );
   }
 
+  /// Valida todos os campos (útil quando apenas o formulário da etapa atual está montado).
+  bool validateAllFieldsForSubmit() {
+    if (validateName(nameController.text) != null) return false;
+    if (validateEmail(emailController.text) != null) return false;
+    if (validatePassword(passwordController.text) != null) return false;
+    if (validateConfirmPassword(confirmPasswordController.text) != null) return false;
+    if (validateCPF(cpfController.text) != null) return false;
+    if (validateRG(rgController.text) != null) return false;
+    if (validatePhone(phoneController.text) != null) return false;
+    if (validateRequired(nationalityController.text, 'reg_nationality'.tr) != null) return false;
+    if (validateBirthDate(birthDateController.text) != null) return false;
+    if (validateDropdown(gender.value, 'reg_gender'.tr) != null) return false;
+    if (validateDropdown(maritalStatus.value, 'reg_marital_status'.tr) != null) return false;
+    if (validateHeight(heightController.text) != null) return false;
+    if (validateWeight(weightController.text) != null) return false;
+    if (validateCEP(cepController.text) != null) return false;
+    if (validateRequired(streetController.text, 'reg_street'.tr) != null) return false;
+    if (validateRequired(numberController.text, 'reg_number'.tr) != null) return false;
+    if (validateRequired(neighborhoodController.text, 'reg_neighborhood'.tr) != null) return false;
+    if (validateRequired(cityController.text, 'reg_city'.tr) != null) return false;
+    if (validateDropdown(state.value, 'reg_state'.tr) != null) return false;
+    return true;
+  }
+
+  void previousStep() {
+    if (currentStep.value > 0) currentStep.value--;
+  }
+
+  void nextStep() {
+    final step = currentStep.value;
+    if (step == 0) {
+      if (!(accountFormKey.currentState?.validate() ?? false)) return;
+    } else if (step == 1) {
+      if (!(personalFormKey.currentState?.validate() ?? false)) return;
+    }
+    if (step < totalSteps - 1) currentStep.value = step + 1;
+  }
+
   Future<void> register() async {
-    if (!formKey.currentState!.validate()) {
+    if (!(addressFormKey.currentState?.validate() ?? false)) {
+      Get.snackbar(
+        'reg_error'.tr,
+        'reg_please_fill'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
+    if (!validateAllFieldsForSubmit()) {
       Get.snackbar(
         'reg_error'.tr,
         'reg_please_fill'.tr,
@@ -615,8 +671,9 @@ class RegistrationController extends GetxController with SafeControllerMixin {
   @override
   void onInit() {
     super.onInit();
-    // Inicializar o formKey
-    formKey = GlobalKey<FormState>();
+    accountFormKey = GlobalKey<FormState>();
+    personalFormKey = GlobalKey<FormState>();
+    addressFormKey = GlobalKey<FormState>();
     
     // Adicionar todos os controllers ao gerenciamento seguro
     addControllers([

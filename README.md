@@ -282,6 +282,16 @@ Os testes devem ser organizados seguindo a estrutura do projeto, com arquivos de
 
 ## Troubleshooting
 
+### Backend sempre disponível (sem depender do Mac)
+
+Ngrok e túneis semelhantes **sempre** precisam de um agente ligado na máquina que expõe a API. Se quiser que o app funcione **24/7 sem o seu Mac**, o centro tem de ser **outro sítio**:
+
+1. **Hospedar a API na nuvem** (Railway, Render, Fly.io, Google Cloud Run, AWS ECS/Fargate, Azure Container Apps, etc.) e obter um URL HTTPS estável (`https://api.seudominio.com`).
+2. **MongoDB gerido** ([MongoDB Atlas](https://www.mongodb.com/atlas)) ou base de dados incluída no mesmo provedor — evita expor `mongod` no seu PC.
+3. No `.env` do Flutter, **`API_BASE_URL`** com esse URL público HTTPS (não use ngrok nem IP da sua casa para produção).
+
+**Alternativa:** uma **VPS barata** (Hetzner, DigitalOcean, etc.) onde corre Docker com API + MongoDB (ou só API ligada ao Atlas); pode usar **Cloudflare Tunnel** ou HTTPS com domínio próprio em vez de ngrok no Mac.
+
 ### Erro de Conexão com API
 
 **Problema:** O aplicativo não consegue conectar com o backend.
