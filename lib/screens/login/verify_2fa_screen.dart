@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../services/auth_service.dart';
+import '../../theme/app_theme.dart';
 
 class Verify2FAScreen extends StatefulWidget {
   final String patientId;
@@ -29,7 +31,6 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
   String? _plaintextCode;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -44,13 +45,6 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
-    ));
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutBack,
     ));
     _animationController.forward();
     
@@ -78,13 +72,17 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
       final parameters = Get.parameters;
       _patientId = parameters['patientId'] ?? '';
     }
+
+    if (_patientId.isEmpty) {
+      _patientId = widget.patientId;
+    }
   }
 
   Future<void> _loadPatientEmail() async {
     if (_patientId.isNotEmpty) {
       try {
         final patient = await AuthService.instance.getPatientById(_patientId);
-        if (patient != null) {
+        if (patient != null && mounted) {
           setState(() {
             _patientEmail = patient.email;
           });
@@ -108,8 +106,9 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
     });
     
     try {
-      await AuthService.instance.resend2FACode(_patientId, method: 'email');
+      await AuthService.instance.resend2FACode(_patientId, method: widget.method);
       final plain = AuthService.instance.plaintext2FACodeForTesting;
+      if (!mounted) return;
       setState(() {
         _plaintextCode = plain ?? _plaintextCode;
       });
@@ -124,10 +123,12 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
         duration: Duration(seconds: plain != null ? 12 : 3),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = '${'auth_2fa_resend_error'.tr}: ${e.toString()}';
       });
     } finally {
+      if (!mounted) return;
       setState(() {
         _isResending = false;
       });
@@ -144,379 +145,463 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final isLandscape = size.width > size.height;
     final isSmallScreen = size.width < 480;
-    final isMediumScreen = size.width >= 480 && size.width < 768;
-    final isLargeScreen = size.width >= 768;
     
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF00324A), // Mudança: cor de fundo igual ao login
-        ),
+        decoration: AppTheme.blueScreenGradientDecoration,
         child: SafeArea(
+          bottom: false,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: _buildContent(isLandscape, isSmallScreen, size),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(bool isLandscape, bool isSmallScreen, Size size) {
+    if (isLandscape) {
+      return Row(
+        children: [
+          Expanded(
+            child: _buildTopBrandSection(size),
+          ),
+          Expanded(
+            child: _buildFormSection(isSmallScreen, size, isLandscape),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      children: [
+        Expanded(
+          flex: 2,
+          child: _buildTopBrandSection(size),
+        ),
+        Expanded(
+          flex: 5,
+          child: _buildFormSection(isSmallScreen, size, isLandscape),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTopBrandSection(Size size) {
+    return Center(
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 700),
+        tween: Tween(begin: 0.95, end: 1.0),
+        curve: Curves.easeOutCubic,
+        builder: (context, value, child) {
+          return Transform.scale(
+            scale: value,
+            child: child,
+          );
+        },
+        child: Image.asset(
+          'assets/images/oryon_health_logo_signin.png',
+          width: size.shortestSide < 420 ? 140 : 176,
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFormSection(bool isSmallScreen, Size size, bool isLandscape) {
+    final mq = MediaQuery.of(context);
+    final bottomPad = (isLandscape ? 20.0 : 24.0) + mq.padding.bottom;
+    final horizontalPad = isSmallScreen ? 20.0 : 28.0;
+
+    final borderRadius = isLandscape
+        ? const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            bottomLeft: Radius.circular(28),
+          )
+        : const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          );
+
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(horizontalPad, 24, horizontalPad, bottomPad),
           child: Center(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isSmallScreen ? 16 : isMediumScreen ? 24 : 32,
-                ),
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: Container(
-                      width: isSmallScreen ? size.width * 0.95 : 
-                             isMediumScreen ? size.width * 0.8 : 
-                             size.width > 600 ? 500 : size.width * 0.9,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isSmallScreen ? 20 : isMediumScreen ? 28 : 32, 
-                        vertical: isSmallScreen ? 24 : isMediumScreen ? 32 : 40
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    height: 4,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.primaryBlue.withValues(alpha: 0.25),
+                          AppTheme.primaryBlue.withValues(alpha: 0.9),
+                          AppTheme.secondaryBlue.withValues(alpha: 0.9),
+                        ],
                       ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: _isLoading ? null : Get.back,
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                        color: AppTheme.primaryBlue,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                      const Spacer(),
+                      Icon(
+                        Icons.verified_user_rounded,
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.92),
+                        size: 22,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'auth_2fa_title'.tr,
+                    textAlign: TextAlign.center,
+                    style: AppTheme.titleLarge.copyWith(
+                      color: AppTheme.primaryBlue,
+                      fontSize: isSmallScreen ? 24 : 28,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'auth_2fa_sent'.tr,
+                    textAlign: TextAlign.center,
+                    style: AppTheme.bodyLarge.copyWith(color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF6FAFD),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.14),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.shield_outlined,
+                          size: 16,
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.85),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'auth_2fa_enter_code'.tr,
+                          style: AppTheme.bodyMedium.copyWith(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.88),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (_patientEmail != null) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 30,
-                            offset: const Offset(0, 12),
+                        color: const Color(0xFFF2F7FB),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.email_outlined,
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.9),
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _patientEmail!,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTheme.bodyMedium.copyWith(
+                                color: AppTheme.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Ícone animado
-                            Container(
-                              height: isSmallScreen ? 70 : isMediumScreen ? 75 : 80,
-                              width: isSmallScreen ? 70 : isMediumScreen ? 75 : 80,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF00324A), // Mudança: cor igual ao login
-                                borderRadius: BorderRadius.circular(isSmallScreen ? 18 : 20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF00324A).withValues(alpha: 0.3), // Mudança: cor igual ao login
-                                    blurRadius: isSmallScreen ? 15 : 20,
-                                    offset: Offset(0, isSmallScreen ? 6 : 8),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.verified_user_rounded,
-                                color: Colors.white,
-                                size: isSmallScreen ? 35 : isMediumScreen ? 38 : 40,
+                    ),
+                  ],
+                  if (_plaintextCode != null) ...[
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.amber.shade300),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'auth_2fa_skip_smtp_title'.tr,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'auth_2fa_skip_smtp_hint'.tr,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SelectableText(
+                            _plaintextCode!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  Text(
+                    'auth_2fa_enter_code'.tr,
+                    textAlign: TextAlign.center,
+                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 14),
+                  TextFormField(
+                    controller: _codeController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(6),
+                    ],
+                    autofillHints: const [AutofillHints.oneTimeCode],
+                    textInputAction: TextInputAction.done,
+                    maxLength: 6,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 22 : 26,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: isSmallScreen ? 6 : 8,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: '000000',
+                      counterText: '',
+                      filled: true,
+                      fillColor: const Color(0xFFF8FAFB),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.24),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.24),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
+                    onFieldSubmitted: (_) => _submitCode(),
+                    validator: (value) {
+                      final sanitizedValue = value?.trim() ?? '';
+                      if (sanitizedValue.isEmpty) {
+                        return 'auth_2fa_code_hint'.tr;
+                      }
+                      if (!RegExp(r'^\d{6}$').hasMatch(sanitizedValue)) {
+                        return 'auth_code_6_digits'.tr;
+                      }
+                      return null;
+                    },
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.red.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline_rounded, color: Colors.red, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _error!,
+                              style: AppTheme.bodyMedium.copyWith(
+                                color: Colors.red.shade700,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                            const SizedBox(height: 24),
-                            
-                            // Título
-                            Text(
-                              'auth_2fa_title'.tr,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: const Color(0xFF00324A), // Mudança: cor igual ao login
-                                fontWeight: FontWeight.bold,
-                                fontSize: isSmallScreen ? 20 : isMediumScreen ? 22 : 24,
-                                height: 1.2,
-                              ),
-                            ),
-                            SizedBox(height: isSmallScreen ? 10 : 12),
-                            
-                            // Subtítulo
-                            Text(
-                              'auth_2fa_sent'.tr,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: isSmallScreen ? 14 : isMediumScreen ? 15 : 16,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            
-                            // Email do paciente
-                            if (_patientEmail != null)
-                              Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: isSmallScreen ? 16 : 20, 
-                                  vertical: isSmallScreen ? 12 : 16
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF00324A).withValues(alpha: 0.1), // Mudança: cor igual ao login
-                                  borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
-                                  border: Border.all(
-                                    color: const Color(0xFF00324A).withValues(alpha: 0.3), // Mudança: cor igual ao login
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.email_rounded,
-                                      color: const Color(0xFF00324A), // Mudança: cor igual ao login
-                                      size: isSmallScreen ? 18 : 20,
-                                    ),
-                                    SizedBox(width: isSmallScreen ? 6 : 8),
-                                    Expanded(
-                                      child: Text(
-                                        _patientEmail!,
-                                        style: TextStyle(
-                                          color: const Color(0xFF00324A), // Mudança: cor igual ao login
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: isSmallScreen ? 14 : isMediumScreen ? 15 : 16,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            
-                            const SizedBox(height: 16),
-
-                            if (_plaintextCode != null)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: Material(
-                                  color: Colors.amber.shade100,
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(14),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        Text(
-                                          'auth_2fa_skip_smtp_title'.tr,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'auth_2fa_skip_smtp_hint'.tr,
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.grey.shade900,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        SelectableText(
-                                          _plaintextCode!,
-                                          style: const TextStyle(
-                                            fontSize: 28,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: 6,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                            Text(
-                              'auth_2fa_enter_code'.tr,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: isSmallScreen ? 13 : 14,
-                              ),
-                            ),
-                            
-                            SizedBox(height: isSmallScreen ? 24 : 32),
-                            
-                            // Container do campo de código
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
-                                border: Border.all(
-                                  color: const Color(0xFF00324A), 
-                                  width: isSmallScreen ? 1.5 : 2
-                                ), // Mudança: cor igual ao login
-                              ),
-                              child: TextFormField(
-                                controller: _codeController,
-                                keyboardType: TextInputType.number,
-                                maxLength: 6,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: isSmallScreen ? 20 : isMediumScreen ? 22 : 24,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: isSmallScreen ? 6 : 8,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: '000000',
-                                  counterText: '',
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: isSmallScreen ? 16 : 20, 
-                                    vertical: isSmallScreen ? 14 : 16
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'auth_2fa_code_hint'.tr;
-                                  }
-                                  if (value.length != 6) {
-                                    return 'auth_code_6_digits'.tr;
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            
-                            // Exibir erro se houver
-                            if (_error != null) ...[
-                              const SizedBox(height: 16),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.red[50],
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.red[200]!),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        _error!,
-                                        style: const TextStyle(
-                                          color: Colors.red,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                            
-                            SizedBox(height: isSmallScreen ? 20 : 24),
-                            
-                            // Botão de verificar
-                            Container(
-                              height: isSmallScreen ? 48 : isMediumScreen ? 52 : 56,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(isSmallScreen ? 16 : 20),
-                                color: const Color(0xFF00324A), // Mudança: cor igual ao login
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF00324A).withValues(alpha: 0.3), // Mudança: cor igual ao login
-                                    blurRadius: isSmallScreen ? 12 : 15,
-                                    offset: Offset(0, isSmallScreen ? 4 : 6),
-                                  ),
-                                ],
-                              ),
-                              child: ElevatedButton.icon(
-                                onPressed: _isLoading
-                                    ? null
-                                    : () async {
-                                        if (!_formKey.currentState!.validate()) return;
-                                        setState(() {
-                                          _isLoading = true;
-                                          _error = null;
-                                        });
-                                        try {
-                                          final patient = await AuthService.instance.verify2FACode(
-                                            _patientId,
-                                            _codeController.text.trim(),
-                                          );
-                                          // Redirecionar para tela home após verificação bem-sucedida
-                                          Get.offAllNamed('/home');
-                                        } catch (e) {
-                                          setState(() {
-                                            _error = e.toString();
-                                          });
-                                        } finally {
-                                          setState(() {
-                                            _isLoading = false;
-                                          });
-                                        }
-                                      },
-                                icon: _isLoading
-                                    ? SizedBox(
-                                        width: isSmallScreen ? 20 : 24,
-                                        height: isSmallScreen ? 20 : 24,
-                                        child: const CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Icon(
-                                        Icons.verified_rounded,
-                                        color: Colors.white,
-                                        size: isSmallScreen ? 20 : 24,
-                                      ),
-                                label: Text(
-                                  _isLoading ? 'auth_2fa_verifying'.tr : 'auth_2fa_verify'.tr,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: isSmallScreen ? 16 : isMediumScreen ? 17 : 18,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            
-                            SizedBox(height: isSmallScreen ? 20 : 24),
-                            
-                            // Botão de reenviar código
-                            TextButton.icon(
-                              onPressed: _isResending ? null : _resendCode,
-                              icon: _isResending
-                                  ? SizedBox(
-                                      width: isSmallScreen ? 14 : 16,
-                                      height: isSmallScreen ? 14 : 16,
-                                      child: const CircularProgressIndicator(
-                                        color: Color(0xFF00324A), // Mudança: cor igual ao login
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.refresh_rounded,
-                                      color: const Color(0xFF00324A), // Mudança: cor igual ao login
-                                      size: isSmallScreen ? 18 : 20,
-                                    ),
-                              label: Text(
-                                _isResending ? 'auth_resending'.tr : 'auth_resend'.tr,
-                                style: TextStyle(
-                                  color: const Color(0xFF00324A), // Mudança: cor igual ao login
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: isSmallScreen ? 14 : isMediumScreen ? 15 : 16,
-                                ),
-                              ),
-                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    height: isSmallScreen ? 50 : 54,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppTheme.primaryBlue,
+                            AppTheme.primaryBlue.withValues(alpha: 0.88),
                           ],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.28),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton.icon(
+                        onPressed: _isLoading ? null : _submitCode,
+                        icon: _isLoading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Icon(Icons.verified_rounded, color: Colors.white),
+                        label: Text(
+                          _isLoading ? 'auth_2fa_verifying'.tr : 'auth_2fa_verify'.tr,
+                          style: AppTheme.titleSmall.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 10),
+                  TextButton.icon(
+                    onPressed: _isResending ? null : _resendCode,
+                    icon: _isResending
+                        ? SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppTheme.primaryBlue.withValues(alpha: 0.85),
+                              ),
+                            ),
+                          )
+                        : Icon(
+                            Icons.refresh_rounded,
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.85),
+                          ),
+                    label: Text(
+                      _isResending ? 'auth_resending'.tr : 'auth_resend'.tr,
+                      style: AppTheme.bodyLarge.copyWith(
+                        color: AppTheme.primaryBlue,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _submitCode() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_patientId.isEmpty) {
+      setState(() {
+        _error = 'auth_2fa_invalid_session'.tr;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      await AuthService.instance.verify2FACode(
+        _patientId,
+        _codeController.text.trim(),
+      );
+      if (!mounted) return;
+      Get.offAllNamed('/home');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 }

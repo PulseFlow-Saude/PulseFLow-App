@@ -148,7 +148,8 @@ Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
 ```env
 # URL da API Backend
-API_BASE_URL=http://localhost:65432
+# Produção: URL HTTPS pública do servidor (ex.: Render)
+API_BASE_URL=https://seu-backend.onrender.com
 
 # MongoDB Connection String
 MONGODB_URI=mongodb://localhost:27017/paciente_app

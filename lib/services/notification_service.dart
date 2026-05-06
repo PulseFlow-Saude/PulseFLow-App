@@ -1,5 +1,7 @@
+import 'dart:io' show Platform;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../config/app_config.dart';
+import 'firebase_bootstrap.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,6 +73,8 @@ class NotificationService extends GetxService {
   /// Inicializar Firebase Messaging
   Future<void> _initializeFirebaseMessaging() async {
     if (!AppConfig.useFirebase) return;
+    await FirebaseBootstrap.ensureInitialized();
+    if (!FirebaseBootstrap.isReady) return;
     try {
       _firebaseMessaging = FirebaseMessaging.instance;
       _firebaseAvailable = true;
@@ -91,12 +95,16 @@ class NotificationService extends GetxService {
         sound: true,
       );
 
-      _fcmToken = await _firebaseMessaging!.getToken();
-
-      if (_fcmToken != null) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('fcm_token', _fcmToken!);
+      if (Platform.isIOS) {
+        await _waitForApnsToken();
       }
+
+      await _obtainAndPersistFcmToken();
+      _firebaseMessaging!.onTokenRefresh.listen((newToken) async {
+        _fcmToken = newToken;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('fcm_token', newToken);
+      });
 
       FirebaseMessaging.onMessage.listen(
         (message) => FirebaseHandlers.handleForegroundMessage(message, _localNotifications),
@@ -110,6 +118,24 @@ class NotificationService extends GetxService {
       }
     } catch (e) {
       _firebaseAvailable = false;
+    }
+  }
+
+  Future<void> _obtainAndPersistFcmToken() async {
+    if (_firebaseMessaging == null) return;
+    final token = await _firebaseMessaging!.getToken();
+    if (token == null || token.isEmpty) return;
+    _fcmToken = token;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('fcm_token', token);
+  }
+
+  Future<void> _waitForApnsToken() async {
+    if (_firebaseMessaging == null || !Platform.isIOS) return;
+    for (var i = 0; i < 8; i++) {
+      final apnsToken = await _firebaseMessaging!.getAPNSToken();
+      if (apnsToken != null && apnsToken.isNotEmpty) return;
+      await Future<void>.delayed(const Duration(milliseconds: 500));
     }
   }
 

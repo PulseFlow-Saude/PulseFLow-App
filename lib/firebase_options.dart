@@ -44,7 +44,7 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static FirebaseOptions get web => const FirebaseOptions(
+  static FirebaseOptions get web => FirebaseOptions(
     apiKey: AppConfig.firebaseWebApiKey,
     appId: AppConfig.firebaseWebAppId,
     messagingSenderId: AppConfig.firebaseMessagingSenderId,
@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
     storageBucket: AppConfig.firebaseStorageBucket,
   );
 
-  static FirebaseOptions get android => const FirebaseOptions(
+  static FirebaseOptions get android => FirebaseOptions(
     apiKey: AppConfig.firebaseAndroidApiKey,
     appId: AppConfig.firebaseAndroidAppId,
     messagingSenderId: AppConfig.firebaseMessagingSenderId,
@@ -61,7 +61,7 @@ class DefaultFirebaseOptions {
     storageBucket: AppConfig.firebaseStorageBucket,
   );
 
-  static FirebaseOptions get ios => const FirebaseOptions(
+  static FirebaseOptions get ios => FirebaseOptions(
     apiKey: AppConfig.firebaseIosApiKey,
     appId: AppConfig.firebaseIosAppId,
     messagingSenderId: AppConfig.firebaseMessagingSenderId,
@@ -70,12 +70,12 @@ class DefaultFirebaseOptions {
     iosBundleId: AppConfig.firebaseIosBundleId,
   );
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDummy-macOSKey-ForPulseFlow',
-    appId: '1:123456789:macos:abcdef123456',
-    messagingSenderId: '123456789',
-    projectId: 'pulseflow-app',
-    storageBucket: 'pulseflow-app.appspot.com',
-    iosBundleId: 'com.example.pacienteApp',
+  static FirebaseOptions get macos => FirebaseOptions(
+    apiKey: AppConfig.firebaseWebApiKey,
+    appId: AppConfig.firebaseWebAppId,
+    messagingSenderId: AppConfig.firebaseMessagingSenderId,
+    projectId: AppConfig.firebaseProjectId,
+    storageBucket: AppConfig.firebaseStorageBucket,
+    iosBundleId: AppConfig.firebaseIosBundleId,
   );
 }

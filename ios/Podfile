@@ -50,4 +50,35 @@ post_install do |installer|
       config.build_settings['ENABLE_BITCODE'] = 'NO'
     end
   end
+
+  # O firebase_core no iOS faz [FIRApp configureWithOptions:] automaticamente se
+  # existir GoogleService-Info.plist no bundle. O Dart também chama
+  # Firebase.initializeApp → duas configurações da app [DEFAULT] → EXC_CRASH em
+  # +[FIRApp addAppToAppDictionary:]. Desativamos esse auto-config aqui; só o
+  # Dart (DefaultFirebaseOptions / FirebaseBootstrap) passa a inicializar.
+  #
+  # NOTA: este ficheiro aponta pelo symlink .symlinks para o pacote no pub-cache;
+  # o patch repete-se ao correr `pod install` até o ficheiro já ter o marcador.
+  pulseflow_marker = '// PULSEFLOW_IOS_FIREBASE_NO_AUTOCONFIGURE'
+  firebase_core_m = File.expand_path(File.join(__dir__, '.symlinks', 'plugins', 'firebase_core', 'ios', 'Classes', 'FLTFirebaseCorePlugin.m'))
+  if File.exist?(firebase_core_m)
+    contents = File.read(firebase_core_m)
+    unless contents.include?(pulseflow_marker)
+      old_block = [
+        '    FIROptions *options = [FIROptions defaultOptions];',
+        '    if (options != nil && [FIRApp allApps][@"__FIRAPP_DEFAULT"] == nil) {',
+        '      [FIRApp configureWithOptions:options];',
+        '    }',
+      ].join("\n")
+      if contents.include?(old_block)
+        new_block = "#{pulseflow_marker}\n    /* Desativado pelo Podfile PulseFlow; ver comentário em post_install. */\n"
+        File.write(firebase_core_m, contents.sub(old_block, new_block))
+        puts '[PulseFlow] Patch firebase_core: sem auto [FIRApp configure] com plist (init só no Dart).'
+      else
+        puts '[PulseFlow] Aviso: bloco FIROptions/defaultOptions no firebase_core não encontrado; não foi aplicado patch.'
+      end
+    end
+  else
+    puts '[PulseFlow] Aviso: .symlinks/plugins/firebase_core inexistente — corra `flutter pub get` na raiz e volte a `pod install`.'
+  end
 end

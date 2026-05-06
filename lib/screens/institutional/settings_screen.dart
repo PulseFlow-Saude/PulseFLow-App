@@ -4,14 +4,14 @@ import '../../widgets/institutional_page.dart';
 import '../../widgets/language_icon_button.dart';
 import 'settings_controller.dart';
 
-void _showLanguagePicker(BuildContext context, SettingsController controller) {
+void _showLanguagePicker(BuildContext context) {
   LanguageIconButton.showLanguageModal(context);
 }
 
 class SettingsScreen extends StatelessWidget {
   SettingsScreen({super.key});
 
-  final SettingsController controller = Get.put(SettingsController());
+  final SettingsController controller = Get.find<SettingsController>();
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,7 @@ class SettingsScreen extends StatelessWidget {
                   description: 'inst_settings_language_desc'.tr,
                   icon: Icons.language_outlined,
                   currentCode: controller.language.value,
-                  onTap: () => _showLanguagePicker(context, controller),
+                  onTap: () => _showLanguagePicker(context),
                 )),
           ],
         ),
@@ -252,10 +252,13 @@ class _LanguageTileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSystem = currentCode == 'system';
     final opt = kLanguageOptions.firstWhere(
       (o) => o.localeCode == currentCode,
       orElse: () => kLanguageOptions.first,
     );
+    final displayFlag = isSystem ? '📱' : opt.flag;
+    final displayName = isSystem ? 'Automático (sistema)' : opt.name;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -302,10 +305,10 @@ class _LanguageTileCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Text(opt.flag, style: const TextStyle(fontSize: 20)),
+                      Text(displayFlag, style: const TextStyle(fontSize: 20)),
                       const SizedBox(width: 8),
                       Text(
-                        opt.name,
+                        displayName,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF00324A),

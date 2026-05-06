@@ -1,12 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'config/app_config.dart';
-import 'firebase_options.dart';
 import 'theme/app_theme.dart';
 import 'routes/app_pages.dart';
 import 'services/auth_service.dart';
@@ -17,6 +17,7 @@ import 'screens/login/login_controller.dart';
 import 'services/enxaqueca_service.dart';
 import 'services/diabetes_service.dart';
 import 'services/notification_service.dart';
+import 'services/firebase_bootstrap.dart';
 import 'services/notifications/firebase_handlers.dart';
 import 'screens/institutional/settings_controller.dart';
 import 'services/app_translations.dart';
@@ -35,26 +36,39 @@ void main() async {
   
   if (AppConfig.useFirebase) {
     try {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+      await FirebaseBootstrap.ensureInitialized()
+          .timeout(const Duration(seconds: 8));
     } catch (e) {
-      // Continuar com notificações locais apenas
+      // Timeout / erro: continuar sem FCM
+    }
+    if (FirebaseBootstrap.isReady) {
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     }
   }
-  
+
   final dbService = Get.put(DatabaseService());
   try {
-    await dbService.testConnection();
+    await dbService
+        .testConnection()
+        .timeout(const Duration(seconds: 20));
   } catch (e) {
-    // Erro ao conectar com banco de dados
+    // Erro ao conectar com banco de dados (rede lenta / Mongo inacessível)
   }
 
   Get.put(MigrationService());
 
   final authService = Get.put(AuthService());
-  await authService.init();
+  try {
+    await authService.init().timeout(const Duration(seconds: 15));
+  } on TimeoutException {
+    try {
+      await authService.logout();
+    } catch (_) {}
+  } catch (e) {
+    try {
+      await authService.logout();
+    } catch (_) {}
+  }
   
   Get.put(PacienteController());
   Get.put(LoginController());

@@ -330,7 +330,7 @@ class HomeScreen extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 2),
                           Text(
                             controller.getPatientName(),
                             style: AppTheme.titleMedium.copyWith(
@@ -1877,8 +1877,8 @@ class HomeScreen extends StatelessWidget {
   Widget _buildScheduleConsultationCard() {
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 176),
-      padding: const EdgeInsets.fromLTRB(22, 20, 18, 20),
+      constraints: const BoxConstraints(minHeight: 188),
+      padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -1912,19 +1912,22 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.26)),
                 ),
-                child: const Icon(Icons.calendar_today_rounded, color: Colors.white, size: 26),
+                child: const Icon(
+                  Icons.calendar_today_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'home_schedule_title'.tr,
@@ -1934,72 +1937,61 @@ class HomeScreen extends StatelessWidget {
                         height: 1.2,
                       ),
                       maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'home_schedule_sub'.tr,
                       style: AppTheme.bodyMedium.copyWith(
-                        color: Colors.white.withValues(alpha: 0.88),
+                        color: Colors.white.withValues(alpha: 0.9),
                         height: 1.35,
                       ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: 4,
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.12),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton.icon(
-                      onPressed: () => Get.toNamed(Routes.APPOINTMENTS_SPECIALTY),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppTheme.primaryBlue,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      ),
-                      icon: const Icon(Icons.medical_services_rounded, size: 22),
-                      label: Text(
+          const SizedBox(height: 18),
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: () => Get.toNamed(Routes.APPOINTMENTS_SPECIALTY),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppTheme.primaryBlue,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.medical_services_rounded, size: 21),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
                         'home_schedule_btn'.tr,
                         style: AppTheme.titleSmall.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  ),
+                    const Icon(Icons.arrow_forward_rounded, size: 19),
+                  ],
                 ),
               ),
-              const SizedBox(width: 4),
-              Material(
-                color: Colors.transparent,
-                child: IconButton(
-                  onPressed: () => Get.toNamed(Routes.APPOINTMENTS_SPECIALTY),
-                  style: IconButton.styleFrom(
-                    foregroundColor: Colors.white.withValues(alpha: 0.95),
-                  ),
-                  icon: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

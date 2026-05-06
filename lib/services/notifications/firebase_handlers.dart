@@ -1,7 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import '../../config/app_config.dart';
+import '../../firebase_options.dart';
 import 'notification_channels.dart';
 import 'notification_builders.dart';
 import 'notification_storage.dart';
@@ -64,10 +67,15 @@ class FirebaseHandlers {
 /// Handler global para mensagens em background (app fechado)
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (!AppConfig.useFirebase) return;
+
   try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    // Firebase já inicializado
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } on FirebaseException catch (e) {
+    if (e.code != 'duplicate-app') return;
+  } catch (_) {
+    return;
   }
 
   final FlutterLocalNotificationsPlugin localNotifications =

@@ -130,7 +130,7 @@ class ApiService {
       if (_isLocalTunnelUnavailable(response)) {
         final fallbackBase = AppConfig.apiFallbackUrl ?? AppConfig.defaultApiBaseUrl;
         if (fallbackBase != currentBaseUrl) {
-          print('⚠️ [ApiService] Túnel indisponível. Tentando fallback local: $fallbackBase');
+          print('⚠️ [ApiService] Endpoint principal indisponível. Tentando fallback: $fallbackBase');
           currentBaseUrl = fallbackBase;
           response = await _postAccessCodeRequest(
             base: currentBaseUrl,
@@ -140,7 +140,7 @@ class ApiService {
           print('📡 [ApiService] Resultado do fallback - Status: ${response.statusCode}');
         } else {
           throw Exception(
-            'Túnel local indisponível. Reinicie o serviço do localtunnel/ngrok ou configure API_FALLBACK_URL com o IP do backend.',
+            'Endpoint público indisponível. Verifique o servidor no Render e ajuste API_BASE_URL/API_FALLBACK_URL para uma URL acessível.',
           );
         }
       }
@@ -151,14 +151,14 @@ class ApiService {
       print('📡 [ApiService] Response body (primeiros 200 chars): ${response.body.length > 200 ? response.body.substring(0, 200) : response.body}');
       print('📡 [ApiService] Response headers: ${response.headers}');
       
-      // Verificar se o ngrok está offline (ERR_NGROK_3200)
+      // Verificar se o proxy/túnel público está offline (ex.: ERR_NGROK_3200)
       final ngrokErrorCode = response.headers['ngrok-error-code'] ?? '';
       final contentType = response.headers['content-type'] ?? '';
       if (ngrokErrorCode == 'ERR_NGROK_3200' || 
           (response.body.contains('is offline') && baseUrl.contains('ngrok'))) {
-        print('⚠️ [ApiService] Ngrok está offline (ERR_NGROK_3200). O túnel não está ativo.');
-        print('⚠️ [ApiService] Solução: Reinicie o túnel ngrok no servidor backend.');
-        throw Exception('Túnel ngrok está offline. O servidor backend não está acessível através do túnel. Reinicie o ngrok no servidor.');
+        print('⚠️ [ApiService] Endpoint público está offline (ERR_NGROK_3200).');
+        print('⚠️ [ApiService] Solução: validar URL pública e disponibilidade do backend no Render.');
+        throw Exception('Endpoint público offline (ERR_NGROK_3200). Verifique a URL da API e o status do servidor no Render.');
       }
       
       // Verificar se o ngrok está bloqueando (retornando HTML em vez de JSON)
@@ -216,8 +216,8 @@ class ApiService {
             print('   1. O domínio fixo expirou (no plano gratuito)');
             print('   2. O ngrok precisa ser reiniciado');
             print('   3. O backend não está rodando na porta 65432');
-            print('⚠️ [ApiService] Solução: Execute ./start_ngrok.sh para reiniciar o túnel');
-            throw Exception('Túnel ngrok offline (ERR_NGROK_3200). O domínio pode ter expirado ou o ngrok precisa ser reiniciado. Execute ./start_ngrok.sh no servidor.');
+            print('⚠️ [ApiService] Solução: valide API_BASE_URL e confirme backend ativo no Render.');
+            throw Exception('Endpoint público offline (ERR_NGROK_3200). O domínio pode estar indisponível. Verifique API_BASE_URL e o servidor no Render.');
           }
           throw Exception('Endpoint não encontrado (404). Verifique se o endpoint /api/access-code/gerar existe no backend.');
         } else if (response.statusCode == 500) {
@@ -225,7 +225,7 @@ class ApiService {
         } else if (response.statusCode == 503) {
           if (_isLocalTunnelUnavailable(response)) {
             throw Exception(
-              'Túnel local indisponível (503). Reinicie o túnel ou ajuste API_BASE_URL/API_FALLBACK_URL para uma URL acessível pelo dispositivo.',
+              'Endpoint público indisponível (503). Verifique o servidor no Render ou ajuste API_BASE_URL/API_FALLBACK_URL para uma URL acessível pelo dispositivo.',
             );
           }
           throw Exception('Servidor indisponível (503). Tente novamente em instantes.');
@@ -269,16 +269,16 @@ class ApiService {
       final errorUrl = '$baseUrl/api/access-code/gerar';
       print('❌ [ApiService] TlsException: ${e.message}');
       print('❌ [ApiService] TlsException OS Error: ${e.osError?.message ?? "N/A"}');
-      print('⚠️ [ApiService] Dica: Verifique se o ngrok está rodando e se o servidor backend está acessível');
+      print('⚠️ [ApiService] Dica: Verifique se o servidor backend está acessível pela URL pública configurada');
       print('⚠️ [ApiService] Teste a URL no navegador: $errorUrl');
-      throw Exception('Erro de certificado SSL. O servidor pode estar fechando a conexão. Verifique se o ngrok e o servidor backend estão rodando corretamente.');
+      throw Exception('Erro de certificado SSL. O servidor pode estar fechando a conexão. Verifique a URL HTTPS configurada e o servidor backend.');
     } on HandshakeException catch (e) {
       final errorUrl = '$baseUrl/api/access-code/gerar';
       print('❌ [ApiService] HandshakeException: ${e.message}');
       print('❌ [ApiService] HandshakeException OS Error: ${e.osError?.message ?? "N/A"}');
-      print('⚠️ [ApiService] Dica: O handshake SSL foi interrompido. Pode ser problema no servidor ou no ngrok');
+      print('⚠️ [ApiService] Dica: O handshake SSL foi interrompido. Pode ser problema no servidor ou no endpoint público');
       print('⚠️ [ApiService] Teste a URL no navegador: $errorUrl');
-      throw Exception('Erro de handshake SSL. A conexão foi interrompida durante o handshake. Verifique se o servidor backend está rodando e acessível através do ngrok.');
+      throw Exception('Erro de handshake SSL. A conexão foi interrompida durante o handshake. Verifique se o servidor backend está rodando e acessível pela URL pública.');
     } catch (e) {
       print('❌ [ApiService] Erro genérico: ${e.runtimeType} - ${e.toString()}');
       print('❌ [ApiService] Stack trace: ${StackTrace.current}');

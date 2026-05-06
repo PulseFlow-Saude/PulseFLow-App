@@ -51,7 +51,7 @@ class SettingsController extends GetxController {
   void onInit() {
     super.onInit();
     _prefsLoadedCompleter = Completer<void>();
-    _loadPreferences();
+    // Preferências: [ensurePreferencesLoaded] em main() (evita corrida / duplo load).
   }
 
   /// Garante que as preferências foram carregadas (para uso em main antes de runApp).
@@ -61,17 +61,25 @@ class SettingsController extends GetxController {
   }
 
   Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    criticalAlerts.value = prefs.getBool(_criticalAlertsKey) ?? true;
-    dailySummary.value = prefs.getBool(_dailySummaryKey) ?? true;
-    smartReminders.value = prefs.getBool(_smartRemindersKey) ?? false;
-    dataVisibility.value = prefs.getBool(_dataVisibilityKey) ?? true;
-    accessLogsEmail.value = prefs.getBool(_accessLogsEmailKey) ?? false;
-    darkTheme.value = prefs.getBool(_darkThemeKey) ?? false;
-    final savedLang = prefs.getString(_languageKey) ?? 'system';
-    language.value = supportedLanguages.contains(savedLang) ? savedLang : 'system';
-    if (!supportedLanguages.contains(savedLang)) {
-      await prefs.setString(_languageKey, 'system');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      criticalAlerts.value = prefs.getBool(_criticalAlertsKey) ?? true;
+      dailySummary.value = prefs.getBool(_dailySummaryKey) ?? true;
+      smartReminders.value = prefs.getBool(_smartRemindersKey) ?? false;
+      dataVisibility.value = prefs.getBool(_dataVisibilityKey) ?? true;
+      accessLogsEmail.value = prefs.getBool(_accessLogsEmailKey) ?? false;
+      darkTheme.value = prefs.getBool(_darkThemeKey) ?? false;
+      final savedLang = prefs.getString(_languageKey) ?? 'system';
+      language.value =
+          supportedLanguages.contains(savedLang) ? savedLang : 'system';
+      if (!supportedLanguages.contains(savedLang)) {
+        await prefs.setString(_languageKey, 'system');
+      }
+    } finally {
+      if (_prefsLoadedCompleter != null &&
+          !_prefsLoadedCompleter!.isCompleted) {
+        _prefsLoadedCompleter!.complete();
+      }
     }
   }
 

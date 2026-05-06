@@ -106,6 +106,18 @@ class Patient {
     };
   }
 
+  /// Aceita `_id` ou `id` em string ou formato MongoDB `{ "\$oid": "..." }`.
+  static String? parseDocumentId(Map<String, dynamic> json) {
+    final raw = json['_id'] ?? json['id'];
+    if (raw == null) return null;
+    if (raw is String) return raw.isEmpty ? null : raw;
+    if (raw is Map) {
+      final oid = raw[r'$oid'];
+      if (oid != null) return oid.toString();
+    }
+    return raw.toString();
+  }
+
   static String? _parseProfilePhoto(Map<String, dynamic> json) {
     final raw = json['profilePhoto'] ?? json['fotoPerfil'] ?? json['foto'];
     if (raw == null) return null;
@@ -131,7 +143,7 @@ class Patient {
     }
 
     return Patient(
-      id: json['_id']?.toString(),
+      id: parseDocumentId(json),
       name: json['name'] ?? json['nome'] ?? '',
       email: json['email'] ?? '',
       password: json['password'] ?? json['senha'] ?? '',
