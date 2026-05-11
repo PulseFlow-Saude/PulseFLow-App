@@ -27,8 +27,9 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
-target 'Runner' do
-  use_frameworks!
+target 'Oryon Health' do
+  # Estático evita 'Flutter/Flutter.h' not found e falhas de VerifyModule com plugins.
+  use_frameworks! :linkage => :static
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
@@ -37,17 +38,55 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  installer.pods_project.build_configurations.each do |config|
+    config.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
+    config.build_settings['ENABLE_MODULE_VERIFIER'] = 'NO'
+  end
+
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
     
     target.build_configurations.each do |config|
       # Corrige erro do Firebase Messaging
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
+      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
+      config.build_settings['ENABLE_MODULE_VERIFIER'] = 'NO'
+      config.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
       
       # Corrige problemas de build do Xcode 14+
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
       config.build_settings['ENABLE_BITCODE'] = 'NO'
     end
+  end
+
+  # O firebase_core no iOS faz [FIRApp configureWithOptions:] automaticamente se
+  # existir GoogleService-Info.plist no bundle. O Dart também chama
+  # Firebase.initializeApp → duas configurações da app [DEFAULT] → EXC_CRASH em
+  # +[FIRApp addAppToAppDictionary:]. Desativamos esse auto-config aqui; só o
+  # Dart (DefaultFirebaseOptions / FirebaseBootstrap) passa a inicializar.
+  #
+  # NOTA: este ficheiro aponta pelo symlink .symlinks para o pacote no pub-cache;
+  # o patch repete-se ao correr `pod install` até o ficheiro já ter o marcador.
+  pulseflow_marker = '// PULSEFLOW_IOS_FIREBASE_NO_AUTOCONFIGURE'
+  firebase_core_m = File.expand_path(File.join(__dir__, '.symlinks', 'plugins', 'firebase_core', 'ios', 'Classes', 'FLTFirebaseCorePlugin.m'))
+  if File.exist?(firebase_core_m)
+    contents = File.read(firebase_core_m)
+    unless contents.include?(pulseflow_marker)
+      old_block = [
+        '    FIROptions *options = [FIROptions defaultOptions];',
+        '    if (options != nil && [FIRApp allApps][@"__FIRAPP_DEFAULT"] == nil) {',
+        '      [FIRApp configureWithOptions:options];',
+        '    }',
+      ].join("\n")
+      if contents.include?(old_block)
+        new_block = "#{pulseflow_marker}\n    /* Desativado pelo Podfile PulseFlow; ver comentário em post_install. */\n"
+        File.write(firebase_core_m, contents.sub(old_block, new_block))
+        puts '[PulseFlow] Patch firebase_core: sem auto [FIRApp configure] com plist (init só no Dart).'
+      else
+        puts '[PulseFlow] Aviso: bloco FIROptions/defaultOptions no firebase_core não encontrado; não foi aplicado patch.'
+      end
+    end
+  else
+    puts '[PulseFlow] Aviso: .symlinks/plugins/firebase_core inexistente — corra `flutter pub get` na raiz e volte a `pod install`.'
   end
 end

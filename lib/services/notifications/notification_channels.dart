@@ -70,8 +70,8 @@ class NotificationChannels {
   static const AndroidNotificationChannel generalChannelForBackground =
       AndroidNotificationChannel(
     generalChannelId,
-    'PulseFlow Notifications',
-    description: 'Canal de notificações do PulseFlow',
+    'Oryon Health Notifications',
+    description: 'Canal de notificações do Oryon Health',
     importance: Importance.max,
     playSound: true,
     enableVibration: true,

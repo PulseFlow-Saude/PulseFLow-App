@@ -4,11 +4,11 @@ import 'package:get/get.dart';
 import '../../models/evento_clinico.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
-import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
+import '../../widgets/pulse_health_record_form_widgets.dart';
 import '../../widgets/pulse_side_menu.dart';
-import '../../widgets/pulse_drawer_button.dart';
 
 class EventoClinicoFormScreen extends StatefulWidget {
   final String? pacienteId;
@@ -141,153 +141,86 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: AppTheme.blueSystemOverlayStyle,
-      child: Scaffold(
-      backgroundColor: const Color(0xFF00324A),
-      drawer: const PulseSideMenu(activeItem: PulseNavItem.history),
+    return PulseBlueScaffold(
       resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Header azul como outras telas
-            _buildHeader(),
-            
-            // Conteúdo principal
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.only(
-                      left: 20,
-                      right: 20,
-                      top: 20,
-                      bottom: 100, // Espaço extra para o bottomNavigationBar
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                          
-                        // Campos principais
-                        _buildTextField(
-                          controller: _tituloController,
-                          label: 'evt_title'.tr,
-                          hint: 'evt_title_hint'.tr,
-                          isRequired: true,
+      drawer: PulseSideMenu(activeItem: PulseNavItem.history),
+      header: PulseBlueLeadTitleHeader(
+        title: 'evt_form_title'.tr,
+        subtitle: 'evt_form_sub'.tr,
+      ),
+      body: Form(
+        key: _formKey,
+        child: PulseHealthRecordMaxWidthAlign(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: PulseHealthRecordLayout.scrollPadding(context, bottom: 100),
+            child: Card(
+                      color: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            PulseRecordSectionIntro(
+                              icon: Icons.medical_information_rounded,
+                              title: 'evt_form_title'.tr,
+                              subtitle: 'menu_eventos_sub'.tr,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildTextField(
+                              controller: _tituloController,
+                              label: 'evt_title'.tr,
+                              hint: 'evt_title_hint'.tr,
+                              labelIcon: Icons.short_text_rounded,
+                              isRequired: true,
+                            ),
+                            const SizedBox(height: 12),
+                            _buildDropdownField(
+                              label: 'evt_type_label'.tr,
+                              labelIcon: Icons.category_rounded,
+                              value: _selectedTipo,
+                              items: _tipoKeys,
+                              onChanged: (value) => setState(() => _selectedTipo = value),
+                              isRequired: true,
+                            ),
+                            const SizedBox(height: 12),
+                            _buildIntensidadeField(),
+                            const SizedBox(height: 12),
+                            _buildDateTimeFields(),
+                            const SizedBox(height: 12),
+                            _buildTextField(
+                              controller: _descricaoController,
+                              label: 'evt_desc_label'.tr,
+                              hint: 'evt_desc_hint'.tr,
+                              labelIcon: Icons.description_outlined,
+                              maxLines: 3,
+                            ),
+                            const SizedBox(height: 12),
+                            _buildTextField(
+                              controller: _medicacaoController,
+                              label: 'evt_medication_label'.tr,
+                              hint: 'evt_medication_hint'.tr,
+                              labelIcon: Icons.medication_rounded,
+                            ),
+                            const SizedBox(height: 12),
+                            _buildTextField(
+                              controller: _sintomasController,
+                              label: 'evt_symptoms_label'.tr,
+                              hint: 'evt_symptoms_hint'.tr,
+                              labelIcon: Icons.healing_rounded,
+                              maxLines: 2,
+                            ),
+                            const SizedBox(height: 20),
+                            _buildActionButtons(),
+                          ],
                         ),
-                        const SizedBox(height: 12),
-                        
-                        _buildDropdownField(
-                          label: 'evt_type_label'.tr,
-                          value: _selectedTipo,
-                          items: _tipoKeys,
-                          onChanged: (value) => setState(() => _selectedTipo = value),
-                          isRequired: true,
-                        ),
-                          const SizedBox(height: 12),
-                          
-                          _buildIntensidadeField(),
-                          const SizedBox(height: 12),
-                          
-                          _buildDateTimeFields(),
-                          const SizedBox(height: 12),
-                          
-                          _buildTextField(
-                            controller: _descricaoController,
-                            label: 'evt_desc_label'.tr,
-                            hint: 'evt_desc_hint'.tr,
-                            maxLines: 3,
-                          ),
-                          const SizedBox(height: 12),
-                          
-                          _buildTextField(
-                            controller: _medicacaoController,
-                            label: 'evt_medication_label'.tr,
-                            hint: 'evt_medication_hint'.tr,
-                          ),
-                          const SizedBox(height: 12),
-                          
-                          _buildTextField(
-                            controller: _sintomasController,
-                            label: 'evt_symptoms_label'.tr,
-                            hint: 'evt_symptoms_hint'.tr,
-                            maxLines: 2,
-                          ),
-                          const SizedBox(height: 20),
-                          
-                        // Botões de ação
-                        _buildActionButtons(),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-      // bottomNavigationBar removido - tela tem sidebar
-      // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
-    ));
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(
-        top: 16,
-        left: 16,
-        right: 16,
-        bottom: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: Row(
-        children: [
-          const PulseDrawerButton(iconSize: 22),
-          const SizedBox(width: 12),
-          
-          // Título
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'evt_form_title'.tr,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                  ),
-                ),
-                Text(
-                  'evt_form_sub'.tr,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-        ],
-      ),
     );
   }
 
@@ -295,21 +228,17 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-          'evt_pain_intensity_label'.tr,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF00324A),
-          ),
+          PulseRecordFieldLabelRow(
+            icon: Icons.monitor_heart_rounded,
+            label: 'evt_pain_intensity_label'.tr,
           ),
           const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-            color: const Color(0xFFF9FAFB),
+            color: PulseHealthRecordFormStyles.fillColor,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: PulseHealthRecordFormStyles.sectionBorderColor),
       ),
       child: Column(
         children: [
@@ -364,33 +293,17 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
     required TextEditingController controller,
     required String label,
     required String hint,
+    required IconData labelIcon,
     bool isRequired = false,
     int maxLines = 1,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF00324A),
-              ),
-            ),
-            if (isRequired) ...[
-              const SizedBox(width: 4),
-              const Text(
-                '*',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ],
+        PulseRecordFieldLabelRow(
+          icon: labelIcon,
+          label: label,
+          isRequired: isRequired,
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -402,30 +315,9 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
             }
             return null;
           },
-          decoration: InputDecoration(
+          decoration: PulseHealthRecordFormStyles.modernInputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
-              color: Color(0xFF9CA3AF),
-            ),
-            filled: true,
-            fillColor: const Color(0xFFF9FAFB),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.red.shade300),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            verticalPadding: maxLines > 1 ? 14 : 16,
           ),
         ),
       ],
@@ -434,6 +326,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
 
   Widget _buildDropdownField({
     required String label,
+    required IconData labelIcon,
     required String? value,
     required List<String> items,
     required ValueChanged<String?> onChanged,
@@ -442,31 +335,15 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
   }) {
     final double textSize = fontSize ?? 14.0;
     final bool isTipoEvento = label == 'evt_type_label'.tr;
+    final borderGrey = Colors.grey[300]!;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF00324A),
-              ),
-            ),
-            if (isRequired) ...[
-            const SizedBox(width: 4),
-              const Text(
-              '*',
-                style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            ],
-          ],
+        PulseRecordFieldLabelRow(
+          icon: labelIcon,
+          label: label,
+          isRequired: isRequired,
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
@@ -492,22 +369,20 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
           },
           decoration: InputDecoration(
             hintText: 'common_select_option'.tr,
-            hintStyle: const TextStyle(
-              color: Color(0xFF9CA3AF),
-            ),
+            hintStyle: TextStyle(color: Colors.grey[400]),
             filled: true,
-            fillColor: const Color(0xFFF9FAFB),
+            fillColor: PulseHealthRecordFormStyles.fillColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
+              borderSide: BorderSide(color: borderGrey),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              borderSide: BorderSide(color: borderGrey),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
+              borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -527,46 +402,15 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
   }
 
   Widget _buildDateTimeFields() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'evt_date'.tr,
-          style: const TextStyle(
-            fontSize: 14,
-                fontWeight: FontWeight.w600,
-            color: Color(0xFF00324A),
-          ),
-        ),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: _selectDate,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.calendar_today, size: 20, color: Color(0xFF00324A)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                    style: const TextStyle(
-                      color: Colors.black,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+    final formatted =
+        '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.year}';
+    return PulseRecordLabeledDateTile(
+      label: 'evt_date'.tr,
+      labelIcon: Icons.calendar_today_outlined,
+      placeholderText: 'common_select_date'.tr,
+      displayText: formatted,
+      showTrailingChevron: true,
+      onTap: _selectDate,
     );
   }
 
@@ -598,7 +442,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
           child: ElevatedButton(
             onPressed: _saveEventoClinico,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00324A),
+              backgroundColor: AppTheme.primaryBlue,
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -628,7 +472,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFF00324A),
+              primary: AppTheme.primaryBlue,
             ),
           ),
           child: child!,
@@ -669,7 +513,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF00324A).withOpacity(0.1),
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
                   blurRadius: 24,
                   offset: const Offset(0, 12),
                 ),
@@ -683,7 +527,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: const BoxDecoration(
-                    color: Color(0xFF00324A),
+                    color: AppTheme.primaryBlue,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
@@ -740,7 +584,7 @@ class _EventoClinicoFormScreenState extends State<EventoClinicoFormScreen> {
                             Navigator.of(context).pop();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00324A),
+                            backgroundColor: AppTheme.primaryBlue,
                             foregroundColor: Colors.white,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 16),

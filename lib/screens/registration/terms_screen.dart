@@ -1,5 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../theme/app_theme.dart';
+import '../../widgets/language_icon_button.dart';
 
 class TermsScreen extends StatefulWidget {
   const TermsScreen({super.key});
@@ -28,364 +33,307 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isLandscape = size.width > size.height;
-    
+
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              const Color(0xFF00324A),
-              const Color(0xFF00324A).withValues(alpha: 0.85),
+              AppTheme.primaryBlue,
+              const Color(0xFF001F2E),
+              AppTheme.primaryBlue.withValues(alpha: 0.92),
             ],
+            stops: const [0.0, 0.45, 1.0],
           ),
         ),
         child: SafeArea(
           bottom: false,
           child: FadeTransition(
             opacity: _fadeAnimation,
-            child: _buildContent(isLandscape, size),
+            child: _buildContent(context, isLandscape, size),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildContent(bool isLandscape, Size size) {
+  Widget _buildContent(BuildContext context, bool isLandscape, Size size) {
     if (isLandscape) {
       return Row(
         children: [
           Expanded(
             flex: 1,
-            child: _buildLogoSection(size),
+            child: _buildLogoSection(context, size),
           ),
           Expanded(
-            flex: 1,
-            child: _buildFormSection(size),
-          ),
-        ],
-      );
-    } else {
-      return Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Expanded(
-            flex: 1,
-            child: _buildLogoSection(size),
-          ),
-          Expanded(
-            flex: 5,
-            child: _buildFormSection(size),
+            flex: 2,
+            child: _buildTermsPanel(context, isLandscape, size),
           ),
         ],
       );
     }
-  }
-
-  Widget _buildLogoSection(Size size) {
-    final availableHeight = size.height * 0.3; // Altura aproximada disponível para o logo
-    final isSmallHeight = size.height < 700;
-    final logoSize = isSmallHeight 
-      ? (size.width * 0.25).clamp(60.0, 100.0)
-      : (size.width * 0.35).clamp(80.0, 140.0);
-    final spacing = isSmallHeight ? 4.0 : size.height * 0.015;
-    
-    return Center(
-      child: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/images/pulseflow2.png',
-              width: logoSize,
-              height: logoSize,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(height: spacing),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
-              child: Text(
-                'terms_title'.tr,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                style: TextStyle(
-                  fontSize: (size.width * 0.05).clamp(18.0, 28.0),
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
-                ),
-                overflow: TextOverflow.visible,
-              ),
-            ),
-            SizedBox(height: spacing * 0.5),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
-              child: Text(
-                'terms_subtitle'.tr,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                style: TextStyle(
-                  fontSize: (size.width * 0.03).clamp(11.0, 15.0),
-                  color: Colors.white.withValues(alpha: 0.9),
-                  letterSpacing: 0.3,
-                ),
-                overflow: TextOverflow.visible,
-              ),
-            ),
-          ],
+    return Column(
+      children: [
+        Expanded(
+          flex: 1,
+          child: _buildLogoSection(context, size),
         ),
-      ),
+        Expanded(
+          flex: 7,
+          child: _buildTermsPanel(context, isLandscape, size),
+        ),
+      ],
     );
   }
 
-  Widget _buildFormSection(Size size) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(30),
-        topRight: Radius.circular(30),
-      ),
-      child: Container(
-        width: double.infinity,
-        constraints: const BoxConstraints.expand(),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+  Widget _buildLogoSection(BuildContext context, Size size) {
+    final logoDim = math.min(size.shortestSide * 0.42, 200.0);
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Center(
+          child: Image.asset(
+            'assets/images/oryon_health_logo_signin.png',
+            width: logoDim,
+            height: logoDim,
+            fit: BoxFit.contain,
           ),
         ),
+        const Positioned(
+          top: 4,
+          right: 4,
+          child: LanguageIconButton(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTermsPanel(BuildContext context, bool isLandscape, Size size) {
+    final mq = MediaQuery.of(context);
+    final bottomPad = math.max(mq.viewInsets.bottom, mq.padding.bottom) + 24;
+    final horizontalPad = math.max(20.0, size.width * 0.07);
+
+    final borderRadius = isLandscape
+        ? const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            bottomLeft: Radius.circular(28),
+          )
+        : const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          );
+
+    final borderColor = AppTheme.primaryBlue.withValues(alpha: 0.22);
+
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: size.width * 0.08,
-              vertical: size.height * 0.02,
-            ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(horizontalPad * 0.5, 16, horizontalPad, 8),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 IconButton(
                   onPressed: () => Get.back(),
                   icon: Icon(
                     Icons.arrow_back_ios_new_rounded,
-                    color: const Color(0xFF00324A),
-                    size: size.width * 0.05,
+                    color: AppTheme.primaryBlue,
+                    size: 22,
                   ),
                 ),
                 Expanded(
-                  child: Text(
-                    'terms_header'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: (size.width * 0.055).clamp(20.0, 28.0),
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF00324A),
-                      letterSpacing: 0.5,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'terms_header'.tr,
+                        textAlign: TextAlign.center,
+                        style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryBlue),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 40,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: AppTheme.secondaryBlue.withValues(alpha: 0.85),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'terms_subtitle'.tr,
+                        textAlign: TextAlign.center,
+                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.textSecondary),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(width: size.width * 0.12),
+                const SizedBox(width: 48),
               ],
             ),
           ),
           Expanded(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                horizontal: size.width * 0.08,
-                vertical: size.height * 0.02,
+              padding: EdgeInsets.fromLTRB(horizontalPad, 8, horizontalPad, bottomPad),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 440),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildSection(
+                        title: 'terms_s1_title'.tr,
+                        content: 'terms_s1_content'.tr,
+                        borderColor: borderColor,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSection(
+                        title: 'terms_s2_title'.tr,
+                        content: 'terms_s2_content'.tr,
+                        borderColor: borderColor,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSection(
+                        title: 'terms_s3_title'.tr,
+                        content: 'terms_s3_content'.tr,
+                        borderColor: borderColor,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSection(
+                        title: 'terms_s4_title'.tr,
+                        content: 'terms_s4_content'.tr,
+                        borderColor: borderColor,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSection(
+                        title: 'terms_s5_title'.tr,
+                        content: 'terms_s5_content'.tr,
+                        borderColor: borderColor,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSection(
+                        title: 'terms_s6_title'.tr,
+                        content: 'terms_s6_content'.tr,
+                        borderColor: borderColor,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSection(
+                        title: 'terms_s7_title'.tr,
+                        content: 'terms_s7_content'.tr,
+                        borderColor: borderColor,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildSection(
+                        title: 'terms_s8_title'.tr,
+                        content: 'terms_s8_content'.tr,
+                        borderColor: borderColor,
+                      ),
+                      const SizedBox(height: 28),
+                      _buildAcceptButton(),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
               ),
-              child: _buildTermsContent(size),
             ),
           ),
         ],
       ),
-      ),
-    );
-  }
-
-  Widget _buildTermsContent(Size size) {
-    final isSmallScreen = size.width < 400;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSection(
-          title: 'terms_s1_title'.tr,
-          content: 'terms_s1_content'.tr,
-          size: size,
-        ),
-        
-        SizedBox(height: size.height * 0.02),
-        _buildSection(
-          title: 'terms_s2_title'.tr,
-          content: 'terms_s2_content'.tr,
-          size: size,
-        ),
-        
-        SizedBox(height: size.height * 0.02),
-        _buildSection(
-          title: 'terms_s3_title'.tr,
-          content: 'terms_s3_content'.tr,
-          size: size,
-        ),
-        
-        SizedBox(height: size.height * 0.02),
-        _buildSection(
-          title: 'terms_s4_title'.tr,
-          content: 'terms_s4_content'.tr,
-          size: size,
-        ),
-        
-        SizedBox(height: size.height * 0.02),
-        _buildSection(
-          title: 'terms_s5_title'.tr,
-          content: 'terms_s5_content'.tr,
-          size: size,
-        ),
-        
-        SizedBox(height: size.height * 0.02),
-        _buildSection(
-          title: 'terms_s6_title'.tr,
-          content: 'terms_s6_content'.tr,
-          size: size,
-        ),
-        
-        SizedBox(height: size.height * 0.02),
-        _buildSection(
-          title: 'terms_s7_title'.tr,
-          content: 'terms_s7_content'.tr,
-          size: size,
-        ),
-        
-        SizedBox(height: size.height * 0.02),
-        _buildSection(
-          title: 'terms_s8_title'.tr,
-          content: 'terms_s8_content'.tr,
-          size: size,
-        ),
-        
-        SizedBox(height: size.height * 0.03),
-        
-        _buildAcceptButton(size),
-        
-        SizedBox(height: size.height * 0.03),
-      ],
     );
   }
 
   Widget _buildSection({
     required String title,
     required String content,
-    required Size size,
+    required Color borderColor,
   }) {
-    final isSmallScreen = size.width < 400;
-    final padding = isSmallScreen ? 12.0 : 16.0;
-    final titleSize = isSmallScreen ? size.width * 0.038 : size.width * 0.042;
-    final contentSize = isSmallScreen ? size.width * 0.032 : size.width * 0.035;
-    
     return Container(
-      padding: EdgeInsets.all(padding),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFF00324A).withValues(alpha: 0.2),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: const Color(0xFFF8FAFB),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontSize: titleSize.clamp(16.0, 22.0),
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF00324A),
-              letterSpacing: 0.3,
+            style: AppTheme.titleSmall.copyWith(
+              color: AppTheme.primaryBlue,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(height: size.height * 0.015),
+          const SizedBox(height: 12),
           Text(
             content,
-            style: TextStyle(
-              fontSize: contentSize.clamp(13.0, 17.0),
-              color: Colors.grey[700],
-              height: 1.6,
-              letterSpacing: 0.2,
+            style: AppTheme.bodyLarge.copyWith(
+              color: AppTheme.textSecondary,
+              height: 1.55,
             ),
-            overflow: TextOverflow.visible,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAcceptButton(Size size) {
-    final isSmallScreen = size.width < 400;
-    final buttonHeight = isSmallScreen ? size.height * 0.065 : size.height * 0.07;
-    final fontSize = isSmallScreen ? size.width * 0.035 : size.width * 0.04;
-    final iconSize = isSmallScreen ? size.width * 0.045 : size.width * 0.05;
-    
+  Widget _buildAcceptButton() {
     return Container(
       width: double.infinity,
-      height: buttonHeight.clamp(48.0, 60.0),
+      height: 52,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF00324A),
-            const Color(0xFF00324A).withValues(alpha: 0.9),
+            AppTheme.primaryBlue,
+            AppTheme.primaryBlue.withValues(alpha: 0.88),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00324A).withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: ElevatedButton(
-        onPressed: () => Get.back(),
+        onPressed: () => Get.back(result: true),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.check_circle,
-              color: Colors.white,
-              size: iconSize.clamp(18.0, 24.0),
-            ),
-            SizedBox(width: size.width * 0.02),
-            Flexible(
-              child: Text(
-                'terms_btn_accept'.tr,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: fontSize.clamp(14.0, 18.0),
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.visible,
+            const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 22),
+            const SizedBox(width: 10),
+            Text(
+              'terms_btn_accept'.tr,
+              style: AppTheme.titleSmall.copyWith(
+                color: AppTheme.textLight,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
@@ -393,4 +341,4 @@ class _TermsScreenState extends State<TermsScreen> with SingleTickerProviderStat
       ),
     );
   }
-} 
+}

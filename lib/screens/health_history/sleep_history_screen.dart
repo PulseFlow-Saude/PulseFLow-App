@@ -128,11 +128,11 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF00324A),
+            colorScheme: ColorScheme.light(
+              primary: AppTheme.primaryBlue,
               onPrimary: Colors.white,
               surface: Colors.white,
-              onSurface: Color(0xFF1E293B),
+              onSurface: AppTheme.textPrimary,
             ),
           ),
           child: child!,
@@ -154,33 +154,34 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.blueSystemOverlayStyle,
       child: Scaffold(
-        backgroundColor: const Color(0xFF00324A),
+        backgroundColor: Colors.transparent,
         drawer: const PulseSideMenu(activeItem: PulseNavItem.history),
-        body: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: AppTheme.blueScreenGradientDecoration,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: Container(
+                  decoration: AppTheme.blueContentSheetDecoration,
+                  clipBehavior: Clip.antiAlias,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20.0),
+                    child: _isLoading
+                        ? _buildLoadingState()
+                        : _error != null
+                            ? _buildErrorState()
+                            : _dailyData.isEmpty
+                                ? _buildEmptyState()
+                                : _buildContent(),
                   ),
                 ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20.0),
-                  child: _isLoading
-                      ? _buildLoadingState()
-                      : _error != null
-                          ? _buildErrorState()
-                          : _dailyData.isEmpty
-                              ? _buildEmptyState()
-                              : _buildContent(),
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         // bottomNavigationBar removido - tela tem sidebar
         // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
@@ -192,37 +193,41 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
+        top: MediaQuery.of(context).padding.top + 12,
         left: 16,
         right: 16,
-        bottom: 16,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
+        bottom: 20,
       ),
       child: Column(
         children: [
           Row(
             children: [
-              const PulseDrawerButton(iconSize: 22),
+              const PulseDrawerButton(),
+              const SizedBox(width: 12),
               Expanded(
-                child: Center(
-                  child: Text(
-                    'health_sleep'.tr,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                child: Text(
+                  'health_sleep'.tr,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
                   ),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.sync, color: Colors.white),
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(
+                    Icons.sync_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                ),
                 onPressed: () async {
                   final authService = Get.find<AuthService>();
                   final healthDataService = HealthDataService();
@@ -279,13 +284,16 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: AppTheme.lightBlue.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.14),
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today, color: Color(0xFF00324A), size: 20),
+                  Icon(Icons.calendar_today,
+                      color: AppTheme.primaryBlue, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -293,9 +301,9 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                       children: [
                         Text(
                           'common_period'.tr,
-                          style: const TextStyle(
+                          style: AppTheme.bodySmall.copyWith(
                             fontSize: 12,
-                            color: Color(0xFF64748B),
+                            color: AppTheme.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -303,16 +311,17 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                           _selectedDateFrom != null && _selectedDateTo != null
                               ? '${DateFormat('dd/MM/yyyy').format(_selectedDateFrom!)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateTo!)}'
                               : 'common_select_period'.tr,
-                          style: const TextStyle(
+                          style: AppTheme.bodyMedium.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF1E293B),
+                            color: AppTheme.textPrimary,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF64748B)),
+                  Icon(Icons.arrow_forward_ios,
+                      size: 16, color: AppTheme.textSecondary),
                 ],
               ),
             ),
@@ -383,31 +392,20 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: AppTheme.surfaceListCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.analytics, color: Colors.blue, size: 20),
+              Icon(Icons.analytics, color: AppTheme.primaryBlue, size: 20),
               const SizedBox(width: 8),
               Text(
                 'common_period_stats'.tr,
-                style: const TextStyle(
+                style: AppTheme.titleSmall.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B),
+                  color: AppTheme.textPrimary,
                 ),
               ),
             ],
@@ -417,15 +415,18 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: _buildStatCard('health_avg'.tr, '${stats['avg'].toStringAsFixed(1)}', 'health_unit_h'.tr, Colors.blue, Icons.trending_up),
+                  child: _buildStatCard('health_avg'.tr, '${stats['avg'].toStringAsFixed(1)}', 'health_unit_h'.tr,
+                      AppTheme.secondaryBlue, Icons.trending_up),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildStatCard('health_min'.tr, '${stats['min'].toStringAsFixed(1)}', 'health_unit_h'.tr, Colors.green, Icons.keyboard_arrow_down),
+                  child: _buildStatCard('health_min'.tr, '${stats['min'].toStringAsFixed(1)}', 'health_unit_h'.tr,
+                      AppTheme.success, Icons.keyboard_arrow_down),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildStatCard('health_max'.tr, '${stats['max'].toStringAsFixed(1)}', 'health_unit_h'.tr, Colors.red, Icons.keyboard_arrow_up),
+                  child: _buildStatCard('health_max'.tr, '${stats['max'].toStringAsFixed(1)}', 'health_unit_h'.tr,
+                      AppTheme.error, Icons.keyboard_arrow_up),
                 ),
               ],
             ),
@@ -487,31 +488,20 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: AppTheme.surfaceListCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.show_chart, color: Colors.blue, size: 20),
+              Icon(Icons.show_chart, color: AppTheme.primaryBlue, size: 20),
               const SizedBox(width: 8),
               Text(
                 'health_evolution'.tr,
-                style: const TextStyle(
+                style: AppTheme.titleSmall.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B),
+                  color: AppTheme.textPrimary,
                 ),
               ),
             ],
@@ -542,9 +532,9 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                           padding: const EdgeInsets.only(right: 8),
                           child: Text(
                             value.toStringAsFixed(1),
-                            style: const TextStyle(
+                            style: AppTheme.bodySmall.copyWith(
                               fontSize: 10,
-                              color: Color(0xFF64748B),
+                              color: AppTheme.textSecondary,
                             ),
                           ),
                         );
@@ -563,9 +553,9 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                         final date = sortedData[index]['date'] as DateTime;
                         return Text(
                           '${date.day}/${date.month}',
-                          style: const TextStyle(
+                          style: AppTheme.bodySmall.copyWith(
                             fontSize: 10,
-                            color: Color(0xFF64748B),
+                            color: AppTheme.textSecondary,
                           ),
                         );
                       },
@@ -588,14 +578,14 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                       return FlSpot(entry.key.toDouble(), entry.value['value'] as double);
                     }).toList(),
                     isCurved: true,
-                    color: Colors.blue,
+                    color: AppTheme.primaryBlue,
                     barWidth: 3,
                     dotData: FlDotData(
                       show: true,
                       getDotPainter: (spot, percent, barData, index) {
                         return FlDotCirclePainter(
                           radius: 4,
-                          color: Colors.blue,
+                          color: AppTheme.primaryBlue,
                           strokeWidth: 2,
                           strokeColor: Colors.white,
                         );
@@ -603,7 +593,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                     ),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: Colors.blue.withOpacity(0.1),
+                      color:
+                          AppTheme.primaryBlue.withValues(alpha: 0.12),
                     ),
                   ),
                 ],
@@ -700,10 +691,10 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
             'health_daily_records'.tr,
-            style: const TextStyle(
+            style: AppTheme.titleSmall.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1E293B),
+              color: AppTheme.textPrimary,
             ),
           ),
         ),
@@ -715,34 +706,23 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+            padding: const EdgeInsets.all(16),
+            decoration: AppTheme.surfaceListCardDecoration(),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.bedtime,
+                    color: AppTheme.primaryBlue,
+                    size: 28,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.bedtime,
-                  color: Colors.blue,
-                  size: 28,
-                ),
-              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -750,10 +730,10 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                   children: [
                     Text(
                       DateFormat('EEEE, dd/MM/yyyy', Get.find<SettingsController>().effectiveLocale.toString()).format(date),
-                      style: const TextStyle(
+                      style: AppTheme.titleSmall.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1E293B),
+                        color: AppTheme.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -772,10 +752,10 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                 children: [
                   Text(
                     '${value.toStringAsFixed(1)}h',
-                    style: const TextStyle(
+                    style: AppTheme.titleMedium.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: AppTheme.primaryBlue,
                     ),
                   ),
                   if (count > 1)
@@ -790,7 +770,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
               ),
             ],
           ),
-          );
+            );
         }),
       ],
     );
@@ -801,14 +781,15 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)),
+          CircularProgressIndicator(
+            valueColor:
+                AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
           ),
           const SizedBox(height: 16),
           Text(
             'health_loading'.tr,
-            style: const TextStyle(
-              color: Color(0xFF64748B),
+            style: AppTheme.bodyLarge.copyWith(
+              color: AppTheme.textSecondary,
               fontSize: 16,
             ),
           ),
@@ -830,18 +811,18 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           const SizedBox(height: 16),
           Text(
             'common_error_load'.tr,
-            style: const TextStyle(
+            style: AppTheme.titleSmall.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
+              color: AppTheme.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             _error ?? 'common_unknown_error'.tr,
-            style: const TextStyle(
+            style: AppTheme.bodyMedium.copyWith(
               fontSize: 14,
-              color: Color(0xFF64748B),
+              color: AppTheme.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -849,7 +830,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           ElevatedButton(
             onPressed: _loadHealthData,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00324A),
+              backgroundColor: AppTheme.primaryBlue,
               foregroundColor: Colors.white,
             ),
             child: Text('common_try_again'.tr),
@@ -872,18 +853,18 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
           const SizedBox(height: 16),
           Text(
             'common_no_data'.tr,
-            style: const TextStyle(
+            style: AppTheme.titleSmall.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
+              color: AppTheme.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'common_no_records_sleep'.tr,
-            style: const TextStyle(
+            style: AppTheme.bodyMedium.copyWith(
               fontSize: 14,
-              color: Color(0xFF64748B),
+              color: AppTheme.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),

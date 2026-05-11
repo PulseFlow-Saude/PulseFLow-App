@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
@@ -19,6 +20,14 @@ import 'email_translations_helper.dart';
 class AuthService extends GetxController {
   static AuthService get instance => Get.find<AuthService>();
   final _storage = const FlutterSecureStorage();
+
+  /// Quando [AppConfig.email2faSkipSmtp] está ativo: código mostrado na UI em vez de e-mail.
+  String? _plaintext2FACodeForTesting;
+  String? get plaintext2FACodeForTesting => _plaintext2FACodeForTesting;
+
+  void clearPlaintext2FACodeForTesting() {
+    _plaintext2FACodeForTesting = null;
+  }
   final _token = ''.obs;
   final _isAuthenticated = false.obs;
   final _currentUser = Rxn<Patient>();
@@ -97,7 +106,7 @@ class AuthService extends GetxController {
     final encodedHeader = base64UrlEncode(utf8.encode(json.encode(header)));
     final encodedPayload = base64UrlEncode(utf8.encode(json.encode(payload)));
     
-    const jwtSecret = AppConfig.jwtSecret;
+    final jwtSecret = AppConfig.jwtSecret;
     
     final signature = Hmac(sha256, utf8.encode(jwtSecret))
         .convert(utf8.encode('$encodedHeader.$encodedPayload'))
@@ -115,110 +124,421 @@ class AuthService extends GetxController {
     return List.generate(6, (_) => rand.nextInt(10)).join();
   }
 
-  // Configura servidor SMTP baseado no domínio do email
+  SmtpServer _smtpServer(
+    String host, {
+    int port = 587,
+    bool ssl = false,
+    required String username,
+    required String password,
+  }) {
+    return SmtpServer(
+      host,
+      port: port,
+      ssl: ssl,
+      username: username,
+      password: password,
+      ignoreBadCertificate: AppConfig.smtpIgnoreBadCertificate,
+      allowInsecure: AppConfig.smtpAllowInsecure,
+    );
+  }
+
+  /// SMTP — `SMTP_HOST` recomendado para Workspace/corporativo.
+  /// Para `smtp.gmail.com` usa as mesmas opções que o helper oficial do pacote mailer + flags do .env.
   SmtpServer _getSmtpServer(String user, String pass) {
+    final explicit = AppConfig.smtpHost;
+    if (explicit != null && explicit.isNotEmpty) {
+      final h = explicit.trim().toLowerCase();
+      if (h == 'smtp.gmail.com') {
+        return _smtpServer(
+          'smtp.gmail.com',
+          username: user,
+          password: pass,
+        );
+      }
+      return _smtpServer(
+        explicit.trim(),
+        port: AppConfig.smtpPort,
+        ssl: AppConfig.smtpSsl,
+        username: user,
+        password: pass,
+      );
+    }
+
     final domain = user.split('@').last.toLowerCase();
-    
+
     switch (domain) {
       case 'gmail.com':
-        return gmail(user, pass);
+        return _smtpServer('smtp.gmail.com', username: user, password: pass);
       case 'outlook.com':
       case 'hotmail.com':
       case 'live.com':
-        return SmtpServer('smtp-mail.outlook.com',
-            port: 587,
-            username: user,
-            password: pass,
-            ssl: false,
-            allowInsecure: false);
+        return _smtpServer(
+          'smtp-mail.outlook.com',
+          username: user,
+          password: pass,
+        );
       case 'yahoo.com':
-        return SmtpServer('smtp.mail.yahoo.com',
-            port: 587,
-            username: user,
-            password: pass,
-            ssl: false,
-            allowInsecure: false);
+        return _smtpServer(
+          'smtp.mail.yahoo.com',
+          username: user,
+          password: pass,
+        );
       case 'icloud.com':
-        return SmtpServer('smtp.mail.me.com',
-            port: 587,
-            username: user,
-            password: pass,
-            ssl: false,
-            allowInsecure: false);
+        return _smtpServer(
+          'smtp.mail.me.com',
+          username: user,
+          password: pass,
+        );
       case 'aol.com':
-        return SmtpServer('smtp.aol.com',
-            port: 587,
-            username: user,
-            password: pass,
-            ssl: false,
-            allowInsecure: false);
+        return _smtpServer('smtp.aol.com', username: user, password: pass);
       default:
-        // Para outros domínios, tenta configuração genérica
-        // Muitos provedores usam smtp.[dominio] na porta 587
-        return SmtpServer('smtp.$domain',
-            port: 587,
-            username: user,
-            password: pass,
-            ssl: false,
-            allowInsecure: false);
+        return _smtpServer(
+          'smtp.$domain',
+          username: user,
+          password: pass,
+        );
     }
   }
 
-  // Envia código 2FA por e-mail (traduzido conforme idioma do usuário/dispositivo)
-  Future<void> send2FACodeEmail(String email, String code) async {
+  bool _shouldRetryGmailImplicitSsl(SmtpServer server, Object error) {
+    if (server.host.toLowerCase() != 'smtp.gmail.com') return false;
+    if (server.ssl && server.port == 465) return false;
+    final tn = error.runtimeType.toString();
+    if (tn.contains('SmtpClientAuthenticationException')) return false;
+    return true;
+  }
+
+  Future<void> _sendSmtpMessage(Message message, String credUser, String credPass) async {
+    final primary = _getSmtpServer(credUser, credPass);
+    final timeout = AppConfig.smtpSendTimeout;
+
     try {
+      await send(message, primary, timeout: timeout);
+      return;
+    } catch (e, st) {
+      developer.log(
+        'SMTP falhou (${primary.host}:${primary.port}, ssl=${primary.ssl}): $e',
+        name: 'PulseFlow.Auth',
+        error: e,
+        stackTrace: st,
+      );
+      if (!_shouldRetryGmailImplicitSsl(primary, e)) {
+        rethrow;
+      }
+      developer.log(
+        'SMTP nova tentativa: smtp.gmail.com:465 (SSL implícito)',
+        name: 'PulseFlow.Auth',
+      );
+      final fallback = _smtpServer(
+        'smtp.gmail.com',
+        port: 465,
+        ssl: true,
+        username: credUser,
+        password: credPass,
+      );
+      await send(message, fallback, timeout: timeout);
+    }
+  }
+
+  /// Erros 534/535 e falhas AUTH SMTP — também usado para fallback (mostrar código no ecrã).
+  bool _smtpLooksLikeAuthRejected(Object e) {
+    final s = e.toString().toLowerCase();
+    final tn = e.runtimeType.toString().toLowerCase();
+    return s.contains('534') ||
+        s.contains('535') ||
+        s.contains('5.7.') ||
+        s.contains('authentication failed') ||
+        s.contains('authentication unsuccessful') ||
+        s.contains('credentials') ||
+        s.contains('invalid login') ||
+        s.contains('username and password') ||
+        tn.contains('smtpclientauthenticationexception');
+  }
+
+  /// Gmail/Outlook devolvem 534 ou 535 quando o SMTP não aceita utilizador/senha do REMETENTE.
+  String _smtpAuthFailureHint(Object e) {
+    if (!_smtpLooksLikeAuthRejected(e)) {
+      return '\n\nConfirme rede/VPN, SMTP_HOST e SMTP_TIMEOUT_SECONDS. '
+          'Para testar sem mail: DEV_PRINT_2FA_CODE=true.';
+    }
+    return '\n\n—— O servidor recusou EMAIL_USER / EMAIL_PASS (erro típico 534 ou 535) ——\n'
+        '• Gmail e Google Workspace: na conta desse mesmo e-mail (EMAIL_USER), '
+        'ativa verificação em 2 passos e cria uma "Senha de app" '
+        '(myaccount.google.com/apppasswords). Coloca só essa senha de 16 letras em EMAIL_PASS.\n'
+        '• Não uses a senha normal da conta Google — o SMTP não aceita.\n'
+        '• EMAIL_USER deve ser o e-mail completo da conta onde geraste a senha de app.\n'
+        '• Workspace: o administrador pode desativar SMTP; aí só OAuth2 ou outro provedor.\n'
+        '• Outlook/Hotmail: Microsoft pode bloquear login SMTP por senha; usa Gmail como remetente '
+        'ou SMTP que o teu serviço de e-mail permita.';
+  }
+
+  void _throwSmtpFailure(String prefix, Object e) {
+    throw '$prefix $e${_smtpAuthFailureHint(e)}';
+  }
+
+  Future<void> _sendAuthEmailViaBackend({
+    required String toEmail,
+    required String code,
+    required String kind,
+    String? patientId,
+  }) async {
+    Future<void> postUri(String endpoint) async {
+      final uri = Uri.parse(endpoint);
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+      final secret = AppConfig.emailApiSecret;
+      if (secret != null && secret.isNotEmpty) {
+        headers['X-PulseFlow-Email-Secret'] = secret;
+      }
+      final resp = await http
+          .post(
+            uri,
+            headers: headers,
+            body: jsonEncode({
+              'to': toEmail,
+              'email': toEmail,
+              'code': code,
+              'patientId': patientId ?? '',
+              'kind': kind,
+            }),
+          )
+          .timeout(AppConfig.emailApiTimeout);
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) return;
+
+      var detail = resp.body;
+      try {
+        final j = jsonDecode(resp.body);
+        if (j is Map && j['message'] != null) {
+          detail = j['message'].toString();
+        }
+      } catch (_) {}
+
+      throw 'HTTP ${resp.statusCode}: $detail';
+    }
+
+    try {
+      await postUri(AppConfig.emailSendEndpoint);
+    } catch (e) {
+      final fb = AppConfig.apiFallbackUrl;
+      if (fb != null &&
+          fb.trim().isNotEmpty &&
+          AppConfig.emailSendAbsoluteUrl == null) {
+        await postUri(AppConfig.emailSendEndpointForApiRoot(fb));
+        return;
+      }
+      rethrow;
+    }
+  }
+
+  /// Primeiro tenta envio pelo **backend** ([AppConfig.emailSendViaApi]); depois SMTP no cliente.
+  Future<void> send2FACodeEmail(
+    String email,
+    String code, {
+    String? patientId,
+  }) async {
+    try {
+      if (AppConfig.devPrint2FACode) {
+        developer.log(
+          '2FA código para $email: $code',
+          name: 'PulseFlow.Auth',
+        );
+      }
+
+      if (AppConfig.emailSendViaApi) {
+        try {
+          await _sendAuthEmailViaBackend(
+            toEmail: email,
+            code: code,
+            patientId: patientId,
+            kind: 'login_2fa',
+          );
+          developer.log(
+            'Código 2FA enviado via API (${AppConfig.emailSendEndpoint}).',
+            name: 'PulseFlow.Auth',
+          );
+          return;
+        } catch (e, st) {
+          developer.log(
+            'Envio 2FA pela API falhou; a tentar SMTP no dispositivo: $e',
+            name: 'PulseFlow.Auth',
+            error: e,
+            stackTrace: st,
+          );
+        }
+      }
+
       final user = AppConfig.emailUser;
       final pass = AppConfig.emailPass;
-      
+
       if (user == null || pass == null || user.isEmpty || pass.isEmpty) {
+        if (AppConfig.emailSendViaApi) {
+          throw 'O servidor não conseguiu enviar o e-mail e não há EMAIL_USER/EMAIL_PASS '
+              'para tentar SMTP neste telemóvel. Confirme EMAIL_SEND_VIA_API / EMAIL_SEND_URL '
+              'e o endpoint no backend, ou configure SMTP.';
+        }
         throw 'Configurações de email não encontradas. Verifique o arquivo .env';
       }
-      
+
       final t = EmailTranslationsHelper.getEmailTranslationsSync();
-      final smtpServer = _getSmtpServer(user, pass);
+      final logoUrl = AppConfig.emailLogoUrl;
+      final logoInnerHtml = (logoUrl != null && logoUrl.isNotEmpty)
+          ? '''
+            <img src="$logoUrl" alt="Logo" style="display:block;margin:0 auto;max-width:170px;max-height:52px;height:auto;border:0;" />
+          '''
+          : '';
+      final logoHtml = '''
+        <div style="padding:2px 0 12px 0;margin:0 auto;text-align:center;">
+          $logoInnerHtml
+        </div>
+      ''';
+
       final message = Message()
         ..from = Address(user, t['email_from_name']!)
         ..recipients.add(email)
         ..subject = t['email_2fa_subject']!
         ..html = '''
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #1CB5E0 0%, #000046 100%); padding: 30px; border-radius: 15px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 24px;">${t['email_2fa_heading']}</h1>
-              <p style="color: white; margin: 10px 0 0 0; opacity: 0.9;">${t['email_2fa_subheading']}</p>
-            </div>
-            
-            <div style="background: white; padding: 30px; border-radius: 0 0 15px 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-              <h2 style="color: #333; margin: 0 0 20px 0;">${t['email_2fa_hello']}</h2>
-              <p style="color: #666; line-height: 1.6; margin: 0 0 20px 0;">
-                ${t['email_2fa_body']}
-              </p>
-              
-              <div style="background: #f8f9fa; border: 2px dashed #1CB5E0; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center;">
-                <h3 style="color: #1CB5E0; margin: 0; font-size: 32px; letter-spacing: 8px; font-weight: bold;">$code</h3>
-                <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">${t['email_2fa_code_label']}</p>
-              </div>
-              
-              <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;">
-                <p style="color: #856404; margin: 0; font-size: 14px;">
-                  ⏰ <strong>${t['email_2fa_important']}</strong>
-                </p>
-              </div>
-              
-              <p style="color: #666; line-height: 1.6; margin: 20px 0 0 0; font-size: 14px;">
-                ${t['email_2fa_ignore']}
-              </p>
-              
-              <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-              <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
-                ${t['email_2fa_footer']}
-              </p>
-            </div>
-          </div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f3f7fb;padding:24px 12px;font-family:Arial,sans-serif;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:620px;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #dce8f2;">
+                  <tr>
+                    <td style="background:linear-gradient(135deg,#00324A 0%,#0B4C6B 100%);padding:26px 24px;text-align:center;">
+                      $logoHtml
+                      <h1 style="margin:0;color:#ffffff;font-size:24px;line-height:1.3;">${t['email_2fa_heading']}</h1>
+                      <p style="margin:10px 0 0 0;color:#d8ebf6;font-size:14px;line-height:1.5;">${t['email_2fa_subheading']}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:24px;">
+                      <h2 style="margin:0 0 12px 0;color:#1f2937;font-size:20px;">${t['email_2fa_hello']}</h2>
+                      <p style="margin:0 0 18px 0;color:#4b5563;font-size:15px;line-height:1.6;">
+                        ${t['email_2fa_body']}
+                      </p>
+
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 18px 0;">
+                        <tr>
+                          <td style="background:#f8fbfe;border:1px solid #cfe0ee;border-radius:14px;padding:18px;text-align:center;">
+                            <p style="margin:0 0 8px 0;font-size:12px;letter-spacing:0.8px;color:#4b6478;font-weight:700;">${t['email_2fa_code_label']}</p>
+                            <p style="margin:0;color:#00324A;font-size:34px;line-height:1.1;font-weight:800;letter-spacing:8px;">$code</p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <div style="background:#fff7df;border:1px solid #f1dd9b;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+                        <p style="margin:0;color:#8a6d1f;font-size:14px;line-height:1.5;"><strong>${t['email_2fa_important']}</strong></p>
+                      </div>
+
+                      <p style="margin:0;color:#6b7280;font-size:14px;line-height:1.6;">
+                        ${t['email_2fa_ignore']}
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:16px 24px;border-top:1px solid #e5edf4;">
+                      <p style="margin:0;color:#93a3b3;font-size:12px;line-height:1.5;text-align:center;">
+                        ${t['email_2fa_footer']}
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
         ''';
-      
-      await send(message, smtpServer);
+
+      await _sendSmtpMessage(message, user, pass);
     } catch (e) {
-      throw 'Erro ao enviar email: $e';
+      _throwSmtpFailure('Erro ao enviar email:', e);
+    }
+  }
+
+  /// Extrai um mapa compatível com [Patient.fromJson] do body do POST /login.
+  Map<String, dynamic>? _patientMapFromLoginPayload(Map<String, dynamic> data) {
+    Map<String, dynamic>? asMap(dynamic v) {
+      if (v is Map<String, dynamic>) return v;
+      if (v is Map) return Map<String, dynamic>.from(v);
+      return null;
+    }
+
+    for (final key in ['user', 'paciente', 'patient', 'usuario']) {
+      final m = asMap(data[key]);
+      if (m != null) return m;
+    }
+
+    final nested = asMap(data['data']);
+    if (nested != null) {
+      for (final key in ['user', 'paciente', 'patient', 'usuario']) {
+        final m = asMap(nested[key]);
+        if (m != null) return m;
+      }
+      if (nested['email'] != null &&
+          (nested['name'] != null || nested['nome'] != null)) {
+        return nested;
+      }
+    }
+
+    if (data['email'] != null &&
+        (data['name'] != null || data['nome'] != null)) {
+      return data;
+    }
+    return null;
+  }
+
+  Patient? _tryPatientFromMap(Map<String, dynamic> map) {
+    try {
+      return Patient.fromJson(map);
+    } catch (e, st) {
+      developer.log(
+        'Patient.fromJson (payload login) falhou: $e',
+        name: 'PulseFlow.Auth',
+        error: e,
+        stackTrace: st,
+      );
+      return null;
+    }
+  }
+
+  /// GET do perfil autenticado — URL em [AppConfig.apiPacienteMeUrl].
+  Future<(Patient?, int)> _getPatientFromMe(String token) async {
+    final meUrl = AppConfig.apiPacienteMeUrl();
+    final response = await http
+        .get(
+          Uri.parse(meUrl),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        )
+        .timeout(const Duration(seconds: 10));
+
+    if (response.statusCode != 200) {
+      final snippet = response.body.length > 400
+          ? '${response.body.substring(0, 400)}…'
+          : response.body;
+      developer.log(
+        'GET $meUrl → HTTP ${response.statusCode}: $snippet',
+        name: 'PulseFlow.Auth',
+      );
+      return (null, response.statusCode);
+    }
+    try {
+      final json = jsonDecode(response.body);
+      final map = json is Map<String, dynamic>
+          ? json
+          : (json is Map ? Map<String, dynamic>.from(json as Map) : null);
+      if (map == null) return (null, response.statusCode);
+      return (Patient.fromJson(map), response.statusCode);
+    } catch (e, st) {
+      developer.log(
+        'Patient.fromJson (/me) falhou: $e',
+        name: 'PulseFlow.Auth',
+        error: e,
+        stackTrace: st,
+      );
+      return (null, response.statusCode);
     }
   }
 
@@ -228,7 +548,7 @@ class AuthService extends GetxController {
     if (baseUrl.isEmpty) throw 'API não configurada (apiBaseUrl)';
 
     final response = await http.post(
-      Uri.parse('$baseUrl/api/paciente-auth/login'),
+      Uri.parse(AppConfig.apiPacienteAuthUrl('login')),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'senha': password}),
     ).timeout(const Duration(seconds: 15));
@@ -238,31 +558,44 @@ class AuthService extends GetxController {
       throw body['message'] ?? 'Erro ao fazer login';
     }
 
-    final data = jsonDecode(response.body);
+    final raw = jsonDecode(response.body);
+    final data = raw is Map<String, dynamic>
+        ? raw
+        : (raw is Map ? Map<String, dynamic>.from(raw as Map) : null);
+    if (data == null) throw 'Resposta de login inválida';
+
     final token = data['token'];
     if (token == null) throw 'Token não retornado pela API';
 
-    await _storage.write(key: 'auth_token', value: token);
+    final tokenStr = token.toString();
 
-    final patient = await _fetchPatientFromApi(token);
-    if (patient == null) throw 'Não foi possível carregar os dados do usuário';
+    final (fromMe, meStatus) = await _getPatientFromMe(tokenStr);
+    Patient? patient = fromMe;
 
-    _token.value = token;
+    final loginMap = _patientMapFromLoginPayload(data);
+    if (patient == null && loginMap != null) {
+      patient = _tryPatientFromMap(loginMap);
+    }
+
+    if (patient == null) {
+      throw 'Não foi possível carregar os dados do usuário. '
+          'Último GET do perfil: HTTP $meStatus (${AppConfig.apiPacienteMeUrl()}). '
+          'Ajuste API_PACIENTE_AUTH_BASE, API_ME_URL ou API_PACIENTE_ME_PATH no .env se a rota for outra; '
+          'ou devolva o paciente no JSON do login (user / paciente / patient). '
+          'Alinhe JWT_SECRET entre app e servidor.';
+    }
+
+    await _storage.write(key: 'auth_token', value: tokenStr);
+
+    _token.value = tokenStr;
     _currentUser.value = patient;
     _isAuthenticated.value = true;
     return patient;
   }
 
   Future<Patient?> _fetchPatientFromApi(String token) async {
-    final baseUrl = AppConfig.apiBaseUrl;
-    final response = await http.get(
-      Uri.parse('$baseUrl/api/paciente-auth/me'),
-      headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
-    ).timeout(const Duration(seconds: 10));
-
-    if (response.statusCode != 200) return null;
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return Patient.fromJson(json);
+    final (p, _) = await _getPatientFromMe(token);
+    return p;
   }
 
   // Login com 2FA 
@@ -307,11 +640,32 @@ class AuthService extends GetxController {
       final patientIdString = patient.id!;
       
       await _databaseService.setTwoFactorCode(patientIdString, code, expires);
-      
-      // Enviar código por email automaticamente
-      await send2FACodeEmail(patient.email, code);
-      
-      // Retorna o ID para o controller fazer o redirecionamento
+
+      if (AppConfig.email2faSkipSmtp) {
+        _plaintext2FACodeForTesting = code;
+        return patientIdString;
+      }
+
+      try {
+        await send2FACodeEmail(
+          patient.email,
+          code,
+          patientId: patientIdString,
+        );
+      } catch (e) {
+        if (_smtpLooksLikeAuthRejected(e)) {
+          _plaintext2FACodeForTesting = code;
+          developer.log(
+            'SMTP AUTH recusado (${e.runtimeType}): código 2FA disponível no ecrã.',
+            name: 'PulseFlow.Auth',
+            error: e,
+          );
+          return patientIdString;
+        }
+        await _databaseService.clearTwoFactorCode(patientIdString);
+        rethrow;
+      }
+
       return patientIdString;
     } catch (e) {
       rethrow;
@@ -344,7 +698,9 @@ class AuthService extends GetxController {
     // Para usuários não-admin, valida o código 2FA
     final isValid = await _databaseService.validateTwoFactorCode(patientId, code);
     if (!isValid) throw 'Código de verificação inválido ou expirado';
-    
+
+    clearPlaintext2FACodeForTesting();
+
     // Gera o token JWT e autentica
     final token = _generateToken(patient);
     await _storage.write(key: 'auth_token', value: token);
@@ -384,6 +740,8 @@ class AuthService extends GetxController {
               gender: patient.gender,
               maritalStatus: patient.maritalStatus,
               nationality: patient.nationality,
+              residenceCountry: patient.residenceCountry,
+              socialSecurityNumber: patient.socialSecurityNumber,
               address: patient.address,
               height: patient.height,
               weight: patient.weight,
@@ -432,9 +790,31 @@ class AuthService extends GetxController {
       final expires = DateTime.now().add(const Duration(minutes: 5));
       
       await _databaseService.setTwoFactorCode(patientId, code, expires);
-      
-      // Sempre enviar por email
-      await send2FACodeEmail(patient.email, code);
+
+      if (AppConfig.email2faSkipSmtp) {
+        _plaintext2FACodeForTesting = code;
+        return;
+      }
+
+      try {
+        await send2FACodeEmail(
+          patient.email,
+          code,
+          patientId: patientId,
+        );
+      } catch (e) {
+        if (_smtpLooksLikeAuthRejected(e)) {
+          _plaintext2FACodeForTesting = code;
+          developer.log(
+            'SMTP AUTH recusado no reenvio 2FA: código no ecrã.',
+            name: 'PulseFlow.Auth',
+            error: e,
+          );
+          return;
+        }
+        await _databaseService.clearTwoFactorCode(patientId);
+        rethrow;
+      }
     } catch (e) {
       rethrow;
     }
@@ -509,6 +889,8 @@ class AuthService extends GetxController {
         gender: patient.gender,
         maritalStatus: patient.maritalStatus,
         nationality: patient.nationality,
+        residenceCountry: patient.residenceCountry,
+        socialSecurityNumber: patient.socialSecurityNumber,
         address: patient.address,
         height: patient.height, // Incluir altura
         weight: patient.weight, // Incluir peso
@@ -565,6 +947,8 @@ class AuthService extends GetxController {
         gender: patient.gender,
         maritalStatus: patient.maritalStatus,
         nationality: patient.nationality,
+        residenceCountry: patient.residenceCountry,
+        socialSecurityNumber: patient.socialSecurityNumber,
         address: patient.address,
         height: patient.height, // Incluir altura
         weight: patient.weight, // Incluir peso
@@ -613,6 +997,7 @@ class AuthService extends GetxController {
   // Logout
   Future<void> logout() async {
     try {
+      clearPlaintext2FACodeForTesting();
       await _storage.delete(key: 'auth_token');
       _token.value = '';
       _isAuthenticated.value = false;
@@ -666,6 +1051,8 @@ class AuthService extends GetxController {
         gender: updatedPatient.gender,
         maritalStatus: updatedPatient.maritalStatus,
         nationality: updatedPatient.nationality,
+        residenceCountry: updatedPatient.residenceCountry,
+        socialSecurityNumber: updatedPatient.socialSecurityNumber,
         address: updatedPatient.address,
         height: updatedPatient.height, // Incluir altura
         weight: updatedPatient.weight, // Incluir peso
@@ -706,7 +1093,9 @@ class AuthService extends GetxController {
     if (AppConfig.useApiForAuth) {
       try {
         final response = await http.get(
-          Uri.parse('${AppConfig.apiBaseUrl}/api/paciente-auth/check-email?email=${Uri.encodeComponent(email)}'),
+          Uri.parse(
+            '${AppConfig.apiPacienteAuthUrl('check-email')}?email=${Uri.encodeComponent(email)}',
+          ),
           headers: {'Content-Type': 'application/json'},
         ).timeout(const Duration(seconds: 15));
         if (response.statusCode == 200) return Patient(id: '', name: '', email: email, password: '', cpf: '', rg: '', phone: '', birthDate: DateTime.now(), gender: '', maritalStatus: '', nationality: '', address: '', acceptedTerms: false);
@@ -732,7 +1121,7 @@ class AuthService extends GetxController {
   Future<void> sendPasswordResetCode(String email) async {
     if (AppConfig.useApiForAuth) {
       final response = await http.post(
-        Uri.parse('${AppConfig.apiBaseUrl}/api/paciente-auth/forgot-password'),
+        Uri.parse(AppConfig.apiPacienteAuthUrl('forgot-password')),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       ).timeout(const Duration(seconds: 15));
@@ -751,7 +1140,12 @@ class AuthService extends GetxController {
       final code = _generate2FACode();
       final expires = DateTime.now().add(const Duration(minutes: 10));
       await _databaseService.setPasswordResetCode(patient.id!, code, expires);
-      await sendPasswordResetEmail(email, code);
+      try {
+        await sendPasswordResetEmail(email, code);
+      } catch (e) {
+        await _databaseService.clearPasswordResetCode(patient.id!);
+        rethrow;
+      }
     } catch (e) {
       rethrow;
     }
@@ -761,7 +1155,7 @@ class AuthService extends GetxController {
   Future<void> resetPassword(String email, String code, String newPassword) async {
     if (AppConfig.useApiForAuth) {
       final response = await http.post(
-        Uri.parse('${AppConfig.apiBaseUrl}/api/paciente-auth/reset-password'),
+        Uri.parse(AppConfig.apiPacienteAuthUrl('reset-password')),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'code': code, 'senha': newPassword}),
       ).timeout(const Duration(seconds: 15));
@@ -797,60 +1191,110 @@ class AuthService extends GetxController {
   // Envia e-mail de redefinição de senha (traduzido conforme idioma do usuário/dispositivo)
   Future<void> sendPasswordResetEmail(String email, String code) async {
     try {
+      if (AppConfig.emailSendViaApi) {
+        try {
+          await _sendAuthEmailViaBackend(
+            toEmail: email,
+            code: code,
+            patientId: null,
+            kind: 'password_reset',
+          );
+          developer.log(
+            'Código de recuperação enviado via API (${AppConfig.emailSendEndpoint}).',
+            name: 'PulseFlow.Auth',
+          );
+          return;
+        } catch (e, st) {
+          developer.log(
+            'Envio recuperação de senha pela API falhou; a tentar SMTP no dispositivo: $e',
+            name: 'PulseFlow.Auth',
+            error: e,
+            stackTrace: st,
+          );
+        }
+      }
+
       final user = AppConfig.emailUser;
       final pass = AppConfig.emailPass;
+      final logoUrl = AppConfig.emailLogoUrl;
+      final logoInnerHtml = (logoUrl != null && logoUrl.isNotEmpty)
+          ? '''
+            <img src="$logoUrl" alt="Logo" style="display:block;margin:0 auto;max-width:150px;max-height:52px;height:auto;border:0;" />
+          '''
+          : '';
+      final logoHtml = '''
+        <div style="padding:2px 0 12px 0;margin:0 auto;text-align:center;">
+          $logoInnerHtml
+        </div>
+      ''';
 
       if (user == null || pass == null || user.isEmpty || pass.isEmpty) {
+        if (AppConfig.emailSendViaApi) {
+          throw 'O servidor não conseguiu enviar o e-mail e não há EMAIL_USER/EMAIL_PASS '
+              'para tentar SMTP neste telemóvel. Confirme EMAIL_SEND_VIA_API / EMAIL_SEND_URL '
+              'e o endpoint no backend, ou configure SMTP.';
+        }
         throw 'Configuração de email não encontrada. Verifique EMAIL_USER e EMAIL_PASS no .env';
       }
 
       final t = EmailTranslationsHelper.getEmailTranslationsSync();
-      final smtpServer = _getSmtpServer(user, pass);
       final message = Message()
         ..from = Address(user, t['email_from_name']!)
         ..recipients.add(email)
         ..subject = t['email_reset_subject']!
         ..html = '''
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa; padding: 20px;">
-            <div style="background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-              <div style="text-align: center; margin-bottom: 30px;">
-                <div style="background-color: #1CB5E0; width: 60px; height: 60px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                  <span style="color: white; font-size: 24px;">🔐</span>
-                </div>
-                <h1 style="color: #222B45; margin: 0; font-size: 24px;">${t['email_reset_heading']}</h1>
-              </div>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-                ${t['email_reset_body']}
-              </p>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
-                ${t['email_reset_code_usage']}
-              </p>
-              
-              <div style="background-color: #1CB5E0; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 30px;">
-                <h2 style="margin: 0; font-size: 32px; letter-spacing: 8px; font-family: monospace;">$code</h2>
-              </div>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-                <strong>${t['email_reset_expiry']}</strong>
-              </p>
-              
-              <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-                ${t['email_reset_ignore']}
-              </p>
-              
-              <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-              <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
-                ${t['email_reset_footer']}
-              </p>
-            </div>
-          </div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f3f7fb;padding:24px 12px;font-family:Arial,sans-serif;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:620px;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #dce8f2;">
+                  <tr>
+                    <td style="background:linear-gradient(135deg,#00324A 0%,#0B4C6B 100%);padding:26px 24px;text-align:center;">
+                      $logoHtml
+                      <h1 style="margin:0;color:#ffffff;font-size:24px;line-height:1.3;">${t['email_reset_heading']}</h1>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:24px;">
+                      <p style="margin:0 0 14px 0;color:#4b5563;font-size:15px;line-height:1.6;">
+                        ${t['email_reset_body']}
+                      </p>
+                      <p style="margin:0 0 18px 0;color:#4b5563;font-size:15px;line-height:1.6;">
+                        ${t['email_reset_code_usage']}
+                      </p>
+
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 18px 0;">
+                        <tr>
+                          <td style="background:#f8fbfe;border:1px solid #cfe0ee;border-radius:14px;padding:18px;text-align:center;">
+                            <p style="margin:0;color:#00324A;font-size:34px;line-height:1.1;font-weight:800;letter-spacing:8px;">$code</p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <div style="background:#fff7df;border:1px solid #f1dd9b;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+                        <p style="margin:0;color:#8a6d1f;font-size:14px;line-height:1.5;"><strong>${t['email_reset_expiry']}</strong></p>
+                      </div>
+
+                      <p style="margin:0;color:#6b7280;font-size:14px;line-height:1.6;">
+                        ${t['email_reset_ignore']}
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:16px 24px;border-top:1px solid #e5edf4;">
+                      <p style="margin:0;color:#93a3b3;font-size:12px;line-height:1.5;text-align:center;">
+                        ${t['email_reset_footer']}
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
         ''';
 
-      await send(message, smtpServer);
+      await _sendSmtpMessage(message, user, pass);
     } catch (e) {
-      // Silenciosamente falha
+      _throwSmtpFailure('Erro ao enviar email de recuperação:', e);
     }
   }
 
@@ -876,6 +1320,8 @@ class AuthService extends GetxController {
         gender: patient.gender,
         maritalStatus: patient.maritalStatus,
         nationality: patient.nationality,
+        residenceCountry: patient.residenceCountry,
+        socialSecurityNumber: patient.socialSecurityNumber,
         address: patient.address,
         height: patient.height, // Incluir altura
         weight: patient.weight, // Incluir peso
@@ -911,14 +1357,13 @@ class AuthService extends GetxController {
       }
       
       final t = EmailTranslationsHelper.getEmailTranslationsSync();
-      final smtpServer = _getSmtpServer(user, pass);
       final message = Message()
         ..from = Address(user, '${t['email_from_name']} - ${t['email_test_suffix']!}')
         ..recipients.add(user)
         ..subject = t['email_test_subject']!
         ..text = t['email_test_body']!;
-      
-      await send(message, smtpServer);
+
+      await _sendSmtpMessage(message, user, pass);
     } catch (e) {
       // Silenciosamente falha
     }

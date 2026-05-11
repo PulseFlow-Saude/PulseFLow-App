@@ -21,37 +21,31 @@ class AccessHistoryScreen extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.blueSystemOverlayStyle,
       child: Scaffold(
-        backgroundColor: const Color(0xFF00324A),
+        backgroundColor: Colors.transparent,
         drawer: const PulseSideMenu(activeItem: PulseNavItem.profile),
-        body: SafeArea(
-          bottom: false,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: AppTheme.blueScreenGradientDecoration,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildHeader(controller, isSmallScreen),
+              _buildHeader(context, controller),
               Expanded(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(24),
-                        topRight: Radius.circular(24),
-                      ),
-                    ),
-                    child: LayoutBuilder(
+                child: Container(
+                  decoration: AppTheme.blueContentSheetDecoration,
+                  clipBehavior: Clip.antiAlias,
+                  child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final maxWidth = constraints.maxWidth > 800 ? 800.0 : constraints.maxWidth;
-                      
+                      final maxWidth =
+                          constraints.maxWidth > 800 ? 800.0 : constraints.maxWidth;
+
                       return Obx(() {
                         if (controller.isLoading.value) {
-                          return const Center(
+                          return Center(
                             child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppTheme.primaryBlue),
                             ),
                           );
                         }
@@ -64,15 +58,18 @@ class AccessHistoryScreen extends StatelessWidget {
                           child: ConstrainedBox(
                             constraints: BoxConstraints(maxWidth: maxWidth),
                             child: RefreshIndicator(
-                              onRefresh: () => controller.carregarHistoricoAcessos(),
-                              color: const Color(0xFF00324A),
+                              onRefresh: () =>
+                                  controller.carregarHistoricoAcessos(),
+                              color: AppTheme.primaryBlue,
                               child: ListView.separated(
                                 padding: EdgeInsets.all(isPhone ? 12 : 16),
                                 itemCount: controller.acessos.length,
-                                separatorBuilder: (context, index) => SizedBox(height: isSmallScreen ? 8 : 12),
+                                separatorBuilder: (context, index) => SizedBox(
+                                    height: isSmallScreen ? 8 : 12),
                                 itemBuilder: (context, index) {
                                   final acesso = controller.acessos[index];
-                                  return _buildAccessCard(controller, acesso, isSmallScreen, isPhone);
+                                  return _buildAccessCard(controller, acesso,
+                                      isSmallScreen, isPhone);
                                 },
                               ),
                             ),
@@ -80,7 +77,6 @@ class AccessHistoryScreen extends StatelessWidget {
                         );
                       });
                     },
-                  ),
                   ),
                 ),
               ),
@@ -91,33 +87,37 @@ class AccessHistoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(AccessHistoryController controller, bool isSmallScreen) {
+  Widget _buildHeader(
+    BuildContext context,
+    AccessHistoryController controller,
+  ) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: isSmallScreen ? 16 : 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: MediaQuery.paddingOf(context).top + 12,
+        bottom: 20,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const PulseDrawerButton(iconSize: 20),
-          const SizedBox(width: 16),
+          const PulseDrawerButton(),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'access_history_title'.tr,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
-                    fontSize: isSmallScreen ? 24 : 28,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Obx(() => Text(
                   controller.acessos.isEmpty
                       ? 'access_none'.tr
@@ -125,9 +125,9 @@ class AccessHistoryScreen extends StatelessWidget {
                           ? 'access_count_plural'.trParams({'n': controller.acessos.length.toString()})
                           : 'access_count'.trParams({'n': controller.acessos.length.toString()}),
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: isSmallScreen ? 12 : 14,
-                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 )),
               ],
@@ -184,21 +184,28 @@ class AccessHistoryScreen extends StatelessWidget {
     final isActive = acesso.isActive;
 
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isActive ? const Color(0xFF4CAF50) : Colors.grey[200]!,
-          width: isActive ? 2 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: isActive
+          ? BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppTheme.success,
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryBlue.withOpacity(0.08),
+                  blurRadius: 22,
+                  offset: const Offset(0, 7),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            )
+          : AppTheme.surfaceListCardDecoration(),
       child: Padding(
         padding: EdgeInsets.all(isPhone ? 12 : 16),
         child: Column(
@@ -209,14 +216,15 @@ class AccessHistoryScreen extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(isSmallScreen ? 8 : 10),
                   decoration: BoxDecoration(
-                    color: isActive 
-                        ? const Color(0xFF4CAF50).withOpacity(0.1)
-                        : const Color(0xFF00324A).withOpacity(0.1),
+                    color: isActive
+                        ? AppTheme.success.withOpacity(0.1)
+                        : AppTheme.primaryBlue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.medical_services_outlined,
-                    color: isActive ? const Color(0xFF4CAF50) : const Color(0xFF00324A),
+                    color:
+                        isActive ? AppTheme.success : AppTheme.primaryBlue,
                     size: isSmallScreen ? 20 : 24,
                   ),
                 ),
@@ -230,7 +238,7 @@ class AccessHistoryScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: isSmallScreen ? 15 : 16,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF212121),
+                          color: AppTheme.textPrimary,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -255,7 +263,7 @@ class AccessHistoryScreen extends StatelessWidget {
                       vertical: isSmallScreen ? 3 : 4,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4CAF50).withOpacity(0.1),
+                      color: AppTheme.success.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -263,7 +271,7 @@ class AccessHistoryScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: isSmallScreen ? 9 : 10,
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF4CAF50),
+                        color: AppTheme.success,
                       ),
                     ),
                   ),

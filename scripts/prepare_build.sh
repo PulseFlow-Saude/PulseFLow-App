@@ -3,7 +3,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-echo "🔧 Preparando build do PulseFlow..."
+echo "🔧 Preparando build do Oryon Health..."
 
 if [ -f "$PROJECT_DIR/.env" ]; then
     echo "✅ Arquivo .env encontrado"

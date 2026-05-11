@@ -4,9 +4,11 @@ import 'package:fl_chart/fl_chart.dart'; // Import fl_chart
 import 'package:url_launcher/url_launcher_string.dart';
 import 'enxaqueca_controller.dart';
 import '../../models/enxaqueca.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
+import '../../widgets/pulse_health_record_form_widgets.dart';
 import '../../widgets/pulse_side_menu.dart';
-import '../../widgets/pulse_drawer_button.dart';
 import '../../utils/intl_locale.dart';
 
 String formatarData(DateTime d) {
@@ -111,59 +113,41 @@ class EnxaquecaScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     controller.carregarRegistros(pacienteId);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF00324A),
-      drawer: const PulseSideMenu(activeItem: PulseNavItem.menu),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF00324A),
-        elevation: 0,
-        title: Text('enx_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-        leading: const PulseDrawerButton(iconSize: 22),
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Obx(() {
+    return PulseBlueScaffold(
+      drawer: PulseSideMenu(activeItem: PulseNavItem.menu),
+      header: PulseBlueCenteredTitleHeader(title: 'enx_title'.tr),
+      body: Obx(() {
           // debug: EnxaquecaScreen building with mostrarGrafico.value
           return Column(
             children: [
               if (!mostrarGrafico.value) ...[
                 // debug: rendering registration and list view
                 Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Card(
+                  child: PulseHealthRecordMaxWidthAlign(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: PulseHealthRecordLayout.scrollPadding(context),
+                      child: Card(
                       color: const Color(0xFFFFFFFF),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                   child: Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.symmetric(vertical: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'common_new_record'.tr,
-                              style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600),
+                        PulseRecordSectionIntro(
+                          icon: Icons.healing_rounded,
+                          title: 'enx_title'.tr,
+                          subtitle: 'menu_enxaqueca_sub'.tr,
                         ),
                         const SizedBox(height: 16),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'enx_pain_intensity'.tr,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF00324A),
-                              ),
+                            PulseRecordFieldLabelRow(
+                              icon: Icons.monitor_heart_rounded,
+                              label: 'enx_pain_intensity'.tr,
                             ),
                             const SizedBox(height: 8),
                             Obx(() {
@@ -172,9 +156,9 @@ class EnxaquecaScreen extends StatelessWidget {
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF9FAFB),
+                                  color: PulseHealthRecordFormStyles.fillColor,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                                  border: Border.all(color: PulseHealthRecordFormStyles.sectionBorderColor),
                                 ),
                                 child: Column(
                                   children: [
@@ -221,20 +205,35 @@ class EnxaquecaScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        TextField(
-                          controller: duracaoController,
-                          decoration: InputDecoration(
-                            labelText: 'enx_duration_label'.tr,
-                            hintText: 'enx_duration_hint'.tr,
-                          ),
-                          keyboardType: TextInputType.number,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            PulseRecordFieldLabelRow(
+                              icon: Icons.schedule_rounded,
+                              label: 'enx_duration_label'.tr,
+                            ),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: duracaoController,
+                              decoration: PulseHealthRecordFormStyles.modernInputDecoration(
+                                hintText: 'enx_duration_hint'.tr,
+                              ),
+                              keyboardType: TextInputType.number,
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         Obx(() {
+                          final placeholder = 'common_select_date'.tr;
                           final dataText = dataSelecionada.value == null
-                              ? 'common_select_date'.tr
+                              ? placeholder
                               : formatarData(dataSelecionada.value!);
-                          return InkWell(
+                          return PulseRecordLabeledDateTile(
+                            label: 'exam_date_label'.tr,
+                            labelIcon: Icons.event_rounded,
+                            isRequired: true,
+                            placeholderText: placeholder,
+                            displayText: dataText,
                             onTap: () async {
                               final hoje = DateTime.now();
                               final picked = await showDatePicker(
@@ -249,7 +248,7 @@ class EnxaquecaScreen extends StatelessWidget {
                                   return Theme(
                                     data: Theme.of(context).copyWith(
                                       colorScheme: const ColorScheme.light(
-                                            primary: Color(0xFF00324A),
+                                            primary: AppTheme.primaryBlue,
                                       ),
                                     ),
                                     child: child!,
@@ -264,26 +263,6 @@ class EnxaquecaScreen extends StatelessWidget {
                                 );
                               }
                             },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                              decoration: BoxDecoration(
-                                    color: const Color(0xFFFFFFFF),
-                                borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFF00324A).withOpacity(0.2)),
-                              ),
-                              child: Row(
-                                children: [
-                                      const Icon(Icons.event, color: Color(0xFF00324A)),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      dataText,
-                                          style: const TextStyle(color: Color(0xFF00324A)),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           );
                         }),
                         const SizedBox(height: 20),
@@ -292,7 +271,7 @@ class EnxaquecaScreen extends StatelessWidget {
                             Expanded(
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF00324A),
+                                      backgroundColor: AppTheme.primaryBlue,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   padding: const EdgeInsets.symmetric(vertical: 14),
                                 ),
@@ -320,14 +299,14 @@ class EnxaquecaScreen extends StatelessWidget {
                             Expanded(
                               child: OutlinedButton(
                                 style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(color: Color(0xFF00324A), width: 2),
+                                      side: const BorderSide(color: AppTheme.primaryBlue, width: 2),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   padding: const EdgeInsets.symmetric(vertical: 14),
                                 ),
                                 onPressed: () {
                                   mostrarGrafico.value = !mostrarGrafico.value;
                                 },
-                                    child: Obx(() => Text(mostrarGrafico.value ? 'common_view_records'.tr : 'common_view_data'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
+                                    child: Obx(() => Text(mostrarGrafico.value ? 'common_view_records'.tr : 'common_view_data'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 16, fontWeight: FontWeight.w600))),
                               ),
                             ),
                           ],
@@ -338,13 +317,16 @@ class EnxaquecaScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    ),
                   ),
                 ),
               ] else ...[
                 Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                  child: Column(
+                  child: PulseHealthRecordMaxWidthAlign(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: PulseHealthRecordLayout.scrollPadding(context),
+                      child: Column(
                     children: [
                       _GraficoEnxaqueca(
                         registros: controller.registrosFiltrados,
@@ -376,14 +358,14 @@ class EnxaquecaScreen extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: const Color(0xFFFFFFFF),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15)),
+                                border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.15)),
                               ),
                               child: Row(
                                 children: [
                                   Container(
                                     width: 50,
                                     height: 50,
-                                    decoration: BoxDecoration(color: const Color(0xFF00324A), borderRadius: BorderRadius.circular(8)),
+                                    decoration: BoxDecoration(color: AppTheme.primaryBlue, borderRadius: BorderRadius.circular(8)),
                                     child: Center(
                                       child: Column(
                                         mainAxisAlignment: MainAxisAlignment.center,
@@ -399,9 +381,9 @@ class EnxaquecaScreen extends StatelessWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(children: [const Icon(Icons.health_and_safety, color: Color(0xFF00324A), size: 16), const SizedBox(width: 8), Text('${'enx_intensity'.tr} ${item.intensidade}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))]),
+                                        Row(children: [const Icon(Icons.health_and_safety, color: AppTheme.primaryBlue, size: 16), const SizedBox(width: 8), Text('${'enx_intensity'.tr} ${item.intensidade}', style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 16, fontWeight: FontWeight.w600))]),
                                         const SizedBox(height: 4),
-                                        Row(children: [const Icon(Icons.timer, color: Color(0xFF00324A), size: 14), const SizedBox(width: 6), Text('${'enx_duration'.tr} ${item.duracao} h', style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))]),
+                                        Row(children: [const Icon(Icons.timer, color: AppTheme.primaryBlue, size: 14), const SizedBox(width: 6), Text('${'enx_duration'.tr} ${item.duracao} h', style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 14))]),
                                         const SizedBox(height: 4),
                                         Wrap(
                                           spacing: 8,
@@ -433,20 +415,19 @@ class EnxaquecaScreen extends StatelessWidget {
                             child: Text(
                               'enx_ref'.tr,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
+                              style: const TextStyle(color: AppTheme.primaryBlue, decoration: TextDecoration.underline),
                             ),
                           ),
                         ),
                     ],
+                    ),
                     ),
                   ),
                 ),
               ],
             ],
           );
-          }),
-        ),
-      ),
+        }),
     );
   }
 }
@@ -476,8 +457,8 @@ Widget _buildChipDuracao(int horas) {
   // Mantém paleta principal para duração
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-    decoration: BoxDecoration(color: const Color(0xFF00324A).withOpacity(0.10), borderRadius: BorderRadius.circular(16)),
-    child: Text(_duracaoKey(horas).tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12, fontWeight: FontWeight.w600)),
+    decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.10), borderRadius: BorderRadius.circular(16)),
+    child: Text(_duracaoKey(horas).tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 12, fontWeight: FontWeight.w600)),
   );
 }
 
@@ -509,17 +490,17 @@ class _GraficoEnxaqueca extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('enx_evolution'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)),
+                      Text('enx_evolution'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 18, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 4),
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
-                        child: Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        child: Text(mes, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ),
                     ],
                   ),
                 ),
-                IconButton(onPressed: onClose, icon: const Icon(Icons.close, color: Color(0xFF00324A), size: 20)),
+                IconButton(onPressed: onClose, icon: const Icon(Icons.close, color: AppTheme.primaryBlue, size: 20)),
               ],
             ),
             const SizedBox(height: 20),
@@ -528,9 +509,9 @@ class _GraficoEnxaqueca extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Column(
                   children: [
-                    const Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)),
+                    const Icon(Icons.insights_outlined, size: 48, color: AppTheme.primaryBlue),
                     const SizedBox(height: 8),
-                    Text('common_no_data_month'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14)),
+                    Text('common_no_data_month'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 14)),
                   ],
                 ),
               ),
@@ -561,7 +542,7 @@ class _GraficoEnxaqueca extends StatelessWidget {
                               return SideTitleWidget(
                                 axisSide: meta.axisSide,
                                 space: 6,
-                                child: Text('${d.day}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 10)),
+                                child: Text('${d.day}', style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 10)),
                               );
                             },
                             interval: (data.length / 6).clamp(1, 6).toDouble(),
@@ -571,14 +552,14 @@ class _GraficoEnxaqueca extends StatelessWidget {
                           sideTitles: SideTitles(
                             showTitles: true,
                             reservedSize: 36,
-                            getTitlesWidget: (value, meta) => Text(value.toInt().toString(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 10)),
+                            getTitlesWidget: (value, meta) => Text(value.toInt().toString(), style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 10)),
                             interval: 1.0,
                           ),
                         ),
                         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                         rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       ),
-                      borderData: FlBorderData(show: true, border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15), width: 1)),
+                      borderData: FlBorderData(show: true, border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.15), width: 1)),
                       minX: 0,
                       maxX: (data.length - 1).toDouble(),
                       minY: 0,
@@ -587,14 +568,14 @@ class _GraficoEnxaqueca extends StatelessWidget {
                         LineChartBarData(
                           spots: data.asMap().entries.map((e) => FlSpot(e.key.toDouble(), (int.tryParse(e.value.intensidade) ?? 0).toDouble())).toList(),
                           isCurved: true,
-                          color: const Color(0xFF00324A),
+                          color: AppTheme.primaryBlue,
                           barWidth: 3,
                           isStrokeCapRound: true,
                           dotData: FlDotData(
                             show: true,
                             getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
                               radius: 4,
-                              color: const Color(0xFF00324A),
+                              color: AppTheme.primaryBlue,
                               strokeWidth: 1.5,
                               strokeColor: Colors.white,
                             ),
@@ -603,8 +584,8 @@ class _GraficoEnxaqueca extends StatelessWidget {
                             show: true,
                             gradient: LinearGradient(
                               colors: [
-                                const Color(0xFF00324A).withOpacity(0.25),
-                                const Color(0xFF00324A).withOpacity(0),
+                                AppTheme.primaryBlue.withOpacity(0.25),
+                                AppTheme.primaryBlue.withOpacity(0),
                               ],
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
@@ -612,7 +593,7 @@ class _GraficoEnxaqueca extends StatelessWidget {
                           ),
                         ),
                       ],
-                      lineTouchData: LineTouchData(touchTooltipData: LineTouchTooltipData(getTooltipColor: (s) => const Color(0xFF00324A)), handleBuiltInTouches: true),
+                      lineTouchData: LineTouchData(touchTooltipData: LineTouchTooltipData(getTooltipColor: (s) => AppTheme.primaryBlue), handleBuiltInTouches: true),
                       ),
                   ),
                 ),
@@ -624,13 +605,13 @@ class _GraficoEnxaqueca extends StatelessWidget {
               children: [
                 ElevatedButton.icon(
                   onPressed: onPrevMonth,
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
                   icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16),
                   label: Text('common_previous'.tr, style: const TextStyle(color: Colors.white, fontSize: 12)),
                 ),
                 ElevatedButton.icon(
                   onPressed: onNextMonth,
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
                   icon: const Icon(Icons.chevron_right, color: Colors.white, size: 16),
                   label: Text('common_next'.tr, style: const TextStyle(color: Colors.white, fontSize: 12)),
                 ),
@@ -655,12 +636,12 @@ class _MigraineAnalysisSection extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15))),
+          decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.15))),
               child: Row(
                 children: [
-                  Expanded(child: Column(children: [Text('common_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMenorIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
-                  Expanded(child: Column(children: [Text('common_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMediaIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
-                  Expanded(child: Column(children: [Text('common_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(calcularMaiorIntensidade(data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))])),
+                  Expanded(child: Column(children: [Text('common_min'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 12)), Text(calcularMenorIntensidade(data), style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 20, fontWeight: FontWeight.w600))])),
+                  Expanded(child: Column(children: [Text('common_avg'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 12)), Text(calcularMediaIntensidade(data), style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 20, fontWeight: FontWeight.w600))])),
+                  Expanded(child: Column(children: [Text('common_max'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 12)), Text(calcularMaiorIntensidade(data), style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 20, fontWeight: FontWeight.w600))])),
                 ],
               ),
             ),

@@ -8,16 +8,23 @@ class HealthService {
 
   final Health _health = Health();
 
-  // Tipos de dados de saúde que queremos acessar
-  static const List<HealthDataType> _healthDataTypes = [
+  // Tipos de dados de saúde usados no app hoje (gráficos/sincronização principal)
+  static const List<HealthDataType> _coreHealthDataTypes = [
     HealthDataType.HEART_RATE,
-    HealthDataType.SLEEP_IN_BED, // Tempo na cama
-    HealthDataType.SLEEP_ASLEEP, // Tempo dormindo
-    HealthDataType.SLEEP_AWAKE, // Tempo acordado durante o sono
-    HealthDataType.SLEEP_DEEP, // Sono profundo
-    HealthDataType.SLEEP_REM, // Sono REM
+    HealthDataType.SLEEP_IN_BED,
+    HealthDataType.SLEEP_ASLEEP,
+    HealthDataType.SLEEP_AWAKE,
     HealthDataType.STEPS,
+    HealthDataType.BLOOD_OXYGEN,
+    HealthDataType.RESPIRATORY_RATE,
   ];
+
+  // Permissões explícitas (HealthKit): leitura e escrita para tipos suportados.
+  static final List<HealthDataAccess> _healthDataPermissions =
+      List<HealthDataAccess>.filled(
+    _coreHealthDataTypes.length,
+    HealthDataAccess.READ,
+  );
 
   // Solicita permissões para acessar dados de saúde
   Future<bool> requestPermissions() async {
@@ -27,7 +34,10 @@ class HealthService {
       // Verifica se o HealthKit está disponível (método não disponível na versão 9.0.1)
       // bool isAvailable = await _health.isHealthDataAvailable();
       
-      bool requested = await _health.requestAuthorization(_healthDataTypes);
+      bool requested = await _health.requestAuthorization(
+        _coreHealthDataTypes,
+        permissions: _healthDataPermissions,
+      );
       
       if (requested) {
         print('✅ [HealthService] Permissões concedidas');
@@ -85,7 +95,7 @@ class HealthService {
         } else {
           // Se não há dados, usa valor padrão
           print('⚠️ [HealthService] Dia $dateKey: sem dados, usando valor padrão');
-          spots.add(FlSpot(i.toDouble(), 70.0));
+          spots.add(FlSpot(i.toDouble(), -1));
         }
       }
 
@@ -234,12 +244,12 @@ class HealthService {
         } else {
           // Se não há dados, usa valor padrão
           print('⚠️ [HealthService] Dia $dateKey: sem dados de sono, usando valor padrão (7.5h)');
-          spots.add(FlSpot(i.toDouble(), 7.5));
+          spots.add(FlSpot(i.toDouble(), -1));
         }
       }
       
       // Se encontrou dados mas não nos últimos 7 dias, mostra aviso
-      if (dailySleep.isNotEmpty && spots.every((spot) => spot.y == 7.5)) {
+      if (dailySleep.isNotEmpty && spots.every((spot) => spot.y == -1)) {
         print('⚠️ [HealthService] Dados de sono encontrados, mas não nos últimos 7 dias');
         print('💡 [HealthService] Dados mais recentes: ${dailySleep.keys.toList().last}');
       }
@@ -295,7 +305,7 @@ class HealthService {
         } else {
           // Se não há dados, usa valor padrão
           print('⚠️ [HealthService] Dia $dateKey: sem dados de passos, usando valor padrão');
-          spots.add(FlSpot(i.toDouble(), 8000.0));
+          spots.add(FlSpot(i.toDouble(), -1));
         }
       }
 
@@ -303,6 +313,82 @@ class HealthService {
     } catch (e) {
       print('❌ [HealthService] Erro ao buscar dados de passos: $e');
       return _generateFallbackStepsData();
+    }
+  }
+
+  // Busca dados de oxigenação (SpO2) dos últimos 7 dias
+  Future<List<FlSpot>> getBloodOxygenData() async {
+    try {
+      final now = DateTime.now();
+      final weekAgo = now.subtract(const Duration(days: 7));
+      final healthData = await _health.getHealthDataFromTypes(
+        startTime: weekAgo,
+        endTime: now,
+        types: [HealthDataType.BLOOD_OXYGEN],
+      );
+
+      final Map<String, List<double>> dailyData = {};
+      for (var dataPoint in healthData) {
+        final dateKey =
+            '${dataPoint.dateFrom.year}-${dataPoint.dateFrom.month}-${dataPoint.dateFrom.day}';
+        final value = _getHealthValueAsDouble(dataPoint.value);
+        if (value <= 0) continue;
+        dailyData.putIfAbsent(dateKey, () => []).add(value);
+      }
+
+      final spots = <FlSpot>[];
+      for (int i = 6; i >= 0; i--) {
+        final date = now.subtract(Duration(days: i));
+        final dateKey = '${date.year}-${date.month}-${date.day}';
+        final values = dailyData[dateKey];
+        if (values != null && values.isNotEmpty) {
+          final avg = values.reduce((a, b) => a + b) / values.length;
+          spots.add(FlSpot(i.toDouble(), avg));
+        } else {
+          spots.add(FlSpot(i.toDouble(), -1));
+        }
+      }
+      return spots;
+    } catch (_) {
+      return List<FlSpot>.generate(7, (i) => FlSpot(i.toDouble(), -1));
+    }
+  }
+
+  // Busca dados de frequência respiratória dos últimos 7 dias
+  Future<List<FlSpot>> getRespiratoryRateData() async {
+    try {
+      final now = DateTime.now();
+      final weekAgo = now.subtract(const Duration(days: 7));
+      final healthData = await _health.getHealthDataFromTypes(
+        startTime: weekAgo,
+        endTime: now,
+        types: [HealthDataType.RESPIRATORY_RATE],
+      );
+
+      final Map<String, List<double>> dailyData = {};
+      for (var dataPoint in healthData) {
+        final dateKey =
+            '${dataPoint.dateFrom.year}-${dataPoint.dateFrom.month}-${dataPoint.dateFrom.day}';
+        final value = _getHealthValueAsDouble(dataPoint.value);
+        if (value <= 0) continue;
+        dailyData.putIfAbsent(dateKey, () => []).add(value);
+      }
+
+      final spots = <FlSpot>[];
+      for (int i = 6; i >= 0; i--) {
+        final date = now.subtract(Duration(days: i));
+        final dateKey = '${date.year}-${date.month}-${date.day}';
+        final values = dailyData[dateKey];
+        if (values != null && values.isNotEmpty) {
+          final avg = values.reduce((a, b) => a + b) / values.length;
+          spots.add(FlSpot(i.toDouble(), avg));
+        } else {
+          spots.add(FlSpot(i.toDouble(), -1));
+        }
+      }
+      return spots;
+    } catch (_) {
+      return List<FlSpot>.generate(7, (i) => FlSpot(i.toDouble(), -1));
     }
   }
 
@@ -367,7 +453,10 @@ class HealthService {
   // Verifica se as permissões foram concedidas
   Future<bool> hasPermissions() async {
     try {
-      final result = await _health.hasPermissions(_healthDataTypes);
+      final result = await _health.hasPermissions(
+        _coreHealthDataTypes,
+        permissions: _healthDataPermissions,
+      );
       
       // Se result é null, significa que as permissões não foram solicitadas ainda
       if (result == null) {
@@ -391,16 +480,16 @@ class HealthService {
     try {
       print('📊 [HealthService] getAllHealthData() chamado');
       
-      // Verifica permissões primeiro (já solicita automaticamente se necessário)
-      final hasPermission = await hasPermissions();
-      
-      if (!hasPermission) {
-        print('⚠️ [HealthService] Sem permissões, tentando solicitar novamente...');
-        final granted = await requestPermissions();
-        if (!granted) {
-          print('❌ [HealthService] Permissões negadas, retornando dados de fallback');
-          return _getFallbackData();
+      // iOS/HealthKit pode conceder permissões parcialmente.
+      // Não bloqueia coleta total: tenta permissões e segue.
+      try {
+        final hasPermission = await hasPermissions();
+        if (!hasPermission) {
+          print('⚠️ [HealthService] Permissões incompletas, solicitando novamente...');
+          await requestPermissions();
         }
+      } catch (e) {
+        print('⚠️ [HealthService] Erro ao validar permissões, seguindo coleta por tipo: $e');
       }
       
       print('✅ [HealthService] Permissões OK, buscando dados reais...');
@@ -410,6 +499,8 @@ class HealthService {
       final heartRateData = await getHeartRateData();
       final sleepData = await getSleepData();
       final stepsData = await getStepsData();
+      final oxygenData = await getBloodOxygenData();
+      final respiratoryData = await getRespiratoryRateData();
 
       print('✅ [HealthService] Dados recuperados:');
       print('  - HeartRate: ${heartRateData.length} pontos');
@@ -420,6 +511,8 @@ class HealthService {
         'heartRate': heartRateData,
         'sleep': sleepData,
         'steps': stepsData,
+        'oxygenation': oxygenData,
+        'respiratoryRate': respiratoryData,
       };
     } catch (e, stackTrace) {
       print('❌ [HealthService] Erro em getAllHealthData(): $e');
@@ -428,12 +521,110 @@ class HealthService {
     }
   }
 
+  // Busca histórico completo do HealthKit e agrega por dia.
+  // Retorna apenas valores reais (sem placeholders), prontos para persistência.
+  Future<Map<String, Map<DateTime, double>>> getHistoricalHealthDataByDay({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final now = endDate ?? DateTime.now();
+    final from = startDate ?? now.subtract(const Duration(days: 3650));
+
+    final result = <String, Map<DateTime, double>>{
+      'heartRate': <DateTime, double>{},
+      'steps': <DateTime, double>{},
+      'sleep': <DateTime, double>{},
+      'oxygenation': <DateTime, double>{},
+      'respiratoryRate': <DateTime, double>{},
+    };
+
+    final averageAccumulators = <String, Map<DateTime, List<double>>>{
+      'heartRate': <DateTime, List<double>>{},
+      'oxygenation': <DateTime, List<double>>{},
+      'respiratoryRate': <DateTime, List<double>>{},
+    };
+
+    Future<void> readType(
+      HealthDataType type,
+      String key, {
+      bool sumValues = false,
+      bool useSleepDuration = false,
+    }) async {
+      try {
+        final points = await _health.getHealthDataFromTypes(
+          startTime: from,
+          endTime: now,
+          types: [type],
+        );
+
+        for (final point in points) {
+          final day = DateTime(
+            point.dateFrom.year,
+            point.dateFrom.month,
+            point.dateFrom.day,
+          );
+
+          double value;
+          if (useSleepDuration) {
+            value = point.dateTo.difference(point.dateFrom).inMinutes / 60.0;
+          } else {
+            value = _getHealthValueAsDouble(point.value);
+            // HealthKit costuma devolver SpO₂ como fração (0,97); o app grava em %.
+            if (key == 'oxygenation' && value > 0 && value <= 1.0) {
+              value *= 100;
+            }
+          }
+
+          if (value <= 0) {
+            continue;
+          }
+
+          if (sumValues) {
+            result[key]![day] = (result[key]![day] ?? 0) + value;
+          } else {
+            averageAccumulators[key]!
+                .putIfAbsent(day, () => <double>[])
+                .add(value);
+          }
+        }
+      } catch (e) {
+        print('⚠️ [HealthService] Falha ao buscar histórico de $key: $e');
+      }
+    }
+
+    await readType(HealthDataType.HEART_RATE, 'heartRate');
+    await readType(HealthDataType.STEPS, 'steps', sumValues: true);
+    await readType(HealthDataType.BLOOD_OXYGEN, 'oxygenation');
+    await readType(HealthDataType.RESPIRATORY_RATE, 'respiratoryRate');
+    // Apenas tempo realmente dormindo: somar IN_BED + ASLEEP + fases etc. duplica horas no mesmo dia.
+    await readType(
+      HealthDataType.SLEEP_ASLEEP,
+      'sleep',
+      sumValues: true,
+      useSleepDuration: true,
+    );
+
+    for (final entry in averageAccumulators.entries) {
+      final key = entry.key;
+      for (final dayEntry in entry.value.entries) {
+        final values = dayEntry.value;
+        if (values.isEmpty) continue;
+        result[key]![dayEntry.key] =
+            values.reduce((a, b) => a + b) / values.length;
+      }
+    }
+
+    return result;
+  }
+
   // Retorna dados de fallback
   Map<String, List<FlSpot>> _getFallbackData() {
     return {
       'heartRate': _generateFallbackHeartRateData(),
       'sleep': _generateFallbackSleepData(),
       'steps': _generateFallbackStepsData(),
+      'oxygenation': List<FlSpot>.generate(7, (i) => FlSpot(i.toDouble(), -1)),
+      'respiratoryRate': List<FlSpot>.generate(7, (i) => FlSpot(i.toDouble(), -1)),
     };
   }
 

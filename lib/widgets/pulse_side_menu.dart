@@ -169,14 +169,35 @@ class PulseSideMenu extends StatelessWidget {
     );
   }
 
-  void _handleTap(BuildContext context, _MenuItemData data) {
+  Future<void> _handleTap(BuildContext context, _MenuItemData data) async {
     Navigator.of(context).pop();
     if (data.navItem != null && activeItem == data.navItem) return;
     if (data.route == null) return;
-    if (data.useOffAll) {
-      Get.offAllNamed(data.route!);
-    } else {
-      Get.toNamed(data.route!);
+
+    try {
+      final hasRoute = Get.routeTree.matchRoute(data.route!).route != null;
+      if (!hasRoute) {
+        Get.snackbar(
+          'Erro',
+          'Rota não encontrada: ${data.route}',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (data.useOffAll) {
+        await Get.offAllNamed(data.route!);
+      } else {
+        await Get.toNamed(data.route!);
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Erro ao abrir tela',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 }
@@ -270,6 +291,11 @@ class _DrawerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final logoAsset = isDarkMode
+        ? 'assets/images/oryon_health_logo.png'
+        : 'assets/images/oryon_health_logo_negative.png';
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
@@ -287,7 +313,7 @@ class _DrawerHeader extends StatelessWidget {
           SizedBox(
             width: 140,
             child: Image.asset(
-              'assets/images/PulseNegativo.png',
+              logoAsset,
               fit: BoxFit.contain,
             ),
           ),

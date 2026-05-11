@@ -1,0 +1,7 @@
+// Copie este ficheiro para DeveloperTeam.xcconfig (na mesma pasta) e preencha.
+// O ficheiro DeveloperTeam.xcconfig não deve ir para o git — está no .gitignore.
+//
+// Team ID: Xcode → Settings (Preferences) → Accounts → selecione a equipa → Team ID (10 caracteres).
+// Ou: https://developer.apple.com/account → Membership details.
+
+DEVELOPMENT_TEAM = XXXXXXXXXX

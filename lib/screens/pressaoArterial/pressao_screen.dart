@@ -5,9 +5,11 @@ import 'package:url_launcher/url_launcher_string.dart';
 import '../diabetes/diabetes_screen.dart' show formatarData, formatarMes, formatarMesAno, formatarMesAnoShort; // reuse helpers
 import 'pressao_controller.dart';
 import '../../models/pressao_arterial.dart';
-import '../../widgets/pulse_bottom_navigation.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
+import '../../widgets/pulse_bottom_navigation.dart' show PulseNavItem;
+import '../../widgets/pulse_health_record_form_widgets.dart';
 import '../../widgets/pulse_side_menu.dart';
-import '../../widgets/pulse_drawer_button.dart';
 
 class PressaoScreen extends StatelessWidget {
   final String pacienteId;
@@ -23,53 +25,62 @@ class PressaoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     controller.carregarRegistros(pacienteId);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF00324A),
-      drawer: const PulseSideMenu(activeItem: PulseNavItem.menu),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF00324A),
-        elevation: 0,
-        title: Text('press_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-        leading: const PulseDrawerButton(iconSize: 22),
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Obx(() {
+    return PulseBlueScaffold(
+      drawer: PulseSideMenu(activeItem: PulseNavItem.menu),
+      header: PulseBlueCenteredTitleHeader(title: 'press_title'.tr),
+      body: Obx(() {
           return Column(
             children: [
               if (!mostrarGrafico.value) ...[
                 Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Card(
+                  child: PulseHealthRecordMaxWidthAlign(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: PulseHealthRecordLayout.scrollPadding(context),
+                      child: Card(
                       color: const Color(0xFFFFFFFF),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       elevation: 0,
                       child: Padding(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('common_new_record'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600)),
+                            PulseRecordSectionIntro(
+                              icon: Icons.monitor_heart_rounded,
+                              title: 'press_title'.tr,
+                              subtitle: 'menu_pressao_sub'.tr,
+                            ),
                             const SizedBox(height: 16),
-                            TextField(
-                              controller: pressaoController,
-                              decoration: InputDecoration(labelText: 'press_label'.tr, hintText: 'press_hint'.tr),
-                              keyboardType: TextInputType.text,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                PulseRecordFieldLabelRow(
+                                  icon: Icons.favorite_rounded,
+                                  label: 'press_label'.tr,
+                                ),
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: pressaoController,
+                                  decoration: PulseHealthRecordFormStyles.modernInputDecoration(
+                                    hintText: 'press_hint'.tr,
+                                  ),
+                                  keyboardType: TextInputType.text,
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 16),
                             Obx(() {
-                              final dataText = dataSelecionada.value == null ? 'common_select_date'.tr : formatarData(dataSelecionada.value!);
-                              return InkWell(
+                              final placeholder = 'common_select_date'.tr;
+                              final dataText = dataSelecionada.value == null
+                                  ? placeholder
+                                  : formatarData(dataSelecionada.value!);
+                              return PulseRecordLabeledDateTile(
+                                label: 'exam_date_label'.tr,
+                                labelIcon: Icons.event_rounded,
+                                isRequired: true,
+                                placeholderText: placeholder,
+                                displayText: dataText,
                                 onTap: () async {
                                   final hoje = DateTime.now();
                                   final picked = await showDatePicker(
@@ -85,11 +96,6 @@ class PressaoScreen extends StatelessWidget {
                                     dataSelecionada.value = DateTime(picked.year, picked.month, picked.day);
                                   }
                                 },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                  decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00324A).withOpacity(0.2))),
-                                  child: Row(children: [const Icon(Icons.event, color: Color(0xFF00324A)), const SizedBox(width: 12), Expanded(child: Text(dataText, style: const TextStyle(color: Color(0xFF00324A))))]),
-                                ),
                               );
                             }),
                             const SizedBox(height: 20),
@@ -97,7 +103,7 @@ class PressaoScreen extends StatelessWidget {
                               children: [
                                 Expanded(
                                   child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                                    style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                                     onPressed: () async {
                                       if (dataSelecionada.value == null) {
                                         Get.snackbar('common_data_required'.tr, 'common_date_measurement'.tr);
@@ -131,9 +137,9 @@ class PressaoScreen extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: OutlinedButton(
-                                    style: OutlinedButton.styleFrom(side: const BorderSide(color: Color(0xFF00324A), width: 2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                                    style: OutlinedButton.styleFrom(side: const BorderSide(color: AppTheme.primaryBlue, width: 2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                                     onPressed: () => mostrarGrafico.value = !mostrarGrafico.value,
-                                    child: Obx(() => Text(mostrarGrafico.value ? 'common_view_records'.tr : 'common_view_data'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
+                                    child: Obx(() => Text(mostrarGrafico.value ? 'common_view_records'.tr : 'common_view_data'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 16, fontWeight: FontWeight.w600))),
                                   ),
                                 ),
                               ],
@@ -145,12 +151,15 @@ class PressaoScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  ),
                 ),
               ] else ...[
                 Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
+                  child: PulseHealthRecordMaxWidthAlign(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: PulseHealthRecordLayout.scrollPadding(context),
+                      child: Column(
                       children: [
                         _GraficoPressao(
                           registros: controller.registrosFiltrados,
@@ -178,12 +187,12 @@ class PressaoScreen extends StatelessWidget {
                             return Container(
                               margin: const EdgeInsets.only(bottom: 12),
                               padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15))),
+                              decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.15))),
                               child: Row(children: [
-                                Container(width: 50, height: 50, decoration: BoxDecoration(color: const Color(0xFF00324A), borderRadius: BorderRadius.circular(8)), child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text('${item.data.day}', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)), Text(formatarMes(item.data.month), style: const TextStyle(color: Colors.white, fontSize: 10))]))),
+                                Container(width: 50, height: 50, decoration: BoxDecoration(color: AppTheme.primaryBlue, borderRadius: BorderRadius.circular(8)), child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text('${item.data.day}', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)), Text(formatarMes(item.data.month), style: const TextStyle(color: Colors.white, fontSize: 10))]))),
                                 const SizedBox(width: 16),
                                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                  Row(children: [const Icon(Icons.favorite, color: Color(0xFF00324A), size: 16), const SizedBox(width: 8), Flexible(child: Text('${item.sistolica.toStringAsFixed(0)}/${item.diastolica.toStringAsFixed(0)} mmHg', overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600)))]),
+                                  Row(children: [const Icon(Icons.favorite, color: AppTheme.primaryBlue, size: 16), const SizedBox(width: 8), Flexible(child: Text('${item.sistolica.toStringAsFixed(0)}/${item.diastolica.toStringAsFixed(0)} mmHg', overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 16, fontWeight: FontWeight.w600)))]),
                                   const SizedBox(height: 6),
                                   Wrap(spacing: 8, runSpacing: 6, children: _buildChips(item)),
                                 ])),
@@ -205,20 +214,19 @@ class PressaoScreen extends StatelessWidget {
                             child: Text(
                               'press_ref'.tr,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Color(0xFF00324A), decoration: TextDecoration.underline),
+                              style: const TextStyle(color: AppTheme.primaryBlue, decoration: TextDecoration.underline),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
+                  ),
                 ),
               ],
             ],
           );
-          }),
-        ),
-      ),
+        }),
     );
   }
 
@@ -251,8 +259,8 @@ class PressaoScreen extends StatelessWidget {
         fg = Colors.red.shade700;
         break;
       default:
-        bg = const Color(0xFF00324A).withOpacity(0.10);
-        fg = const Color(0xFF00324A);
+        bg = AppTheme.primaryBlue.withOpacity(0.10);
+        fg = AppTheme.primaryBlue;
     }
     final statusKey = status == 'Normal' ? 'press_status_normal' : status == 'Elevada' ? 'press_status_elevated' : status == 'Hipertensão estágio 1' ? 'press_status_ha1' : status == 'Hipertensão estágio 2' ? 'press_status_ha2' : 'press_status_undefined';
     return [
@@ -291,16 +299,16 @@ class _GraficoPressao extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('press_chart_title'.tr, overflow: TextOverflow.ellipsis, maxLines: 1, style: const TextStyle(color: Color(0xFF00324A), fontSize: 18, fontWeight: FontWeight.w600)), const SizedBox(height: 4), Text(mes, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))])), IconButton(onPressed: onClose, icon: const Icon(Icons.close, color: Color(0xFF00324A), size: 20))]),
+          Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('press_chart_title'.tr, overflow: TextOverflow.ellipsis, maxLines: 1, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 18, fontWeight: FontWeight.w600)), const SizedBox(height: 4), Text(mes, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 14))])), IconButton(onPressed: onClose, icon: const Icon(Icons.close, color: AppTheme.primaryBlue, size: 20))]),
           const SizedBox(height: 20),
           if (data.isEmpty) ...[
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Column(
                 children: [
-                  const Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)),
+                  const Icon(Icons.insights_outlined, size: 48, color: AppTheme.primaryBlue),
                   const SizedBox(height: 8),
-                  Text('common_no_data_month'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 14)),
+                  Text('common_no_data_month'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 14)),
                 ],
               ),
             ),
@@ -320,13 +328,13 @@ class _GraficoPressao extends StatelessWidget {
                         final i = value.toInt();
                         if (i < 0 || i >= data.length) return const SizedBox.shrink();
                         final d = data[i].data;
-                        return SideTitleWidget(axisSide: meta.axisSide, space: 6, child: Text('${d.day}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 10)));
+                        return SideTitleWidget(axisSide: meta.axisSide, space: 6, child: Text('${d.day}', style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 10)));
                       }, interval: (data.length / 6).clamp(1, 6).toDouble())),
-                      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 36, getTitlesWidget: (value, meta) => Text(value.toInt().toString(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 10)), interval: 10)),
+                      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 36, getTitlesWidget: (value, meta) => Text(value.toInt().toString(), style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 10)), interval: 10)),
                       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     ),
-                    borderData: FlBorderData(show: true, border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15), width: 1)),
+                    borderData: FlBorderData(show: true, border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.15), width: 1)),
                     minX: 0,
                     maxX: (data.length - 1).toDouble(),
                     minY: 40,
@@ -340,14 +348,14 @@ class _GraficoPressao extends StatelessWidget {
                           return FlSpot(e.key.toDouble(), map);
                         }).toList(),
                         isCurved: true,
-                        color: const Color(0xFF00324A),
+                        color: AppTheme.primaryBlue,
                         barWidth: 3,
                         isStrokeCapRound: true,
-                        dotData: FlDotData(show: true, getDotPainter: (spot, p, b, i) => FlDotCirclePainter(radius: 4, color: const Color(0xFF00324A), strokeWidth: 1.5, strokeColor: Colors.white)),
-                        belowBarData: BarAreaData(show: true, gradient: LinearGradient(colors: [const Color(0xFF00324A).withOpacity(0.25), const Color(0xFF00324A).withOpacity(0)], begin: Alignment.bottomCenter, end: Alignment.topCenter)),
+                        dotData: FlDotData(show: true, getDotPainter: (spot, p, b, i) => FlDotCirclePainter(radius: 4, color: AppTheme.primaryBlue, strokeWidth: 1.5, strokeColor: Colors.white)),
+                        belowBarData: BarAreaData(show: true, gradient: LinearGradient(colors: [AppTheme.primaryBlue.withOpacity(0.25), AppTheme.primaryBlue.withOpacity(0)], begin: Alignment.bottomCenter, end: Alignment.topCenter)),
                       ),
                     ],
-                    lineTouchData: LineTouchData(touchTooltipData: LineTouchTooltipData(getTooltipColor: (s) => const Color(0xFF00324A)), handleBuiltInTouches: true),
+                    lineTouchData: LineTouchData(touchTooltipData: LineTouchTooltipData(getTooltipColor: (s) => AppTheme.primaryBlue), handleBuiltInTouches: true),
                   ),
                 ),
               ),
@@ -355,8 +363,8 @@ class _GraficoPressao extends StatelessWidget {
           ],
           const SizedBox(height: 16),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            ElevatedButton.icon(onPressed: onPrevMonth, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16), label: Text('common_previous'.tr, style: const TextStyle(color: Colors.white, fontSize: 12))),
-            ElevatedButton.icon(onPressed: onNextMonth, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_right, color: Colors.white, size: 16), label: Text('common_next'.tr, style: const TextStyle(color: Colors.white, fontSize: 12))),
+            ElevatedButton.icon(onPressed: onPrevMonth, style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16), label: Text('common_previous'.tr, style: const TextStyle(color: Colors.white, fontSize: 12))),
+            ElevatedButton.icon(onPressed: onNextMonth, style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)), icon: const Icon(Icons.chevron_right, color: Colors.white, size: 16), label: Text('common_next'.tr, style: const TextStyle(color: Colors.white, fontSize: 12))),
           ]),
         ]),
       ),
@@ -393,13 +401,13 @@ class _PressaoAnalysisSection extends StatelessWidget {
     return Column(children: [
       Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15))),
+        decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.15))),
         child: Row(children: [
-          Expanded(child: Column(children: [Text('common_min'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(menorPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
+          Expanded(child: Column(children: [Text('common_min'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 12)), Text(menorPair(), style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 20, fontWeight: FontWeight.w600))]))
           ,
-          Expanded(child: Column(children: [Text('common_avg'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(mediaPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
+          Expanded(child: Column(children: [Text('common_avg'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 12)), Text(mediaPair(), style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 20, fontWeight: FontWeight.w600))]))
           ,
-          Expanded(child: Column(children: [Text('common_max'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 12)), Text(maiorPair(), style: const TextStyle(color: Color(0xFF00324A), fontSize: 20, fontWeight: FontWeight.w600))]))
+          Expanded(child: Column(children: [Text('common_max'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 12)), Text(maiorPair(), style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 20, fontWeight: FontWeight.w600))]))
         ]),
       ),
     ]);

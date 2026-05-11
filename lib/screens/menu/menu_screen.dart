@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
 import '../enxaqueca/enxaqueca_screen.dart';
 import '../diabetes/diabetes_screen.dart';
 import '../login/paciente_controller.dart';
@@ -8,109 +11,132 @@ import '../../routes/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/common/bp_menu_icon.dart';
 import '../../widgets/common/hormonal_icon.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
+import '../../widgets/pulse_drawer_button.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../home/home_controller.dart';
 
 class MenuScreen extends StatelessWidget {
-  const MenuScreen({Key? key}) : super(key: key);
+  const MenuScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final pacienteController = Get.find<PacienteController>();
+    final horizontalPad = math.max(16.0, MediaQuery.sizeOf(context).width * 0.055);
+    final bottomPad = math.max(MediaQuery.paddingOf(context).bottom, 16.0) + 16;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: AppTheme.blueSystemOverlayStyle,
-      child: Scaffold(
-        backgroundColor: const Color(0xFF00324A),
-        drawer: const PulseSideMenu(activeItem: PulseNavItem.menu),
-        body: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionHeader('menu_section_records'.tr),
-                      const SizedBox(height: 16),
-                      _buildHealthRecordsList(pacienteController),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-              ),
+    return PulseBlueScaffold(
+      drawer: PulseSideMenu(activeItem: PulseNavItem.menu),
+      header: _buildHeader(context),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(horizontalPad, 20, horizontalPad, bottomPad),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildSectionIntro(context),
+                _buildHealthRecordsList(pacienteController),
+              ],
             ),
-          ],
+          ),
         ),
-        // bottomNavigationBar removido - tela tem sidebar
-        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.menu),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(Get.context!).padding.top + 16,
-        left: 16,
-        right: 16,
-        bottom: 16,
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 10),
+      child: Row(
+        children: [
+          const PulseDrawerButton(iconSize: 22),
+          Expanded(
+            child: Center(child: _buildBrandLogo()),
+          ),
+          _buildNotificationIcon(),
+        ],
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
+    );
+  }
+
+  Widget _buildSectionIntro(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Builder(
-                builder: (context) {
-                  return IconButton(
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.menu,
-                        color: Colors.white,
-                        size: 24,
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.07),
+                      blurRadius: 14,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.library_books_rounded,
+                  color: AppTheme.primaryBlue,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'menu_section_records'.tr,
+                      style: AppTheme.titleLarge.copyWith(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                        height: 1.15,
+                        letterSpacing: 0.2,
+                        color: AppTheme.textPrimary,
                       ),
                     ),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                  );
-                },
+                    const SizedBox(height: 8),
+                    Text(
+                      'menu_section_records_sub'.tr,
+                      style: AppTheme.bodyMedium.copyWith(
+                        color: AppTheme.textSecondary.withValues(alpha: 0.95),
+                        height: 1.45,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              _buildPulseFlowLogo(),
-              _buildNotificationIcon(),
             ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            'menu_main'.tr,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          const SizedBox(height: 18),
+          Container(
+            height: 1.2,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(2),
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryBlue.withValues(alpha: 0.28),
+                  AppTheme.primaryBlue.withValues(alpha: 0.08),
+                  AppTheme.primaryBlue.withValues(alpha: 0.02),
+                ],
+              ),
             ),
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -139,12 +165,13 @@ class MenuScreen extends StatelessWidget {
 
   Widget _notificationBadge(int? count) {
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: const Icon(
             Icons.notifications_outlined,
@@ -154,18 +181,15 @@ class MenuScreen extends StatelessWidget {
         ),
         if (count != null && count > 0)
           Positioned(
-            right: 0,
-            top: 0,
+            right: -2,
+            top: -2,
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: const BoxDecoration(
                 color: Colors.red,
                 shape: BoxShape.circle,
               ),
-              constraints: const BoxConstraints(
-                minWidth: 16,
-                minHeight: 16,
-              ),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(
                 count > 9 ? '9+' : count.toString(),
                 style: const TextStyle(
@@ -181,28 +205,24 @@ class MenuScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPulseFlowLogo() {
+  Widget _buildBrandLogo() {
     return SizedBox(
       width: 140,
       height: 45,
       child: Image.asset(
-        'assets/images/PulseNegativo.png',
+        'assets/images/oryon_health_logo_negative.png',
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.3)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
             ),
-            child: const Center(
+            child: Center(
               child: Text(
-                'PulseFlow',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                'Oryon Health',
+                style: AppTheme.titleSmall.copyWith(color: Colors.white),
               ),
             ),
           );
@@ -211,21 +231,11 @@ class MenuScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF1E293B),
-      ),
-    );
-  }
-
   Widget _buildHealthRecordsList(PacienteController pacienteController) {
     final cards = [
       _RecordCardData(
-        icon: Icons.attach_file,
+        accent: AppTheme.primaryBlue,
+        icon: Icons.attach_file_rounded,
         title: 'menu_exames'.tr,
         subtitle: 'menu_exames_sub'.tr,
         onTap: () {
@@ -234,7 +244,8 @@ class MenuScreen extends StatelessWidget {
         },
       ),
       _RecordCardData(
-        icon: Icons.psychology,
+        accent: Colors.deepPurple,
+        icon: Icons.psychology_rounded,
         title: 'menu_enxaqueca'.tr,
         subtitle: 'menu_enxaqueca_sub'.tr,
         onTap: () {
@@ -245,7 +256,8 @@ class MenuScreen extends StatelessWidget {
         },
       ),
       _RecordCardData(
-        icon: Icons.bloodtype,
+        accent: Colors.red.shade700,
+        icon: Icons.bloodtype_rounded,
         title: 'menu_diabetes'.tr,
         subtitle: 'menu_diabetes_sub'.tr,
         onTap: () {
@@ -256,7 +268,8 @@ class MenuScreen extends StatelessWidget {
         },
       ),
       _RecordCardData(
-        customIcon: const BpMenuIcon(size: 40, color: Colors.white),
+        accent: const Color(0xFFC62828),
+        customIcon: BpMenuIcon(size: 28, color: const Color(0xFFC62828)),
         title: 'menu_pressao'.tr,
         subtitle: 'menu_pressao_sub'.tr,
         onTap: () {
@@ -265,7 +278,8 @@ class MenuScreen extends StatelessWidget {
         },
       ),
       _RecordCardData(
-        icon: Icons.sick,
+        accent: Colors.orange.shade800,
+        icon: Icons.sick_rounded,
         title: 'menu_gastrite'.tr,
         subtitle: 'menu_gastrite_sub'.tr,
         onTap: () {
@@ -274,7 +288,8 @@ class MenuScreen extends StatelessWidget {
         },
       ),
       _RecordCardData(
-        icon: Icons.event_note,
+        accent: const Color(0xFF1565C0),
+        icon: Icons.event_note_rounded,
         title: 'menu_eventos'.tr,
         subtitle: 'menu_eventos_sub'.tr,
         onTap: () {
@@ -283,7 +298,8 @@ class MenuScreen extends StatelessWidget {
         },
       ),
       _RecordCardData(
-        customIcon: const HormonalIcon(size: 40, color: Colors.white),
+        accent: Colors.teal.shade700,
+        customIcon: HormonalIcon(size: 28, color: Colors.teal.shade700),
         title: 'menu_hormonal'.tr,
         subtitle: 'menu_hormonal_sub'.tr,
         onTap: () {
@@ -292,7 +308,8 @@ class MenuScreen extends StatelessWidget {
         },
       ),
       _RecordCardData(
-        icon: Icons.favorite,
+        accent: Colors.pink.shade400,
+        icon: Icons.favorite_rounded,
         title: 'menu_ciclo'.tr,
         subtitle: 'menu_ciclo_sub'.tr,
         onTap: () {
@@ -306,137 +323,15 @@ class MenuScreen extends StatelessWidget {
       children: [
         for (int i = 0; i < cards.length; i++) ...[
           _RecordCard(data: cards[i]),
-          if (i < cards.length - 1) const SizedBox(height: 16),
+          if (i < cards.length - 1) const SizedBox(height: 12),
         ],
       ],
     );
   }
-
-  Widget _buildMenuButton({
-    required IconData icon,
-    required String title,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Semantics(
-      button: true,
-      label: title,
-      hint: '${'menu_tap_to'.tr} $title',
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFCBD5F5).withOpacity(0.35),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(18),
-            onTap: onPressed,
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      icon,
-                      size: 28,
-                      color: color,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Color(0xFF1E293B),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuButtonCustomIcon({
-    required Widget icon,
-    required String title,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Semantics(
-      button: true,
-      label: title,
-      hint: '${'menu_tap_to'.tr} $title',
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFCBD5F5).withOpacity(0.35),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(18),
-            onTap: onPressed,
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: icon,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Color(0xFF1E293B),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
 }
 
 class _RecordCardData {
+  final Color accent;
   final IconData? icon;
   final Widget? customIcon;
   final String title;
@@ -444,6 +339,7 @@ class _RecordCardData {
   final VoidCallback onTap;
 
   const _RecordCardData({
+    required this.accent,
     this.icon,
     this.customIcon,
     required this.title,
@@ -459,101 +355,70 @@ class _RecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const gradientColors = [Color(0xFF00324A), Color(0xFF004A6B)];
     return Semantics(
       button: true,
       label: data.title,
       hint: '${'menu_tap_to'.tr} ${data.title}',
       child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradientColors,
-          ),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: gradientColors.first.withOpacity(0.25),
-              blurRadius: 22,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        decoration: AppTheme.surfaceListCardDecoration(),
         child: Material(
           color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          clipBehavior: Clip.antiAlias,
           child: InkWell(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
             onTap: data.onTap,
-            splashColor: Colors.white.withOpacity(0.2),
-            highlightColor: Colors.white.withOpacity(0.1),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
               child: Row(
                 children: [
                   Container(
-                    width: 64,
-                    height: 64,
+                    width: 52,
+                    height: 52,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1.5,
-                      ),
+                      color: data.accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
                       child: data.customIcon ??
                           Icon(
                             data.icon,
-                            size: 32,
-                            color: Colors.white,
+                            size: 26,
+                            color: data.accent,
                           ),
                     ),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           data.title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.5,
+                          style: AppTheme.titleMedium.copyWith(
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            height: 1.25,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           data.subtitle,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
+                          style: AppTheme.bodySmall.copyWith(
+                            color: AppTheme.textSecondary,
+                            height: 1.35,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 16,
-                      color: Colors.white,
-                    ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 24,
+                    color: AppTheme.textSecondary.withValues(alpha: 0.55),
                   ),
                 ],
               ),
@@ -564,4 +429,3 @@ class _RecordCard extends StatelessWidget {
     );
   }
 }
-

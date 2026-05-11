@@ -131,7 +131,9 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           message = 'pk_sync_error_session'.tr;
         } else if (fullError.contains('ngrok está offline') ||
                    fullError.contains('ERR_NGROK_3200') ||
-                   fullError.contains('Túnel ngrok está offline')) {
+                   fullError.contains('Túnel ngrok está offline') ||
+                   fullError.contains('Endpoint público offline') ||
+                   fullError.contains('Endpoint público indisponível')) {
           message = 'pk_sync_error_ngrok'.tr;
         } else if (fullError.contains('Servidor não está acessível') ||
                    fullError.contains('URL do servidor inválida') ||
@@ -147,7 +149,8 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           message = 'pk_sync_error_forbidden'.tr;
         } else if (fullError.contains('ngrok offline') ||
                    fullError.contains('Túnel ngrok offline') ||
-                   fullError.contains('ERR_NGROK_3200')) {
+                   fullError.contains('ERR_NGROK_3200') ||
+                   fullError.contains('Endpoint público offline')) {
           message = 'pk_sync_error_ngrok_short'.tr;
         } else if (fullError.contains('404') || fullError.contains('not found')) {
           message = 'pk_sync_error_404'.tr;

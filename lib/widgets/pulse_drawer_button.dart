@@ -14,11 +14,11 @@ class PulseDrawerButton extends StatelessWidget {
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
-              Icons.menu,
+              Icons.menu_rounded,
               color: Colors.white,
               size: iconSize,
             ),
@@ -26,6 +26,34 @@ class PulseDrawerButton extends StatelessWidget {
           onPressed: () => Scaffold.of(context).openDrawer(),
         );
       },
+    );
+  }
+}
+
+/// Voltar com o mesmo “pill” translúcido do menu na home.
+class PulseBlueBackButton extends StatelessWidget {
+  const PulseBlueBackButton({super.key, this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+      onPressed: onPressed ?? () => Navigator.of(context).maybePop(),
     );
   }
 }

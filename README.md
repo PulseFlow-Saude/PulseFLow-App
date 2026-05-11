@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="assets/images/Pulselogo.png" alt="PulseFlow Logo" width="200"/>
+<img src="assets/images/oryon_health_logo.png" alt="Oryon Health Logo" width="200"/>
 
-# PulseFlow Mobile
+# Oryon Health
 
 **Sistema de Monitoramento de Saúde e Gerenciamento de Pacientes**
 
@@ -33,7 +33,7 @@
 
 ## Sobre o Projeto
 
-O **PulseFlow Mobile** é um aplicativo desenvolvido em Flutter que permite aos pacientes gerenciar seus dados de saúde de forma completa e segura. O aplicativo oferece monitoramento em tempo real de diversas condições médicas, registro de eventos clínicos, compartilhamento seguro de informações com profissionais de saúde através do **Pulse Key**, e integração com dispositivos wearables.
+O **Oryon Health** é um aplicativo desenvolvido em Flutter que permite aos pacientes gerenciar seus dados de saúde de forma completa e segura. O aplicativo oferece monitoramento em tempo real de diversas condições médicas, registro de eventos clínicos, compartilhamento seguro de informações com profissionais de saúde através do **Chave Oryon**, e integração com dispositivos wearables.
 
 ### Objetivo
 
@@ -48,7 +48,7 @@ Facilitar o acompanhamento da saúde do paciente, proporcionando uma interface i
 - Login seguro com autenticação de dois fatores (2FA)
 - Recuperação de senha via email
 - Armazenamento seguro de credenciais com Flutter Secure Storage
-- Pulse Key para compartilhamento seguro e temporário de dados
+- Chave Oryon para compartilhamento seguro e temporário de dados
 
 ### Monitoramento de Saúde
 
@@ -121,7 +121,7 @@ Antes de começar, certifique-se de ter instalado e configurado:
 - **Dart SDK** >= 3.0.0 ([Instalação](https://dart.dev/get-dart))
 - **Android Studio** ou **Xcode** (para desenvolvimento)
 - **Git** ([Instalação](https://git-scm.com/))
-- **Backend PulseFlow** em execução (porta 65432)
+- **Backend Oryon Health** em execução (porta 65432)
 - **MongoDB** configurado e acessível
 - **Firebase** configurado com projeto criado
 
@@ -132,8 +132,8 @@ Antes de começar, certifique-se de ter instalado e configurado:
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/PulseFlow-APP.git
-cd PulseFlow-APP
+git clone https://github.com/seu-usuario/Oryon-Health-App.git
+cd Oryon-Health-App
 ```
 
 ### 2. Instale as dependências
@@ -148,7 +148,8 @@ Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
 ```env
 # URL da API Backend
-API_BASE_URL=http://localhost:65432
+# Produção: URL HTTPS pública do servidor (ex.: Render)
+API_BASE_URL=https://seu-backend.onrender.com
 
 # MongoDB Connection String
 MONGODB_URI=mongodb://localhost:27017/paciente_app
@@ -251,11 +252,11 @@ Adicione as seguintes descrições em `ios/Runner/Info.plist`:
 
 ## Segurança
 
-O PulseFlow Mobile implementa várias camadas de segurança para proteger os dados dos pacientes:
+O Oryon Health Mobile implementa várias camadas de segurança para proteger os dados dos pacientes:
 
 - **Autenticação JWT** - Tokens seguros com expiração automática
 - **Armazenamento Criptografado** - Dados sensíveis protegidos com Flutter Secure Storage
-- **Pulse Key Temporário** - Sistema de compartilhamento seguro e controlado
+- **Chave Oryon temporária** - Sistema de compartilhamento seguro e controlado
 - **Validação de Dados** - Validação tanto no cliente quanto no servidor
 - **HTTPS** - Comunicação criptografada com o backend
 - **Autenticação de Dois Fatores** - Camada adicional de segurança no login
@@ -281,6 +282,16 @@ Os testes devem ser organizados seguindo a estrutura do projeto, com arquivos de
 ---
 
 ## Troubleshooting
+
+### Backend sempre disponível (sem depender do Mac)
+
+Ngrok e túneis semelhantes **sempre** precisam de um agente ligado na máquina que expõe a API. Se quiser que o app funcione **24/7 sem o seu Mac**, o centro tem de ser **outro sítio**:
+
+1. **Hospedar a API na nuvem** (Railway, Render, Fly.io, Google Cloud Run, AWS ECS/Fargate, Azure Container Apps, etc.) e obter um URL HTTPS estável (`https://api.seudominio.com`).
+2. **MongoDB gerido** ([MongoDB Atlas](https://www.mongodb.com/atlas)) ou base de dados incluída no mesmo provedor — evita expor `mongod` no seu PC.
+3. No `.env` do Flutter, **`API_BASE_URL`** com esse URL público HTTPS (não use ngrok nem IP da sua casa para produção).
+
+**Alternativa:** uma **VPS barata** (Hetzner, DigitalOcean, etc.) onde corre Docker com API + MongoDB (ou só API ligada ao Atlas); pode usar **Cloudflare Tunnel** ou HTTPS com domínio próprio em vez de ngrok no Mac.
 
 ### Erro de Conexão com API
 

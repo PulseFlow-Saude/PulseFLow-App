@@ -1,17 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
 import 'profile_controller.dart';
-import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
+import '../../widgets/pulse_bottom_navigation.dart';
+import '../../widgets/pulse_drawer_button.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
 import '../../services/auth_service.dart';
-import '../../routes/app_routes.dart';
 import '../home/home_controller.dart';
 import '../../utils/greeting_utils.dart';
+import '../../utils/residence_date_format.dart';
+import '../institutional/settings_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -20,119 +22,52 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(ProfileController());
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: AppTheme.blueSystemOverlayStyle,
-      child: Scaffold(
-        backgroundColor: const Color(0xFF00324A), // Cor de fundo azul para ocupar toda a tela
-        drawer: const PulseSideMenu(activeItem: PulseNavItem.profile),
-        body: Column(
-          children: [
-            // Header com perfil - sem SafeArea para ocupar toda a área superior
-            _buildHeader(controller),
-            
-            // Conteúdo principal
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                ),
-                child: Obx(() {
-                  if (controller.isLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)),
-                      ),
-                    );
-                  }
-                  
-                  return SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Seção da foto do perfil
-                        _buildProfilePhotoSection(controller),
-                        const SizedBox(height: 20),
-                        
-                        // Seção de dados pessoais
-                        _buildPersonalDataSection(controller),
-                        const SizedBox(height: 20),
-                        
-                        // Seção de dados de saúde
-                        _buildHealthDataSection(controller),
-                        const SizedBox(height: 20),
-                        
-                        // Seção de privacidade e segurança
-                        _buildPrivacySection(),
-                        const SizedBox(height: 20),
-                        
-                        // Botão de salvar
-                        _buildSaveButton(controller),
-                        const SizedBox(height: 20),
-                        
-                        // Botão de sair
-                        _buildLogoutButton(),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  );
-                }),
-              ),
+    return PulseBlueScaffold(
+      drawer: PulseSideMenu(activeItem: PulseNavItem.profile),
+      header: _buildHeader(controller),
+      body: Obx(() {
+        if (controller.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
             ),
-          ],
-        ),
-        // bottomNavigationBar removido - tela tem sidebar
-        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.profile),
-      ),
+          );
+        }
+
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildProfilePhotoSection(controller),
+              const SizedBox(height: 20),
+              _buildPersonalDataSection(controller),
+              const SizedBox(height: 20),
+              _buildHealthDataSection(controller),
+              const SizedBox(height: 20),
+              _buildPrivacySection(),
+              const SizedBox(height: 20),
+              _buildSaveButton(controller),
+              const SizedBox(height: 20),
+              _buildLogoutButton(),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      }),
     );
   }
 
   Widget _buildHeader(ProfileController controller) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(Get.context!).padding.top + 16,
-        left: 16,
-        right: 16,
-        bottom: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 14),
       child: Row(
         children: [
-          Builder(
-            builder: (context) {
-              return IconButton(
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.menu,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-              );
-            },
-          ),
-          const SizedBox(width: 16),
+          const PulseDrawerButton(iconSize: 22),
           Expanded(
             child: Center(
-              child: _buildPulseFlowLogo(),
+              child: _buildBrandLogo(),
             ),
           ),
           _buildNotificationIcon(),
@@ -141,23 +76,23 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPulseFlowLogo() {
-    return SizedBox(
+  Widget _buildBrandLogo() {
+    return Container(
       width: 140,
       height: 45,
       child: Image.asset(
-        'assets/images/PulseNegativo.png',
+        'assets/images/oryon_health_logo_negative.png',
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.3)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
             ),
             child: const Center(
               child: Text(
-                'PulseFlow',
+                'Oryon Health',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -198,8 +133,8 @@ class ProfileScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: const Icon(
             Icons.notifications_outlined,
@@ -241,7 +176,10 @@ class ProfileScreen extends StatelessWidget {
       final isEditing = controller.isEditing;
       final patient = controller.patient;
       final fullName = _displayValue(patient?.name);
-      final createdAt = _formatDateDisplay(patient?.createdAt);
+      final createdAt = _formatDateDisplay(
+        patient?.createdAt,
+        patient?.residenceCountry,
+      );
       final greeting = _resolveGreeting();
       final displayName = _combineNames(
         _extractFirstName(patient?.name),
@@ -420,21 +358,33 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildFieldRow(
-              children: [
-                _buildFieldTile(
-                  label: 'profile_cpf'.tr,
+            Builder(builder: (_) {
+              final p = controller.patient;
+              final showSsn = controller.patientShowsUsSocialSecurity(p);
+              if (showSsn) {
+                return _buildFieldTile(
+                  label: 'profile_ssn_us'.tr,
                   controller: controller.cpfController,
                   keyboardType: TextInputType.number,
                   isEditing: false,
-                ),
-                _buildFieldTile(
-                  label: 'profile_rg'.tr,
-                  controller: controller.rgController,
-                  isEditing: isEditing,
-                ),
-              ],
-            ),
+                );
+              }
+              return _buildFieldRow(
+                children: [
+                  _buildFieldTile(
+                    label: 'profile_cpf'.tr,
+                    controller: controller.cpfController,
+                    keyboardType: TextInputType.number,
+                    isEditing: false,
+                  ),
+                  _buildFieldTile(
+                    label: 'profile_rg'.tr,
+                    controller: controller.rgController,
+                    isEditing: isEditing,
+                  ),
+                ],
+              );
+            }),
           ],
         ),
       );
@@ -820,12 +770,9 @@ class ProfileScreen extends StatelessWidget {
     return parts.length > 1 ? parts.last : 'profile_lastname_not_informed'.tr;
   }
 
-  String _formatDateDisplay(DateTime? date) {
+  String _formatDateDisplay(DateTime? date, [String? residenceCountry]) {
     if (date == null) return 'profile_not_informed'.tr;
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final year = date.year.toString();
-    return '$day/$month/$year';
+    return ResidenceDateFormat.formatDate(date, residenceCountry);
   }
 
   String _combineNames(String firstName, String lastName, String fullName) {
@@ -1220,16 +1167,26 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Future<void> _selectDate(ProfileController controller) async {
+    final appLocale = Get.isRegistered<SettingsController>()
+        ? Get.find<SettingsController>().effectiveLocale
+        : const Locale('pt', 'BR');
+    final pickerLocale = ResidenceDateFormat.datePickerLocale(
+      residenceCountry: controller.patient?.residenceCountry,
+      appLocale: appLocale,
+    );
     final DateTime? picked = await showDatePicker(
       context: Get.context!,
       initialDate: DateTime.now().subtract(const Duration(days: 365 * 25)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      locale: pickerLocale,
     );
-    
+
     if (picked != null) {
-      controller.birthDateController.text = 
-          '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+      controller.birthDateController.text = ResidenceDateFormat.formatDate(
+        picked,
+        controller.patient?.residenceCountry,
+      );
     }
   }
 }

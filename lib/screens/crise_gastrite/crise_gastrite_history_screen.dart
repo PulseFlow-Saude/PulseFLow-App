@@ -125,42 +125,40 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.blueSystemOverlayStyle,
       child: Scaffold(
-      backgroundColor: const Color(0xFF00324A),
+      backgroundColor: Colors.transparent,
       drawer: const PulseSideMenu(activeItem: PulseNavItem.history),
-      body: Column(
-        children: [
-          // Header moderno com gradiente
-          _buildModernHeader(),
-          
-          // Conteúdo (mesmo layout do histórico de eventos)
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: AppTheme.blueScreenGradientDecoration,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildModernHeader(),
+            Expanded(
+              child: Container(
+                decoration: AppTheme.blueContentSheetDecoration,
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _isLoading
+                      ? _buildLoadingState()
+                      : _hasError
+                          ? _buildErrorState()
+                          : _crises.isEmpty
+                              ? _buildEmptyState()
+                              : _filteredCrises.isEmpty
+                                  ? _buildNoResultsState()
+                                  : _buildCrisesList(),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: _isLoading
-                    ? _buildLoadingState()
-                    : _hasError
-                        ? _buildErrorState()
-                        : _crises.isEmpty
-                            ? _buildEmptyState()
-                            : _filteredCrises.isEmpty
-                                ? _buildNoResultsState()
-                                : _buildCrisesList(),
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Get.toNamed(Routes.CRISE_GASTRITE_FORM),
-        backgroundColor: const Color(0xFF00324A),
+        backgroundColor: AppTheme.primaryBlue,
         icon: const Icon(Icons.add, color: Colors.white),
           label: Text(
           'crise_new'.tr,
@@ -183,13 +181,6 @@ class _CriseGastriteHistoryScreenState extends State<CriseGastriteHistoryScreen>
         left: 16,
         right: 16,
         bottom: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
       ),
       child: Column(
         children: [

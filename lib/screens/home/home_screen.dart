@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -12,6 +14,42 @@ import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import 'package:flutter/services.dart';
 
+const double _kHomeCardRadius = 16;
+
+/// Cartões da lista na home: fundo suave, borda no tom do app e sombra discreta.
+BoxDecoration _homeListCardDecoration({bool emphasized = false}) {
+  return BoxDecoration(
+    color: const Color(0xFFF8FAFB),
+    borderRadius: BorderRadius.circular(_kHomeCardRadius),
+    border: Border.all(
+      color: emphasized
+          ? AppTheme.primaryBlue.withValues(alpha: 0.32)
+          : AppTheme.primaryBlue.withValues(alpha: 0.12),
+      width: emphasized ? 1.5 : 1,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: AppTheme.primaryBlue.withValues(alpha: 0.07),
+        blurRadius: 22,
+        offset: const Offset(0, 7),
+      ),
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.04),
+        blurRadius: 10,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  );
+}
+
+BoxDecoration _homeEmptyStateDecoration() {
+  return BoxDecoration(
+    color: const Color(0xFFF3F6F8),
+    borderRadius: BorderRadius.circular(_kHomeCardRadius),
+    border: Border.all(color: AppTheme.primaryBlue.withValues(alpha: 0.1)),
+  );
+}
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -19,134 +57,193 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(HomeController());
 
+    final horizontalPad = math.max(16.0, MediaQuery.sizeOf(context).width * 0.055);
+    final size = MediaQuery.sizeOf(context);
+    final isLandscape = size.width > size.height;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.blueSystemOverlayStyle,
       child: Scaffold(
-        backgroundColor: const Color(0xFF00324A), // Cor de fundo azul para ocupar toda a tela
+        backgroundColor: Colors.transparent,
         drawer: const PulseSideMenu(activeItem: PulseNavItem.home),
-        body: Column(
-          children: [
-            // Header com perfil - sem SafeArea para ocupar toda a área superior
-            _buildHeader(context, controller),
-            
-            // Conteúdo principal
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                ),
-                child: Obx(() {
-                  if (controller.isLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)), // Nova cor azul
-                      ),
-                    );
-                  }
-                  
-                  return RefreshIndicator(
-                    onRefresh: controller.refreshPatientData,
-                    color: const Color(0xFF00324A), // Nova cor azul
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.only(
-                        top: 16,
-                        left: 16,
-                        right: 16,
-                        bottom: 16,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Card de Agendamento (sempre visível)
-                          _buildScheduleConsultationCard(),
-                          const SizedBox(height: 24),
-                          
-                          // Seção de Consultas Agendadas
-                          _buildUpcomingAppointmentsSection(controller),
-                          const SizedBox(height: 24),
-                          
-                          // Seção Favorito
-                          _buildFavoriteSection(controller),
-                          const SizedBox(height: 24),
-                          
-                          // Seção Atalhos
-                          _buildShortcutsSection(controller),
-                          
-                          // Padding extra no final para evitar corte
-                          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.primaryBlue,
+                const Color(0xFF001F2E),
+                AppTheme.primaryBlue.withValues(alpha: 0.92),
+              ],
+              stops: const [0.0, 0.45, 1.0],
             ),
-          ],
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: isLandscape
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: _buildHeader(context, controller, isCompact: true),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: _buildHomeContentSheet(
+                          context,
+                          controller,
+                          horizontalPad,
+                          isLandscape: true,
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      _buildHeader(context, controller),
+                      Expanded(
+                        child: _buildHomeContentSheet(
+                          context,
+                          controller,
+                          horizontalPad,
+                          isLandscape: false,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         ),
-        // bottomNavigationBar removido - tela tem sidebar
-        // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.home),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, HomeController controller) {
+  Widget _buildHomeContentSheet(
+    BuildContext context,
+    HomeController controller,
+    double horizontalPad, {
+    required bool isLandscape,
+  }) {
+    final mq = MediaQuery.of(context);
+    final bottomPad = math.max(mq.padding.bottom, 16.0) + 24;
+    final borderRadius = isLandscape
+        ? const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            bottomLeft: Radius.circular(28),
+          )
+        : const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          );
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(Get.context!).padding.top + 12, // Adiciona padding da status bar
-        left: 16,
-        right: 16,
-        bottom: 24,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A), // Nova cor azul
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
+      clipBehavior: Clip.antiAlias,
+      child: Obx(() {
+        if (controller.isLoading) {
+          return Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: controller.refreshPatientData,
+          color: AppTheme.primaryBlue,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              horizontalPad,
+              16,
+              horizontalPad,
+              bottomPad,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildScheduleConsultationCard(),
+                    const SizedBox(height: 24),
+                    _buildUpcomingAppointmentsSection(controller),
+                    const SizedBox(height: 24),
+                    _buildFavoriteSection(controller),
+                    const SizedBox(height: 24),
+                    _buildShortcutsSection(controller),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, HomeController controller, {bool isCompact = false}) {
+    final avatarSize = isCompact ? 56.0 : 70.0;
+    final logoHeight = isCompact ? 38.0 : 46.0;
+    final logoWidth = isCompact ? 118.0 : 144.0;
+    final gapTopBarToProfile = isCompact ? 12.0 : 20.0;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        12,
+        isCompact ? 4 : 6,
+        12,
+        isCompact ? 14 : 18,
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Top row com logo centralizado e notificação
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Builder(
-                builder: (context) {
+                builder: (ctx) {
                   return IconButton(
                     icon: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(
-                        Icons.menu,
-                        color: Colors.white,
-                        size: 24,
-                      ),
+                      child: const Icon(Icons.menu_rounded, color: Colors.white, size: 24),
                     ),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
+                    onPressed: () => Scaffold.of(ctx).openDrawer(),
                   );
                 },
               ),
-              _buildPulseFlowLogo(),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Obx(() => IconButton(
+              _buildBrandLogo(width: logoWidth, height: logoHeight),
+              Obx(() => IconButton(
                     icon: Stack(
+                      clipBehavior: Clip.none,
                       children: [
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                           child: const Icon(
                             Icons.notifications_outlined,
@@ -154,106 +251,102 @@ class HomeScreen extends StatelessWidget {
                             size: 24,
                           ),
                         ),
-                    if (controller.unreadNotificationsCount.value > 0)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
-                          ),
-                          child: Text(
-                            controller.unreadNotificationsCount.value > 9 
-                                ? '9+' 
-                                : controller.unreadNotificationsCount.value.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                        if (controller.unreadNotificationsCount.value > 0)
+                          Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                              child: Text(
+                                controller.unreadNotificationsCount.value > 9
+                                    ? '9+'
+                                    : controller.unreadNotificationsCount.value.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                        ),
-                      ),
-                  ],
-                ),
+                      ],
+                    ),
                     onPressed: () async {
                       await Get.toNamed(Routes.NOTIFICATIONS);
                       controller.loadNotificationsCount();
                     },
                   )),
-                ],
-              ),
             ],
           ),
-          const SizedBox(height: 12),
-          
-          // Perfil do usuário simplificado
-          Obx(() => Row(
-            children: [
-              // Avatar
-              Container(
-                width: 70,
-                height: 70,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.2),
-                  border: Border.all(color: Colors.white, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: controller.getProfilePhoto() != null
-                    ? ClipOval(
-                        child: _buildProfileImage(controller),
-                      )
-                    : const Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-              ),
-              const SizedBox(width: 12),
-              
-              // Informações do usuário
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          SizedBox(height: gapTopBarToProfile),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              isCompact ? 6 : 14,
+              0,
+              isCompact ? 10 : 16,
+              0,
+            ),
+            child: Obx(() => Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      controller.getGreeting().tr,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
+                    Container(
+                      width: avatarSize,
+                      height: avatarSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.2),
+                        border: Border.all(color: Colors.white, width: 2.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
+                      child: controller.getProfilePhoto() != null
+                          ? ClipOval(child: _buildProfileImage(controller, size: avatarSize))
+                          : Icon(Icons.person_rounded, color: Colors.white, size: avatarSize * 0.55),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      controller.getPatientName(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    SizedBox(width: isCompact ? 12 : 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            controller.getGreeting().tr,
+                            style: AppTheme.bodyLarge.copyWith(
+                              fontSize: 15,
+                              color: Colors.white.withValues(alpha: 0.92),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            controller.getPatientName(),
+                            style: AppTheme.titleMedium.copyWith(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
                     ),
                   ],
-                ),
-              ),
-            ],
-          )),
+                )),
+          ),
         ],
       ),
     );
@@ -280,14 +373,14 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.favorite,
-                    color: Color(0xFF00324A),
+                    color: AppTheme.primaryBlue,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'home_favorites'.tr,
                     style: AppTheme.titleLarge.copyWith(
-                      color: const Color(0xFF1E293B),
+                      color: AppTheme.textPrimary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -298,8 +391,9 @@ class HomeScreen extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00324A).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppTheme.primaryBlue.withValues(alpha: 0.18)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -307,14 +401,14 @@ class HomeScreen extends StatelessWidget {
                       const Icon(
                         Icons.edit,
                         size: 16,
-                        color: Color(0xFF00324A),
+                        color: AppTheme.primaryBlue,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'home_edit'.tr,
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF00324A),
+                          color: AppTheme.primaryBlue,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -336,24 +430,20 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildNoDataMessage() {
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
+      decoration: _homeEmptyStateDecoration(),
       child: Column(
         children: [
           Icon(
             Icons.inbox_outlined,
-            size: 48,
-            color: Colors.grey[400],
+            size: 44,
+            color: AppTheme.primaryBlue.withValues(alpha: 0.45),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           Text(
             'home_no_data'.tr,
             style: AppTheme.titleMedium.copyWith(
-              color: Colors.grey[600],
+              color: AppTheme.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -361,7 +451,8 @@ class HomeScreen extends StatelessWidget {
           Text(
             'home_no_data_sub'.tr,
             style: AppTheme.bodyMedium.copyWith(
-              color: Colors.grey[500],
+              color: AppTheme.textPrimary.withValues(alpha: 0.55),
+              height: 1.4,
             ),
             textAlign: TextAlign.center,
           ),
@@ -372,26 +463,30 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildNoFavoritesMessage() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.blue[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.withOpacity(0.2)),
-      ),
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      decoration: _homeEmptyStateDecoration(),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.info_outline,
-            color: Colors.blue[600],
-            size: 20,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.info_outline_rounded,
+              color: AppTheme.primaryBlue.withValues(alpha: 0.9),
+              size: 22,
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Text(
               'home_configure_favorites'.tr,
-              style: TextStyle(
-                color: Colors.blue[700],
-                fontSize: 14,
+              style: AppTheme.bodyMedium.copyWith(
+                color: AppTheme.textPrimary.withValues(alpha: 0.78),
+                height: 1.35,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -418,20 +513,8 @@ class HomeScreen extends StatelessWidget {
     
     if (stats.isEmpty) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(18),
+      decoration: _homeListCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -446,7 +529,7 @@ class HomeScreen extends StatelessWidget {
               Text(
                 itemData['title'],
                 style: AppTheme.titleMedium.copyWith(
-                  color: const Color(0xFF1E293B),
+                  color: AppTheme.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -456,16 +539,12 @@ class HomeScreen extends StatelessWidget {
             Container(
               height: 80,
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.withOpacity(0.2)),
-              ),
+              decoration: _homeEmptyStateDecoration(),
               child: Center(
                 child: Text(
                   'home_no_data_available'.tr,
-                  style: const TextStyle(
-                    color: Colors.grey,
+                  style: TextStyle(
+                    color: AppTheme.textPrimary.withValues(alpha: 0.45),
                     fontSize: 14,
                   ),
                 ),
@@ -499,20 +578,8 @@ class HomeScreen extends StatelessWidget {
     final ultimaIntensidade = stats['ultimaIntensidade'] as int? ?? 0;
     
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(18),
+      decoration: _homeListCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -521,8 +588,8 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: itemData['color'].withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: (itemData['color'] as Color).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   itemData['icon'],
@@ -538,7 +605,7 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       itemData['title'],
                       style: AppTheme.titleMedium.copyWith(
-                        color: const Color(0xFF1E293B),
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -598,20 +665,8 @@ class HomeScreen extends StatelessWidget {
     if (status == 'Baixa') statusColor = Colors.orange;
     
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-              ],
-            ),
+      padding: const EdgeInsets.all(18),
+      decoration: _homeListCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -620,8 +675,8 @@ class HomeScreen extends StatelessWidget {
             Container(
                 padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                  color: itemData['color'].withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: (itemData['color'] as Color).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   itemData['icon'],
@@ -637,7 +692,7 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       itemData['title'],
                       style: AppTheme.titleMedium.copyWith(
-                        color: const Color(0xFF1E293B),
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -659,9 +714,9 @@ class HomeScreen extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor.withOpacity(0.3)),
+                    color: statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.28)),
                   ),
                   child: Column(
                     children: [
@@ -731,20 +786,8 @@ class HomeScreen extends StatelessWidget {
     final ultimaIntensidade = stats['ultimaIntensidade'] as int? ?? 0;
     
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-              ),
+      padding: const EdgeInsets.all(18),
+      decoration: _homeListCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -753,8 +796,8 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: itemData['color'].withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: (itemData['color'] as Color).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   itemData['icon'],
@@ -770,7 +813,7 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       itemData['title'],
                       style: AppTheme.titleMedium.copyWith(
-                        color: const Color(0xFF1E293B),
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -823,20 +866,8 @@ class HomeScreen extends StatelessWidget {
     final proximoEvento = stats['proximoEvento'] as DateTime?;
     
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(18),
+      decoration: _homeListCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -845,8 +876,8 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: itemData['color'].withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: (itemData['color'] as Color).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   itemData['icon'],
@@ -859,7 +890,7 @@ class HomeScreen extends StatelessWidget {
                 child: Text(
                   itemData['title'],
                   style: AppTheme.titleMedium.copyWith(
-                    color: const Color(0xFF1E293B),
+                    color: AppTheme.textPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -891,9 +922,9 @@ class HomeScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.28)),
               ),
               child: Row(
                 children: [
@@ -938,20 +969,8 @@ class HomeScreen extends StatelessWidget {
     final proximoCiclo = stats['proximoCiclo'] as DateTime?;
     
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(18),
+      decoration: _homeListCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -960,8 +979,8 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: itemData['color'].withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: (itemData['color'] as Color).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   itemData['icon'],
@@ -977,7 +996,7 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       itemData['title'],
                       style: AppTheme.titleMedium.copyWith(
-                        color: const Color(0xFF1E293B),
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1018,9 +1037,9 @@ class HomeScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.pink.withOpacity(0.1),
+                color: Colors.pink.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.pink.withOpacity(0.3)),
+                border: Border.all(color: Colors.pink.withValues(alpha: 0.28)),
               ),
               child: Row(
                 children: [
@@ -1061,20 +1080,8 @@ class HomeScreen extends StatelessWidget {
   
   Widget _buildDefaultCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(18),
+      decoration: _homeListCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1089,7 +1096,7 @@ class HomeScreen extends StatelessWidget {
               Text(
                 itemData['title'],
                 style: AppTheme.titleMedium.copyWith(
-                  color: const Color(0xFF1E293B),
+                  color: AppTheme.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1113,9 +1120,9 @@ class HomeScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.28)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1407,20 +1414,8 @@ class HomeScreen extends StatelessWidget {
   Widget _buildFavoriteCard(String item) {
     final itemData = _getFavoriteItemData(item);
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(14),
+      decoration: _homeListCardDecoration(),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
@@ -1435,7 +1430,7 @@ class HomeScreen extends StatelessWidget {
             child: Text(
               itemData['title'],
               style: AppTheme.titleSmall.copyWith(
-                color: const Color(0xFF1E293B),
+                color: AppTheme.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
               ),
@@ -1522,7 +1517,7 @@ class HomeScreen extends StatelessWidget {
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(20),
+            top: Radius.circular(28),
           ),
         ),
         child: Column(
@@ -1540,7 +1535,7 @@ class HomeScreen extends StatelessWidget {
             Text(
               'home_config_favorites'.tr,
               style: AppTheme.titleLarge.copyWith(
-                color: const Color(0xFF1E293B),
+                color: AppTheme.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1585,10 +1580,10 @@ class HomeScreen extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00324A),
+                      backgroundColor: AppTheme.primaryBlue,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
                     child: Text(
@@ -1618,13 +1613,13 @@ class HomeScreen extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         leading: Icon(
           isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: isSelected ? const Color(0xFF00324A) : Colors.grey,
+          color: isSelected ? AppTheme.primaryBlue : Colors.grey,
           size: 20,
         ),
         title: Text(
           title,
           style: AppTheme.bodyLarge.copyWith(
-            color: isAvailable ? const Color(0xFF1E293B) : Colors.grey,
+            color: isAvailable ? AppTheme.textPrimary : Colors.grey,
             fontWeight: FontWeight.w600,
             fontSize: 14,
           ),
@@ -1882,22 +1877,30 @@ class HomeScreen extends StatelessWidget {
   Widget _buildScheduleConsultationCard() {
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(
-        minHeight: 180, // Altura mínima para garantir que não seja cortado
-      ),
-      padding: const EdgeInsets.all(20),
+      constraints: const BoxConstraints(minHeight: 188),
+      padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF00324A), Color(0xFF00557A)],
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryBlue,
+            AppTheme.primaryBlue.withValues(alpha: 0.88),
+            const Color(0xFF00557A),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
+          stops: const [0.0, 0.45, 1.0],
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(_kHomeCardRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.28),
+            blurRadius: 28,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.07),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1906,83 +1909,89 @@ class HomeScreen extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white24),
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.26)),
                 ),
-                child: const Icon(Icons.calendar_today_rounded, color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.calendar_today_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'home_schedule_title'.tr,
                       style: AppTheme.titleLarge.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
+                        height: 1.2,
                       ),
                       maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     Text(
                       'home_schedule_sub'.tr,
                       style: AppTheme.bodyMedium.copyWith(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.9),
+                        height: 1.35,
                       ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: 4,
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF00324A).withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+          const SizedBox(height: 18),
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: () => Get.toNamed(Routes.APPOINTMENTS_SPECIALTY),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppTheme.primaryBlue,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.medical_services_rounded, size: 21),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'home_schedule_btn'.tr,
+                        style: AppTheme.titleSmall.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ],
-                  ),
-                  child: ElevatedButton.icon(
-                    onPressed: () => Get.toNamed(Routes.APPOINTMENTS_SPECIALTY),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF00324A),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      shadowColor: Colors.transparent,
                     ),
-                    icon: const Icon(Icons.medical_services_rounded),
-                    label: Text(
-                      'home_schedule_btn'.tr,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                    const Icon(Icons.arrow_forward_rounded, size: 19),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              IconButton(
-                onPressed: () => Get.toNamed(Routes.APPOINTMENTS_SPECIALTY),
-                icon: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white),
-              ),
-            ],
+            ),
           ),
         ],
       ),
@@ -1993,23 +2002,16 @@ class HomeScreen extends StatelessWidget {
     return Obx(() {
       if (controller.isLoadingAppointments.value) {
         return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.withOpacity(0.2)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+          decoration: _homeListCardDecoration(),
           child: const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)),
+            child: SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+              ),
             ),
           ),
         );
@@ -2030,7 +2032,7 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.event_note,
-                      color: Color(0xFF00324A),
+                      color: AppTheme.primaryBlue,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -2038,7 +2040,7 @@ class HomeScreen extends StatelessWidget {
                       child: Text(
                         'home_appointments_section'.tr,
                         style: AppTheme.titleLarge.copyWith(
-                          color: const Color(0xFF1E293B),
+                          color: AppTheme.textPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -2053,7 +2055,7 @@ class HomeScreen extends StatelessWidget {
                   child: Text(
                     'home_see_all'.tr,
                     style: const TextStyle(
-                      color: Color(0xFF00324A),
+                      color: AppTheme.primaryBlue,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -2064,25 +2066,29 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 16),
           if (appointments.isEmpty)
             Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.withOpacity(0.2)),
-              ),
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+              decoration: _homeEmptyStateDecoration(),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    color: Colors.grey[400],
-                    size: 24,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.calendar_today_outlined,
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.65),
+                      size: 22,
+                    ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Text(
                       'home_no_appointments'.tr,
                       style: AppTheme.bodyMedium.copyWith(
-                        color: Colors.grey[600],
+                        color: AppTheme.textPrimary.withValues(alpha: 0.65),
+                        height: 1.35,
                       ),
                     ),
                   ),
@@ -2109,39 +2115,22 @@ class HomeScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => Get.toNamed(Routes.UPCOMING_APPOINTMENTS),
       child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isToday 
-                ? const Color(0xFF00324A).withOpacity(0.3)
-                : Colors.grey.withOpacity(0.2),
-            width: isToday ? 2 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+        padding: const EdgeInsets.fromLTRB(16, 16, 12, 16),
+        decoration: _homeListCardDecoration(emphasized: isToday),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isToday
-                    ? const Color(0xFF00324A).withOpacity(0.1)
-                    : Colors.grey.withOpacity(0.1),
+                    ? AppTheme.primaryBlue.withValues(alpha: 0.12)
+                    : Colors.grey.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                Icons.calendar_today,
+                Icons.calendar_today_rounded,
                 color: isToday 
-                    ? const Color(0xFF00324A)
+                    ? AppTheme.primaryBlue
                     : Colors.grey[600],
                 size: 24,
               ),
@@ -2154,7 +2143,7 @@ class HomeScreen extends StatelessWidget {
                   Text(
                     appointment.doctorName,
                     style: AppTheme.titleMedium.copyWith(
-                      color: const Color(0xFF1E293B),
+                      color: AppTheme.textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),
@@ -2195,9 +2184,9 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.grey[400],
+              Icons.chevron_right_rounded,
+              size: 22,
+              color: Colors.grey.withValues(alpha: 0.45),
             ),
           ],
         ),
@@ -2218,14 +2207,14 @@ class HomeScreen extends StatelessWidget {
             children: [
               const Icon(
                 Icons.push_pin,
-                color: Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 'home_shortcuts'.tr,
                 style: AppTheme.titleLarge.copyWith(
-                  color: const Color(0xFF1E293B),
+                  color: AppTheme.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -2240,24 +2229,20 @@ class HomeScreen extends StatelessWidget {
   
   Widget _buildNoShortcutsMessage() {
     return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
+      decoration: _homeEmptyStateDecoration(),
       child: Column(
         children: [
           Icon(
-            Icons.assignment_outlined,
-            size: 48,
-            color: Colors.grey[400],
+            Icons.push_pin_outlined,
+            size: 44,
+            color: AppTheme.primaryBlue.withValues(alpha: 0.45),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           Text(
             'home_no_exams'.tr,
             style: AppTheme.titleMedium.copyWith(
-              color: Colors.grey[600],
+              color: AppTheme.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -2265,7 +2250,8 @@ class HomeScreen extends StatelessWidget {
           Text(
             'Registre seus dados de saúde para ver os atalhos aqui.',
             style: AppTheme.bodyMedium.copyWith(
-              color: Colors.grey[500],
+              color: AppTheme.textPrimary.withValues(alpha: 0.55),
+              height: 1.4,
             ),
             textAlign: TextAlign.center,
           ),
@@ -2354,36 +2340,24 @@ class HomeScreen extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.withOpacity(0.2)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+        padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+        decoration: _homeListCardDecoration(),
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+                color: color.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
                 color: color,
-                size: 20,
+                size: 22,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -2392,7 +2366,7 @@ class HomeScreen extends StatelessWidget {
                   Text(
                     title,
                     style: AppTheme.titleMedium.copyWith(
-                      color: const Color(0xFF1E293B),
+                      color: AppTheme.textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -2413,9 +2387,9 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey[400],
-              size: 14,
+              Icons.chevron_right_rounded,
+              color: Colors.grey.withValues(alpha: 0.45),
+              size: 22,
             ),
           ],
         ),
@@ -2426,35 +2400,30 @@ class HomeScreen extends StatelessWidget {
   Widget _buildNoShortcutsState() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      decoration: _homeEmptyStateDecoration(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.folder_open,
-            color: Colors.grey,
-            size: 48,
+          Icon(
+            Icons.folder_open_rounded,
+            color: AppTheme.primaryBlue.withValues(alpha: 0.4),
+            size: 44,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
             'home_no_shortcuts'.tr,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+            style: AppTheme.titleSmall.copyWith(
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             'home_no_shortcuts_sub'.tr,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
+            style: AppTheme.bodySmall.copyWith(
+              color: AppTheme.textPrimary.withValues(alpha: 0.55),
+              height: 1.35,
             ),
             textAlign: TextAlign.center,
           ),
@@ -2469,26 +2438,14 @@ class HomeScreen extends StatelessWidget {
         Get.snackbar(
           'Exame Selecionado',
           'Visualizando detalhes do exame: $title',
-          backgroundColor: const Color(0xFF00324A), // Nova cor azul
+          backgroundColor: AppTheme.primaryBlue, // Nova cor azul
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
         );
       },
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.withOpacity(0.3)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
+        decoration: _homeListCardDecoration(),
         child: Row(
           children: [
             Expanded(
@@ -2532,7 +2489,7 @@ class HomeScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00324A), // Nova cor azul
+                  color: AppTheme.primaryBlue, // Nova cor azul
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
@@ -2563,30 +2520,24 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  // Widget personalizado para a logo do PulseFlow
-  Widget _buildPulseFlowLogo() {
+  Widget _buildBrandLogo({double width = 140, double height = 45}) {
     return SizedBox(
-      width: 140,
-      height: 45,
+      width: width,
+      height: height,
       child: Image.asset(
-        'assets/images/PulseNegativo.png',
+        'assets/images/oryon_health_logo_negative.png',
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
-          // Fallback caso a imagem não seja encontrada
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.3)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
             ),
-            child: const Center(
+            child: Center(
               child: Text(
-                'PulseFlow',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                'Oryon Health',
+                style: AppTheme.titleSmall.copyWith(color: Colors.white),
               ),
             ),
           );
@@ -2595,66 +2546,47 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Constrói a imagem do perfil baseada no tipo (base64, URL ou arquivo local)
-  Widget _buildProfileImage(HomeController controller) {
+  Widget _buildProfileImage(HomeController controller, {required double size}) {
     final photo = controller.getProfilePhoto();
+    final iconSize = size * 0.55;
     if (photo == null) {
-      return const Icon(
-        Icons.person,
-        color: Colors.white,
-        size: 40,
-      );
+      return Icon(Icons.person_rounded, color: Colors.white, size: iconSize);
     }
 
-    // Se é base64 (data:image/... ou base64 puro)
     if (controller.isBase64Photo(photo)) {
       final bytes = controller.decodeProfilePhoto(photo);
       if (bytes != null && bytes.isNotEmpty) {
         return Image.memory(
           bytes,
-          width: 70,
-          height: 70,
+          width: size,
+          height: size,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            return const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 40,
-            );
+            return Icon(Icons.person_rounded, color: Colors.white, size: iconSize);
           },
         );
       }
     }
-    
-    // Se é URL (http/https)
+
     if (photo.startsWith('http')) {
       return Image.network(
         photo,
-        width: 70,
-        height: 70,
+        width: size,
+        height: size,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return const Icon(
-            Icons.person,
-            color: Colors.white,
-            size: 40,
-          );
+          return Icon(Icons.person_rounded, color: Colors.white, size: iconSize);
         },
       );
     }
-    
-    // Se é arquivo local
+
     return Image.file(
       File(photo),
-      width: 70,
-      height: 70,
+      width: size,
+      height: size,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
-        return const Icon(
-          Icons.person,
-          color: Colors.white,
-          size: 40,
-        );
+        return Icon(Icons.person_rounded, color: Colors.white, size: iconSize);
       },
     );
   }

@@ -18,7 +18,7 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
   
-  const notificationTitle = payload.notification?.title || 'PulseFlow';
+  const notificationTitle = payload.notification?.title || 'Oryon Health';
   const notificationOptions = {
     body: payload.notification?.body || 'Nova notificação',
     icon: '/icons/Icon-192.png',

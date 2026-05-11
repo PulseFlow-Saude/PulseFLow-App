@@ -17,7 +17,7 @@ import '../../utils/specialty_translations.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../../widgets/pulse_drawer_button.dart';
-import '../../theme/app_theme.dart';
+import '../../widgets/pulse_lower_fab_location.dart';
 
 class EventoClinicoHistoryScreen extends StatefulWidget {
   const EventoClinicoHistoryScreen({super.key});
@@ -152,56 +152,69 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
     return t;
   }
 
+  double _fabScrollBottomPadding(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final scaledFab =
+        mq.textScaler.scale(kFloatingActionButtonMargin * 2 + 58.0);
+    return scaledFab + mq.padding.bottom + 24.0;
+  }
+
+  bool get _shouldShowNewEventFab =>
+      !_isLoading && _error == null && _eventos.isNotEmpty;
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.blueSystemOverlayStyle,
       child: Scaffold(
-      backgroundColor: const Color(0xFF00324A),
+      backgroundColor: Colors.transparent,
       drawer: const PulseSideMenu(activeItem: PulseNavItem.history),
-      body: Column(
-        children: [
-          // Header moderno com gradiente
-          _buildModernHeader(),
-          
-          // Conteúdo principal
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: AppTheme.blueScreenGradientDecoration,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildModernHeader(),
+            Expanded(
+              child: Container(
+                decoration: AppTheme.blueContentSheetDecoration,
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _isLoading
+                      ? _buildLoadingState()
+                      : _error != null
+                          ? _buildErrorState()
+                          : _filteredEventos.isEmpty
+                              ? _buildEmptyState()
+                              : _buildEventosList(),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: _isLoading
-                    ? _buildLoadingState()
-                    : _error != null
-                        ? _buildErrorState()
-                        : _filteredEventos.isEmpty
-                            ? _buildEmptyState()
-                            : _buildEventosList(),
-              ),
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Get.toNamed('/evento-clinico-form');
-        },
-        backgroundColor: const Color(0xFF00324A),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: Text(
-          'evt_new_event'.tr,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+          ],
         ),
       ),
+      floatingActionButton: _shouldShowNewEventFab
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Get.toNamed('/evento-clinico-form');
+              },
+              backgroundColor: AppTheme.primaryBlue,
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: Text(
+                'evt_new_event'.tr,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : null,
+      floatingActionButtonLocation: _shouldShowNewEventFab
+          ? const PulseLowerEndFloatFabLocation()
+          : FloatingActionButtonLocation.endFloat,
       // bottomNavigationBar removido - tela tem sidebar
       // bottomNavigationBar: const PulseBottomNavigation(activeItem: PulseNavItem.history),
     ));
@@ -215,13 +228,6 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
         left: 16,
         right: 16,
         bottom: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF00324A),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
       ),
       child: Column(
         children: [
@@ -594,12 +600,12 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1E3A8A).withOpacity(0.1),
+                                  color: AppTheme.primaryBlue.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
                                   Icons.search_off_rounded,
-                                  color: Color(0xFF1E3A8A),
+                                  color: AppTheme.primaryBlue,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -642,12 +648,12 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                               leading: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1E3A8A).withOpacity(0.1),
+                                  color: AppTheme.primaryBlue.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
                                   Icons.local_hospital_rounded,
-                                  color: Color(0xFF1E3A8A),
+                                  color: AppTheme.primaryBlue,
                                 ),
                               ),
                               title: Text(
@@ -659,7 +665,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                                 ),
                               ),
                               trailing: isSelected
-                                  ? const Icon(Icons.check_rounded, color: Color(0xFF1E3A8A))
+                                  ? const Icon(Icons.check_rounded, color: AppTheme.primaryBlue)
                                   : null,
                             );
                           },
@@ -965,11 +971,11 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF00324A).withOpacity(0.1),
+              color: AppTheme.primaryBlue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const CircularProgressIndicator(
-              color: Color(0xFF00324A),
+              color: AppTheme.primaryBlue,
               strokeWidth: 3,
             ),
           ),
@@ -1042,7 +1048,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
               icon: const Icon(Icons.refresh, color: Colors.white),
               label: Text('common_try_again'.tr),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00324A),
+                backgroundColor: AppTheme.primaryBlue,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -1067,7 +1073,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00324A).withOpacity(0.1),
+              color: AppTheme.primaryBlue.withOpacity(0.1),
               blurRadius: 20,
               offset: const Offset(0, 4),
             ),
@@ -1079,13 +1085,13 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF00324A).withOpacity(0.1),
+                color: AppTheme.primaryBlue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(
                 Icons.medical_services_outlined,
                 size: 48,
-                color: Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
               ),
             ),
             const SizedBox(height: 24),
@@ -1115,7 +1121,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
               icon: const Icon(Icons.add, color: Colors.white),
               label: Text('evt_register_first'.tr),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00324A),
+                backgroundColor: AppTheme.primaryBlue,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -1165,9 +1171,9 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
               IconButton(
                 onPressed: _loadEventos,
                 icon: const Icon(Icons.refresh_rounded),
-                color: const Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
                 style: IconButton.styleFrom(
-                  backgroundColor: const Color(0xFF00324A).withOpacity(0.1),
+                  backgroundColor: AppTheme.primaryBlue.withOpacity(0.1),
                   padding: const EdgeInsets.all(8),
                   minimumSize: const Size(36, 36),
                   shape: RoundedRectangleBorder(
@@ -1181,7 +1187,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
         const SizedBox(height: 16),
         Expanded(
           child: ListView.separated(
-            padding: const EdgeInsets.only(bottom: 24),
+            padding: EdgeInsets.only(bottom: _fabScrollBottomPadding(context)),
             itemCount: _filteredEventos.length,
             separatorBuilder: (_, __) => const SizedBox(height: 16),
             itemBuilder: (context, index) {
@@ -1198,9 +1204,9 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF00324A).withOpacity(0.1),
+        color: AppTheme.primaryBlue.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF00324A).withOpacity(0.3)),
+        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1209,7 +1215,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             label,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFF00324A),
+              color: AppTheme.primaryBlue,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1219,7 +1225,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
             child: const Icon(
               Icons.close,
               size: 14,
-              color: Color(0xFF00324A),
+              color: AppTheme.primaryBlue,
             ),
           ),
         ],
@@ -1258,13 +1264,13 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            const Color(0xFF00324A).withOpacity(0.1),
-                            const Color(0xFF00324A).withOpacity(0.05),
+                            AppTheme.primaryBlue.withOpacity(0.1),
+                            AppTheme.primaryBlue.withOpacity(0.05),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: const Color(0xFF00324A).withOpacity(0.2),
+                          color: AppTheme.primaryBlue.withOpacity(0.2),
                         ),
                       ),
                       child: Row(
@@ -1273,7 +1279,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                           const Icon(
                             Icons.medical_services,
                             size: 16,
-                            color: Color(0xFF00324A),
+                            color: AppTheme.primaryBlue,
                           ),
                           const SizedBox(width: 6),
                           Flexible(
@@ -1282,7 +1288,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF00324A),
+                                color: AppTheme.primaryBlue,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -1347,7 +1353,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                     _buildInfoChip(
                       Icons.event_note,
                       _displayTipoEvento(evento.tipoEvento),
-                      const Color(0xFF00324A),
+                      AppTheme.primaryBlue,
                     ),
                     if (int.tryParse(evento.intensidadeDor) != null && int.tryParse(evento.intensidadeDor)! > 0)
                       _buildInfoChip(
@@ -1376,12 +1382,12 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF00324A), Color(0xFF00324A)],
+                          colors: [AppTheme.primaryBlue, AppTheme.primaryBlue],
                         ),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF00324A).withOpacity(0.3),
+                            color: AppTheme.primaryBlue.withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -1488,13 +1494,13 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E3A8A).withOpacity(0.1),
+                    color: AppTheme.primaryBlue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Icon(
                     Icons.medical_services_rounded,
                     size: 24,
-                    color: Color(0xFF1E3A8A),
+                    color: AppTheme.primaryBlue,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -1515,7 +1521,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                       Text(
                         SpecialtyTranslations.translate(evento.especialidade),
                         style: const TextStyle(
-                          color: Color(0xFF1E3A8A),
+                          color: AppTheme.primaryBlue,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1700,7 +1706,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                       icon: const Icon(Icons.picture_as_pdf_rounded),
                       label: Text('common_export_pdf'.tr),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1E3A8A),
+                        backgroundColor: AppTheme.primaryBlue,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -1739,12 +1745,12 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E3A8A).withOpacity(0.1),
+                  color: AppTheme.primaryBlue.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
-                  color: const Color(0xFF1E3A8A),
+                  color: AppTheme.primaryBlue,
                   size: 20,
                 ),
               ),
@@ -1813,7 +1819,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
     try {
       final now = DateTime.now();
       final pdf = pw.Document();
-      final bytes = await rootBundle.load('assets/images/Pulselogo.png');
+      final bytes = await rootBundle.load('assets/images/oryon_health_logo.png');
       final logoImage = pw.MemoryImage(bytes.buffer.asUint8List());
       final generatedAt = DateFormat('dd/MM/yyyy HH:mm').format(now);
       final atendimentoEm = DateFormat('dd/MM/yyyy HH:mm').format(evento.dataHora);
@@ -1823,7 +1829,7 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
         pw.Page(
           pageFormat: PdfPageFormat.a4,
           build: (_) {
-            const titleColor = PdfColor.fromInt(0xFF00324A);
+            final titleColor = PdfColor.fromInt(AppTheme.primaryBlue.value);
             return pw.Container(
               padding: const pw.EdgeInsets.symmetric(horizontal: 32, vertical: 40),
               child: pw.Column(
@@ -1960,8 +1966,8 @@ final selectedIntensidadeKey = _selectedIntensidadeDor?.trim();
                         ),
                         pw.SizedBox(height: 4),
                         pw.Text(
-                          'Histórico exportado automaticamente pelo aplicativo PulseFlow.',
-                          style: const pw.TextStyle(
+                          'Histórico exportado automaticamente pelo aplicativo Oryon Health.',
+                          style: pw.TextStyle(
                             fontSize: 10,
                             color: PdfColors.blueGrey700,
                           ),

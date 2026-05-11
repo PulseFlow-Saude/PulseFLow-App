@@ -1,7 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'reset_password_controller.dart';
+
+import '../../theme/app_theme.dart';
 import '../../widgets/language_icon_button.dart';
+import 'reset_password_controller.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -22,10 +26,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeIn,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeIn);
     _fadeController.forward();
   }
 
@@ -37,30 +38,32 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final isLandscape = size.width > size.height;
 
     return GetBuilder<ResetPasswordController>(
       init: ResetPasswordController(),
       builder: (controller) {
         return Scaffold(
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: true,
           body: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFF00324A),
-                  const Color(0xFF00324A).withValues(alpha: 0.85),
+                  AppTheme.primaryBlue,
+                  const Color(0xFF001F2E),
+                  AppTheme.primaryBlue.withValues(alpha: 0.92),
                 ],
+                stops: const [0.0, 0.45, 1.0],
               ),
             ),
             child: SafeArea(
               bottom: false,
               child: FadeTransition(
                 opacity: _fadeAnimation,
-                child: _buildContent(isLandscape, size),
+                child: _buildContent(context, isLandscape, size),
               ),
             ),
           ),
@@ -69,521 +72,409 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen>
     );
   }
 
-  Widget _buildContent(bool isLandscape, Size size) {
+  Widget _buildContent(BuildContext context, bool isLandscape, Size size) {
     if (isLandscape) {
       return Row(
         children: [
-          Expanded(
-            flex: 1,
-            child: _buildLogoSection(size),
-          ),
-          Expanded(
-            flex: 1,
-            child: _buildFormSection(size),
-          ),
-        ],
-      );
-    } else {
-      final isSmallHeight = size.height < 700;
-      return Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Expanded(
-            flex: isSmallHeight ? 3 : 2,
-            child: _buildLogoSection(size),
-          ),
-          Expanded(
-            flex: isSmallHeight ? 5 : 4,
-            child: _buildFormSection(size),
-          ),
+          Expanded(flex: 1, child: _buildLogoSection(context, size)),
+          Expanded(flex: 1, child: _buildFormSection(context, isLandscape, size)),
         ],
       );
     }
+    return Column(
+      children: [
+        Expanded(flex: 2, child: _buildLogoSection(context, size)),
+        Expanded(flex: 5, child: _buildFormSection(context, isLandscape, size)),
+      ],
+    );
   }
 
-  Widget _buildLogoSection(Size size) {
-    final isSmallHeight = size.height < 700;
-    final logoSize = isSmallHeight
-        ? (size.width * 0.22).clamp(50.0, 90.0)
-        : (size.width * 0.35).clamp(80.0, 140.0);
-    final spacing = isSmallHeight ? 6.0 : size.height * 0.015;
-    final titleFontSize = isSmallHeight
-        ? (size.width * 0.045).clamp(16.0, 22.0)
-        : (size.width * 0.05).clamp(18.0, 28.0);
-    final hintFontSize = isSmallHeight
-        ? (size.width * 0.032).clamp(11.0, 14.0)
-        : (size.width * 0.035).clamp(12.0, 16.0);
-
+  Widget _buildLogoSection(BuildContext context, Size size) {
+    final logoDim = math.min(size.shortestSide * 0.42, 200.0);
     return Stack(
+      alignment: Alignment.center,
       children: [
-        Align(
-          alignment: Alignment.topCenter,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(size.width * 0.06, 16, size.width * 0.06, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  'assets/images/pulseflow2.png',
-                  width: logoSize,
-                  height: logoSize,
-                  fit: BoxFit.contain,
-                ),
-                SizedBox(height: spacing),
-                Text(
-                  'auth_reset_title'.tr,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  style: TextStyle(
-                    fontSize: titleFontSize,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                SizedBox(height: spacing * 0.5),
-                Text(
-                  'auth_reset_hint'.tr,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  style: TextStyle(
-                    fontSize: hintFontSize,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ],
-            ),
+        Center(
+          child: Image.asset(
+            'assets/images/oryon_health_logo_signin.png',
+            width: logoDim,
+            height: logoDim,
+            fit: BoxFit.contain,
           ),
         ),
         const Positioned(
-          top: 8,
-          right: 8,
+          top: 4,
+          right: 4,
           child: LanguageIconButton(),
         ),
       ],
     );
   }
 
-  Widget _buildFormSection(Size size) {
-    final isSmallHeight = size.height < 700;
-    final paddingVertical = isSmallHeight ? 16.0 : 24.0;
-    final spacing = isSmallHeight ? 8.0 : 12.0;
-    
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(30),
-        topRight: Radius.circular(30),
-      ),
-      child: Container(
-        width: double.infinity,
-        constraints: const BoxConstraints.expand(),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+  Widget _buildFormSection(BuildContext context, bool isLandscape, Size size) {
+    final mq = MediaQuery.of(context);
+    final bottomPad = math.max(mq.viewInsets.bottom, mq.padding.bottom) + 24;
+    final horizontalPad = math.max(20.0, size.width * 0.07);
+
+    final borderRadius = isLandscape
+        ? const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            bottomLeft: Radius.circular(28),
+          )
+        : const BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          );
+
+    final borderColor = AppTheme.primaryBlue.withValues(alpha: 0.22);
+    final c = Get.find<ResetPasswordController>();
+
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
           ),
-        ),
+        ],
+      ),
       child: Form(
-        key: Get.find<ResetPasswordController>().formKey,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: size.width * 0.08,
-            vertical: paddingVertical,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                flex: isSmallHeight ? 1 : 2,
-                child: const SizedBox.shrink(),
+        key: c.formKey,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(horizontalPad, 28, horizontalPad, bottomPad),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!isLandscape) const SizedBox(height: 8),
+                    _buildHeader(),
+                    SizedBox(height: isLandscape ? 24 : size.height * 0.03),
+                    _buildCodeField(c, borderColor),
+                    const SizedBox(height: 16),
+                    _buildNewPasswordField(c, borderColor),
+                    const SizedBox(height: 16),
+                    _buildConfirmPasswordField(c, borderColor),
+                    const SizedBox(height: 24),
+                    _buildResetPasswordButton(c),
+                    const SizedBox(height: 16),
+                    _buildResendCodeButton(c),
+                    const SizedBox(height: 16),
+                    _buildBackButton(),
+                    const SizedBox(height: 12),
+                  ],
+                ),
               ),
-              _buildHeader(size),
-              SizedBox(height: spacing),
-              _buildCodeField(size),
-              SizedBox(height: spacing),
-              _buildNewPasswordField(size),
-              SizedBox(height: spacing),
-              _buildConfirmPasswordField(size),
-              SizedBox(height: spacing * 1.5),
-              _buildResetPasswordButton(size),
-              SizedBox(height: spacing),
-              _buildResendCodeButton(size),
-              SizedBox(height: spacing),
-              _buildBackButton(size),
-              Flexible(
-                flex: isSmallHeight ? 1 : 2,
-                child: const SizedBox.shrink(),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
 
-  Widget _buildHeader(Size size) {
-    final isSmallHeight = size.height < 700;
-    
+  Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           'auth_new_password'.tr,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: isSmallHeight ? 22 : 28,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF00324A),
-            letterSpacing: 0.5,
+          style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryBlue),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          width: 40,
+          height: 3,
+          decoration: BoxDecoration(
+            color: AppTheme.secondaryBlue.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
-        SizedBox(height: isSmallHeight ? 4 : 8),
+        const SizedBox(height: 14),
         Text(
           'auth_new_password_hint'.tr,
           textAlign: TextAlign.center,
-          maxLines: 2,
-          style: TextStyle(
-            fontSize: isSmallHeight ? 13 : 16,
-            color: Colors.grey[600],
-            letterSpacing: 0.3,
-          ),
+          style: AppTheme.bodyLarge.copyWith(color: AppTheme.textSecondary),
         ),
       ],
     );
   }
 
-  Widget _buildCodeField(Size size) {
-    final isSmallHeight = size.height < 700;
-    
-    return Container(
-      height: isSmallHeight ? 50 : 54,
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TextFormField(
-        controller: Get.find<ResetPasswordController>().codeController,
-                                      keyboardType: TextInputType.number,
-                                      maxLength: 6,
-        style: TextStyle(
-          fontSize: isSmallHeight ? 14 : 16,
-          fontWeight: FontWeight.w500,
+  Widget _buildCodeField(ResetPasswordController c, Color borderColor) {
+    return TextFormField(
+      controller: c.codeController,
+      keyboardType: TextInputType.number,
+      maxLength: 6,
+      style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
+      decoration: InputDecoration(
+        labelText: 'auth_verification_code'.tr,
+        hintText: 'auth_code_hint'.tr,
+        labelStyle: AppTheme.bodyMedium,
+        prefixIcon: Icon(Icons.verified_user_outlined, color: AppTheme.primaryBlue.withValues(alpha: 0.9)),
+        filled: true,
+        fillColor: const Color(0xFFF8FAFB),
+        counterText: '',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
         ),
-        decoration: InputDecoration(
-          labelText: 'auth_verification_code'.tr,
-          labelStyle: TextStyle(color: Colors.grey[600]),
-          hintText: 'auth_code_hint'.tr,
-          prefixIcon: const Icon(Icons.security, color: Color(0xFF00324A)),
-          filled: true,
-          fillColor: Colors.grey[50],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A).withValues(alpha: 0.3)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A).withValues(alpha: 0.3)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[400]!, width: 1),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[400]!, width: 2),
-          ),
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: isSmallHeight ? 12 : 16,
-          ),
-          counterText: '',
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'auth_code_required'.tr;
-          }
-          if (value.length != 6) {
-            return 'auth_code_6_digits'.tr;
-          }
-          return null;
-        },
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: AppTheme.error.withValues(alpha: 0.85)),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: AppTheme.error.withValues(alpha: 0.95), width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'auth_code_required'.tr;
+        }
+        if (value.length != 6) {
+          return 'auth_code_6_digits'.tr;
+        }
+        return null;
+      },
     );
   }
 
-  Widget _buildNewPasswordField(Size size) {
-    final isSmallHeight = size.height < 700;
-    
-    return Obx(() => Container(
-      height: isSmallHeight ? 50 : 54,
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TextFormField(
-        controller: Get.find<ResetPasswordController>().newPasswordController,
-        obscureText: Get.find<ResetPasswordController>().obscurePassword.value,
-        style: TextStyle(
-          fontSize: isSmallHeight ? 14 : 16,
-          fontWeight: FontWeight.w500,
-        ),
-        decoration: InputDecoration(
-          labelText: 'auth_new_password'.tr,
-          labelStyle: TextStyle(color: Colors.grey[600]),
-          hintText: 'auth_new_password_placeholder'.tr,
-          prefixIcon: const Icon(Icons.lock_outlined, color: Color(0xFF00324A)),
-          suffixIcon: IconButton(
-            icon: Icon(
-              Get.find<ResetPasswordController>().obscurePassword.value
-                  ? Icons.visibility_off_outlined
-                  : Icons.visibility_outlined,
-            color: Colors.grey[600],
-            ),
-            onPressed: Get.find<ResetPasswordController>().togglePasswordVisibility,
-          ),
-          filled: true,
-          fillColor: Colors.grey[50],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A).withValues(alpha: 0.3)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A).withValues(alpha: 0.3)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[400]!, width: 1),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[400]!, width: 2),
-          ),
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: isSmallHeight ? 12 : 16,
-          ),
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'auth_password_required'.tr;
-          }
-          if (value.length < 6) {
-            return 'auth_password_min'.tr;
-          }
-          return null;
-        },
-      ),
-    ));
-  }
-
-  Widget _buildConfirmPasswordField(Size size) {
-    final isSmallHeight = size.height < 700;
-    
-    return Obx(() => Container(
-      height: isSmallHeight ? 50 : 54,
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TextFormField(
-        controller: Get.find<ResetPasswordController>().confirmPasswordController,
-        obscureText: Get.find<ResetPasswordController>().obscureConfirmPassword.value,
-        style: TextStyle(
-          fontSize: isSmallHeight ? 14 : 16,
-          fontWeight: FontWeight.w500,
-        ),
-        decoration: InputDecoration(
-          labelText: 'auth_confirm_password'.tr,
-          labelStyle: TextStyle(color: Colors.grey[600]),
-          hintText: 'auth_confirm_password_hint'.tr,
-          prefixIcon: const Icon(Icons.lock_outlined, color: Color(0xFF00324A)),
-          suffixIcon: IconButton(
-            icon: Icon(
-              Get.find<ResetPasswordController>().obscureConfirmPassword.value
-                  ? Icons.visibility_off_outlined
-                  : Icons.visibility_outlined,
-            color: Colors.grey[600],
-            ),
-            onPressed: Get.find<ResetPasswordController>().toggleConfirmPasswordVisibility,
-          ),
-          filled: true,
-          fillColor: Colors.grey[50],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A).withValues(alpha: 0.3)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: const Color(0xFF00324A).withValues(alpha: 0.3)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF00324A), width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[400]!, width: 1),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[400]!, width: 2),
-          ),
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: isSmallHeight ? 12 : 16,
-          ),
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'auth_password_confirm_required'.tr;
-          }
-          if (value != Get.find<ResetPasswordController>().newPasswordController.text) {
-            return 'auth_passwords_dont_match'.tr;
-          }
-          return null;
-        },
-      ),
-    ));
-  }
-
-  Widget _buildResetPasswordButton(Size size) {
-    final isSmallHeight = size.height < 700;
-    
-    return Obx(() => Container(
-      width: double.infinity,
-      height: isSmallHeight ? 48 : 54,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF00324A),
-            const Color(0xFF00324A).withValues(alpha: 0.9),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00324A).withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: Get.find<ResetPasswordController>().isLoading.value
-            ? null
-            : Get.find<ResetPasswordController>().resetPassword,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: Get.find<ResetPasswordController>().isLoading.value
-            ? SizedBox(
-                width: isSmallHeight ? 20 : 24,
-                height: isSmallHeight ? 20 : 24,
-                child: const CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.lock_reset, color: Colors.white, size: isSmallHeight ? 18 : 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'auth_reset_btn'.tr,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: isSmallHeight ? 14 : 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
+  Widget _buildNewPasswordField(ResetPasswordController c, Color borderColor) {
+    return Obx(() => TextFormField(
+          controller: c.newPasswordController,
+          obscureText: c.obscurePassword.value,
+          style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
+          decoration: InputDecoration(
+            labelText: 'auth_new_password'.tr,
+            hintText: 'auth_new_password_placeholder'.tr,
+            labelStyle: AppTheme.bodyMedium,
+            prefixIcon: Icon(Icons.lock_outlined, color: AppTheme.primaryBlue.withValues(alpha: 0.9)),
+            suffixIcon: IconButton(
+              icon: Icon(
+                c.obscurePassword.value ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                color: AppTheme.textSecondary,
               ),
-      ),
-    ));
-  }
-
-  Widget _buildResendCodeButton(Size size) {
-    final isSmallHeight = size.height < 700;
-    
-    return Obx(() => SizedBox(
-      width: double.infinity,
-      height: isSmallHeight ? 48 : 54,
-      child: OutlinedButton.icon(
-        onPressed: Get.find<ResetPasswordController>().isResending.value
-            ? null
-            : Get.find<ResetPasswordController>().resendCode,
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Color(0xFF00324A), width: 2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        icon: Get.find<ResetPasswordController>().isResending.value
-            ? SizedBox(
-                width: isSmallHeight ? 18 : 20,
-                height: isSmallHeight ? 18 : 20,
-                child: const CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)),
-                ),
-              )
-            : Icon(Icons.refresh, color: const Color(0xFF00324A), size: isSmallHeight ? 18 : 20),
-        label: Text(
-          Get.find<ResetPasswordController>().isResending.value
-              ? 'auth_resending'.tr
-              : 'auth_resend'.tr,
-          style: TextStyle(
-            color: const Color(0xFF00324A),
-            fontSize: isSmallHeight ? 14 : 16,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
+              onPressed: c.togglePasswordVisibility,
+            ),
+            filled: true,
+            fillColor: const Color(0xFFF8FAFB),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: borderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: AppTheme.error.withValues(alpha: 0.85)),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: AppTheme.error.withValues(alpha: 0.95), width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
-        ),
-      ),
-    ));
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'auth_password_required'.tr;
+            }
+            if (value.length < 6) {
+              return 'auth_password_min'.tr;
+            }
+            return null;
+          },
+        ));
   }
 
-  Widget _buildBackButton(Size size) {
-    final isSmallHeight = size.height < 700;
-    
+  Widget _buildConfirmPasswordField(ResetPasswordController c, Color borderColor) {
+    return Obx(() => TextFormField(
+          controller: c.confirmPasswordController,
+          obscureText: c.obscureConfirmPassword.value,
+          style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
+          decoration: InputDecoration(
+            labelText: 'auth_confirm_password'.tr,
+            hintText: 'auth_confirm_password_hint'.tr,
+            labelStyle: AppTheme.bodyMedium,
+            prefixIcon: Icon(Icons.lock_outlined, color: AppTheme.primaryBlue.withValues(alpha: 0.9)),
+            suffixIcon: IconButton(
+              icon: Icon(
+                c.obscureConfirmPassword.value
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                color: AppTheme.textSecondary,
+              ),
+              onPressed: c.toggleConfirmPasswordVisibility,
+            ),
+            filled: true,
+            fillColor: const Color(0xFFF8FAFB),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: borderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: AppTheme.error.withValues(alpha: 0.85)),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: AppTheme.error.withValues(alpha: 0.95), width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'auth_password_confirm_required'.tr;
+            }
+            if (value != c.newPasswordController.text) {
+              return 'auth_passwords_dont_match'.tr;
+            }
+            return null;
+          },
+        ));
+  }
+
+  Widget _buildResetPasswordButton(ResetPasswordController c) {
+    return Obx(() => Container(
+          width: double.infinity,
+          height: 52,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppTheme.primaryBlue,
+                AppTheme.primaryBlue.withValues(alpha: 0.88),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryBlue.withValues(alpha: 0.35),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: c.isLoading.value ? null : c.resetPassword,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+            child: c.isLoading.value
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.lock_reset_rounded, color: Colors.white, size: 22),
+                      const SizedBox(width: 10),
+                      Text(
+                        'auth_reset_btn'.tr,
+                        style: AppTheme.titleSmall.copyWith(
+                          color: AppTheme.textLight,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ));
+  }
+
+  Widget _buildResendCodeButton(ResetPasswordController c) {
+    return Obx(() => SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: OutlinedButton(
+            onPressed: c.isResending.value ? null : c.resendCode,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+            child: c.isResending.value
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.refresh_rounded, color: AppTheme.primaryBlue, size: 22),
+                      const SizedBox(width: 10),
+                      Text(
+                        c.isResending.value ? 'auth_resending'.tr : 'auth_resend'.tr,
+                        style: AppTheme.titleSmall.copyWith(
+                          color: AppTheme.primaryBlue,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ));
+  }
+
+  Widget _buildBackButton() {
     return SizedBox(
       width: double.infinity,
-      height: isSmallHeight ? 48 : 54,
+      height: 52,
       child: OutlinedButton(
         onPressed: () => Get.back(),
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Color(0xFF00324A), width: 2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          side: const BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.arrow_back, color: const Color(0xFF00324A), size: isSmallHeight ? 18 : 20),
-            const SizedBox(width: 8),
+            Icon(Icons.arrow_back_rounded, color: AppTheme.primaryBlue, size: 22),
+            const SizedBox(width: 10),
             Text(
               'auth_back'.tr,
-              style: TextStyle(
-                color: const Color(0xFF00324A),
-                fontSize: isSmallHeight ? 14 : 16,
+              style: AppTheme.titleSmall.copyWith(
+                color: AppTheme.primaryBlue,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
               ),
             ),
           ],

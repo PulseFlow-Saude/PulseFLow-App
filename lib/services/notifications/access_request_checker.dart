@@ -12,13 +12,13 @@ class AccessRequestChecker {
 
   /// Iniciar verificação periódica
   void startPeriodicCheck() {
-    // Verificar após 5 segundos
-    Future.delayed(const Duration(seconds: 5), () async {
+    stopPeriodicCheck();
+    // Só faz sentido com utilizador sessão iniciada — atrasamos para não competir com o arranque.
+    Future.delayed(const Duration(seconds: 25), () async {
       await _checkPendingRequests();
     });
 
-    // Verificar a cada 30 segundos
-    _timer = Timer.periodic(const Duration(seconds: 30), (timer) async {
+    _timer = Timer.periodic(const Duration(seconds: 45), (timer) async {
       await _checkPendingRequests();
     });
   }
@@ -46,15 +46,18 @@ class AccessRequestChecker {
         final doctorName = request['medicoNome'] ?? 'Um médico';
         final specialty = request['especialidade'] ?? '';
 
-        if (!_shownRequests.contains(requestId)) {
+        // Reserva o id antes dos awaits — evita duas chamadas em paralelo mostrarem a mesma notificação.
+        if (_shownRequests.contains(requestId)) continue;
+        _shownRequests.add(requestId);
+        try {
           await _showAccessRequestNotification(
             doctorName: doctorName,
             specialty: specialty,
             requestId: requestId,
           );
-
-          _shownRequests.add(requestId);
           await _apiService.marcarSolicitacaoVisualizada(requestId);
+        } catch (_) {
+          _shownRequests.remove(requestId);
         }
       }
     } catch (e) {

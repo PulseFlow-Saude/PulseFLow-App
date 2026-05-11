@@ -7,9 +7,9 @@ import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../theme/app_theme.dart';
 import '../institutional/settings_controller.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
-import '../../widgets/pulse_drawer_button.dart';
 
 class MenstruacaoFormScreen extends StatefulWidget {
   final Menstruacao? menstruacao;
@@ -311,92 +311,22 @@ class _MenstruacaoFormScreenState extends State<MenstruacaoFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.primaryBlue, // Azul escuro como outras telas
-      drawer: const PulseSideMenu(activeItem: PulseNavItem.menu),
-      body: Column(
-        children: [
-          // Header azul como outras telas
-          _buildHeader(),
-          
-          // Conteúdo principal
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              child: _showCalendar ? _buildCalendarView() : _buildDetailsView(),
-            ),
+    return PulseBlueScaffold(
+      drawer: PulseSideMenu(activeItem: PulseNavItem.menu),
+      header: PulseBlueLeadTitleHeader(
+        title: widget.menstruacao == null ? 'menst_new_cycle'.tr : 'menst_edit_cycle'.tr,
+        subtitle: 'menst_register_sub'.tr,
+        trailing: Container(
+          padding: const EdgeInsets.all(11),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        left: 16,
-        right: 16,
-        bottom: 20,
-      ),
-      decoration: const BoxDecoration(
-        color: AppTheme.primaryBlue,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+          child: const Icon(Icons.calendar_month_rounded, color: Colors.white, size: 24),
         ),
       ),
-      child: Row(
-        children: [
-          const PulseDrawerButton(iconSize: 22),
-          const SizedBox(width: 16),
-          
-          // Título
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.menstruacao == null ? 'menst_new_cycle'.tr : 'menst_edit_cycle'.tr,
-                  style: AppTheme.titleLarge.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-                    fontSize: 24,
-                  ),
-                ),
-                Text(
-                  'menst_register_sub'.tr,
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Ícone decorativo
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.calendar_month_rounded,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-        ],
-      ),
+      body: _showCalendar ? _buildCalendarView() : _buildDetailsView(),
     );
   }
 

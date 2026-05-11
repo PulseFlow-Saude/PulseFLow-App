@@ -115,11 +115,11 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF00324A),
+            colorScheme: ColorScheme.light(
+              primary: AppTheme.primaryBlue,
               onPrimary: Colors.white,
               surface: Colors.white,
-              onSurface: Color(0xFF1E293B),
+              onSurface: const Color(0xFF1E293B),
             ),
           ),
           child: child!,
@@ -138,28 +138,100 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF00324A),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF00324A),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.white,
-            size: 20,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: AppTheme.blueSystemOverlayStyle,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: AppTheme.blueScreenGradientDecoration,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildModernHeader(),
+              Expanded(
+                child: Container(
+                  decoration: AppTheme.blueContentSheetDecoration,
+                  clipBehavior: Clip.antiAlias,
+                  child: _isLoading
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'health_loading'.tr,
+                                style: const TextStyle(
+                                  color: Color(0xFF64748B),
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : _error != null
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.error_outline,
+                                      size: 64, color: Colors.red),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    '${'health_error'.tr}: $_error',
+                                    style: const TextStyle(color: Colors.red),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: _buildContent(),
+                            ),
+                ),
+              ),
+            ],
           ),
-          onPressed: () => Get.back(),
         ),
-        title: Text(
-          'health_title'.tr,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _buildModernHeader() {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 12,
+        left: 8,
+        right: 8,
+        bottom: 16,
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Colors.white,
+              size: 20,
+            ),
+            onPressed: () => Get.back(),
           ),
-        ),
-        actions: [
+          Expanded(
+            child: Text(
+              'health_title'.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           Obx(() {
             final homeController = Get.find<HomeController>();
             return IconButton(
@@ -181,9 +253,10 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
                           minHeight: 16,
                         ),
                         child: Text(
-                          homeController.unreadNotificationsCount.value > 9 
-                              ? '9+' 
-                              : homeController.unreadNotificationsCount.value.toString(),
+                          homeController.unreadNotificationsCount.value > 9
+                              ? '9+'
+                              : homeController.unreadNotificationsCount.value
+                                  .toString(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -198,9 +271,10 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
               onPressed: () async {
                 await Get.toNamed(Routes.NOTIFICATIONS);
                 try {
-                  final homeController = Get.find<HomeController>();
-                  await homeController.loadNotificationsCount();
+                  final hc = Get.find<HomeController>();
+                  await hc.loadNotificationsCount();
                 } catch (e) {
+                  // ignore
                 }
               },
             );
@@ -208,10 +282,9 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
           IconButton(
             icon: const Icon(Icons.sync, color: Colors.white),
             onPressed: () async {
-              // Força sincronização com HealthKit antes de recarregar
               final authService = Get.find<AuthService>();
               final healthDataService = Get.find<HealthDataService>();
-              
+
               if (authService.currentUser?.id != null) {
                 try {
                   Get.snackbar(
@@ -221,24 +294,25 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
                     colorText: Colors.white,
                     duration: const Duration(seconds: 2),
                   );
-                  
-                  print('🔄 [HealthHistory] Sincronizando dados do HealthKit...');
-                  await healthDataService.saveHealthDataFromHealthKit(authService.currentUser!.id!);
-                  
-                  print('✅ [HealthHistory] Sincronização concluída, aguardando salvamento...');
-                  // Aguarda mais tempo para garantir que os dados foram salvos no banco
+
+                  print(
+                      '🔄 [HealthHistory] Sincronizando dados do HealthKit...');
+                  await healthDataService.saveHealthDataFromHealthKit(
+                      authService.currentUser!.id!);
+
+                  print(
+                      '✅ [HealthHistory] Sincronização concluída, aguardando salvamento...');
                   await Future.delayed(const Duration(milliseconds: 1000));
-                  
+
                   print('🔄 [HealthHistory] Recarregando dados do banco...');
-                  // Limpa os dados antes de recarregar
                   setState(() {
                     _dailyData.clear();
                   });
-                  // Recarrega os dados
                   await _loadHealthData();
-                  
-                  print('✅ [HealthHistory] Recarregamento concluído. Total de dados: ${_dailyData.length}');
-                  
+
+                  print(
+                      '✅ [HealthHistory] Recarregamento concluído. Total de dados: ${_dailyData.length}');
+
                   Get.snackbar(
                     'health_success'.tr,
                     'health_updated'.tr,
@@ -260,50 +334,6 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
             },
           ),
         ],
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-        ),
-        child: _isLoading
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00324A)),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'health_loading'.tr,
-                      style: const TextStyle(
-                        color: Color(0xFF64748B),
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : _error != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                        const SizedBox(height: 16),
-                        Text(
-                          '${'health_error'.tr}: $_error',
-                          style: const TextStyle(color: Colors.red),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  )
-                : _buildContent(),
       ),
     );
   }

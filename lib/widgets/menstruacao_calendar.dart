@@ -27,26 +27,39 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Header do calendário
+        // Header — cartão sobre o sheet branco (mesmo idioma do hub Registros/Históricos)
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF00324A),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppTheme.primaryBlue.withValues(alpha: 0.12),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.18),
+                  ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.calendar_month_rounded,
-                  color: Colors.white,
-                  size: 20,
+                  color: AppTheme.primaryBlue,
+                  size: 22,
                 ),
               ),
               const SizedBox(width: 12),
@@ -57,7 +70,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                     Text(
                       'menst_calendar_title'.tr,
                       style: AppTheme.titleMedium.copyWith(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -65,7 +78,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                     Text(
                       'menst_calendar_sub'.tr,
                       style: AppTheme.bodySmall.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: AppTheme.textSecondary.withValues(alpha: 0.95),
                       ),
                     ),
                   ],
@@ -81,12 +94,19 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFF64B5F6).withOpacity(0.2),
-              width: 1,
+              color: AppTheme.primaryBlue.withValues(alpha: 0.12),
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
+          clipBehavior: Clip.antiAlias,
           child: TableCalendar<Menstruacao>(
             firstDay: DateTime.utc(2020, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
@@ -97,10 +117,10 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
             calendarStyle: CalendarStyle(
               outsideDaysVisible: false,
               weekendTextStyle: AppTheme.bodyMedium.copyWith(
-                color: const Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
               ),
               defaultTextStyle: AppTheme.bodyMedium.copyWith(
-                color: const Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
                 fontWeight: FontWeight.w600,
               ),
               selectedTextStyle: AppTheme.bodyMedium.copyWith(
@@ -108,7 +128,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                 fontWeight: FontWeight.w700,
               ),
               todayTextStyle: AppTheme.bodyMedium.copyWith(
-                color: const Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
                 fontWeight: FontWeight.w700,
               ),
               markersMaxCount: 3,
@@ -116,15 +136,15 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                 color: Color(0xFFEC4899),
                 shape: BoxShape.circle,
               ),
-              selectedDecoration: const BoxDecoration(
-                color: Color(0xFF00324A),
+              selectedDecoration: BoxDecoration(
+                color: AppTheme.primaryBlue,
                 shape: BoxShape.circle,
               ),
               todayDecoration: BoxDecoration(
-                color: const Color(0xFF00324A).withOpacity(0.2),
+                color: AppTheme.primaryBlue.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFF00324A),
+                  color: AppTheme.primaryBlue,
                   width: 2,
                 ),
               ),
@@ -151,44 +171,47 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
               titleCentered: true,
               formatButtonShowsNext: false,
               formatButtonDecoration: BoxDecoration(
-                color: const Color(0xFF00324A).withOpacity(0.1),
+                color: AppTheme.primaryBlue.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.15),
+                ),
               ),
               formatButtonTextStyle: AppTheme.bodySmall.copyWith(
-                color: const Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
                 fontWeight: FontWeight.w600,
               ),
               titleTextStyle: AppTheme.titleMedium.copyWith(
-                color: const Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
                 fontWeight: FontWeight.w700,
               ),
               leftChevronIcon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE3F2FD),
+                  color: AppTheme.lightBlue.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFF64B5F6).withOpacity(0.3),
+                    color: AppTheme.secondaryBlue.withValues(alpha: 0.25),
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.chevron_left_rounded,
-                  color: Color(0xFF00324A),
+                  color: AppTheme.primaryBlue,
                   size: 16,
                 ),
               ),
               rightChevronIcon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE3F2FD),
+                  color: AppTheme.lightBlue.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFF64B5F6).withOpacity(0.3),
+                    color: AppTheme.secondaryBlue.withValues(alpha: 0.25),
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.chevron_right_rounded,
-                  color: Color(0xFF00324A),
+                  color: AppTheme.primaryBlue,
                   size: 16,
                 ),
               ),
@@ -197,11 +220,11 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
             ),
             daysOfWeekStyle: DaysOfWeekStyle(
               weekdayStyle: AppTheme.bodySmall.copyWith(
-                color: const Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
                 fontWeight: FontWeight.w600,
               ),
               weekendStyle: AppTheme.bodySmall.copyWith(
-                color: const Color(0xFF00324A),
+                color: AppTheme.primaryBlue,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -231,7 +254,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                   child: Text(
                     keys[day.weekday % 7].tr,
                     style: AppTheme.bodySmall.copyWith(
-                      color: const Color(0xFF00324A),
+                      color: AppTheme.primaryBlue,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -267,7 +290,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
                         style: AppTheme.bodyMedium.copyWith(
                           color: isMenstruacao 
                               ? _getFluxoColorForDay(day, menstruacao)
-                              : const Color(0xFF00324A),
+                              : AppTheme.primaryBlue,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -285,15 +308,18 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFE3F2FD).withOpacity(0.5),
-            borderRadius: BorderRadius.circular(12),
+            color: AppTheme.lightBlue.withValues(alpha: 0.45),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+            ),
           ),
           child: Column(
             children: [
               Text(
                 'menst_legend'.tr,
                 style: AppTheme.bodyMedium.copyWith(
-                  color: const Color(0xFF00324A),
+                  color: AppTheme.primaryBlue,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -344,7 +370,7 @@ class _MenstruacaoCalendarState extends State<MenstruacaoCalendar> {
         Text(
           label,
           style: AppTheme.bodySmall.copyWith(
-            color: const Color(0xFF00324A),
+            color: AppTheme.primaryBlue,
             fontWeight: FontWeight.w500,
           ),
         ),

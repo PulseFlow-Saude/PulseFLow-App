@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../models/patient.dart';
+import '../../utils/residence_date_format.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../services/api_service.dart';
@@ -54,7 +55,10 @@ class ProfileController extends GetxController {
   Patient? get patient => _patient.value;
   String? get profilePhoto => _profilePhoto.value;
   bool get isEditing => _isEditing.value;
-  String get birthDateDisplay => _formatDate(_patient.value?.birthDate);
+  String get birthDateDisplay => ResidenceDateFormat.formatDate(
+        _patient.value?.birthDate,
+        _patient.value?.residenceCountry,
+      );
 
   @override
   void onInit() {
@@ -182,21 +186,36 @@ class ProfileController extends GetxController {
     _populateControllers(current);
   }
 
+  /// Residência EUA: exibir apenas SSN, sem CPF/RG.
+  bool patientShowsUsSocialSecurity(Patient? p) =>
+      (p?.residenceCountry ?? '').toUpperCase() == 'US';
+
+  static String formatSsnDisplay(String digitsOrMasked) {
+    final d = digitsOrMasked.replaceAll(RegExp(r'\D'), '');
+    if (d.length != 9) return digitsOrMasked.trim();
+    return '${d.substring(0, 3)}-${d.substring(3, 5)}-${d.substring(5)}';
+  }
+
   void _populateControllers(Patient data) {
     nameController.text = data.name;
     emailController.text = data.email;
     phoneController.text = data.phone ?? '';
-    birthDateController.text = _formatDate(data.birthDate);
-    cpfController.text = data.cpf ?? '';
-    rgController.text = data.rg ?? '';
+    birthDateController.text = ResidenceDateFormat.formatDate(
+      data.birthDate,
+      data.residenceCountry,
+    );
+    if (patientShowsUsSocialSecurity(data)) {
+      final ssn = data.socialSecurityNumber?.trim();
+      cpfController.text = (ssn != null && ssn.isNotEmpty)
+          ? ProfileController.formatSsnDisplay(ssn)
+          : '';
+      rgController.text = '';
+    } else {
+      cpfController.text = data.cpf;
+      rgController.text = data.rg;
+    }
     emergencyContactController.text = data.emergencyContact ?? '';
     emergencyPhoneController.text = data.emergencyPhone ?? '';
-  }
-
-  // Formata data para exibição
-  String _formatDate(DateTime? date) {
-    if (date == null) return '';
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   // Seleciona foto da galeria
@@ -271,17 +290,24 @@ class ProfileController extends GetxController {
         email: currentPatient.email,
         password: currentPatient.password,
         phone: currentPatient.phone,
+        secondaryPhone: currentPatient.secondaryPhone,
         birthDate: currentPatient.birthDate,
         cpf: currentPatient.cpf,
         rg: currentPatient.rg,
         gender: currentPatient.gender,
         maritalStatus: currentPatient.maritalStatus,
         nationality: currentPatient.nationality,
+        residenceCountry: currentPatient.residenceCountry,
+        socialSecurityNumber: currentPatient.socialSecurityNumber,
         address: currentPatient.address,
+        height: currentPatient.height,
+        weight: currentPatient.weight,
+        profession: currentPatient.profession,
         acceptedTerms: currentPatient.acceptedTerms,
         profilePhoto: base64Photo, // Salvar como base64
         emergencyContact: currentPatient.emergencyContact,
         emergencyPhone: currentPatient.emergencyPhone,
+        fcmToken: currentPatient.fcmToken,
         isAdmin: currentPatient.isAdmin,
         twoFactorCode: currentPatient.twoFactorCode,
         twoFactorExpires: currentPatient.twoFactorExpires,
@@ -374,6 +400,8 @@ class ProfileController extends GetxController {
       return;
     }
 
+    final isUs = patientShowsUsSocialSecurity(currentPatient);
+
     // Cria o paciente atualizado
     final updatedPatient = Patient(
       id: currentPatient.id,
@@ -381,17 +409,28 @@ class ProfileController extends GetxController {
       email: emailController.text.trim(),
       password: currentPatient.password,
       phone: phoneController.text.trim().isEmpty ? '' : phoneController.text.trim(),
+      secondaryPhone: currentPatient.secondaryPhone,
       birthDate: currentPatient.birthDate,
-      cpf: cpfController.text.trim().isEmpty ? '' : cpfController.text.trim(),
-      rg: rgController.text.trim().isEmpty ? '' : rgController.text.trim(),
+      cpf: isUs
+          ? currentPatient.cpf
+          : (cpfController.text.trim().isEmpty ? '' : cpfController.text.trim()),
+      rg: isUs
+          ? currentPatient.rg
+          : (rgController.text.trim().isEmpty ? '' : rgController.text.trim()),
       gender: currentPatient.gender,
       maritalStatus: currentPatient.maritalStatus,
       nationality: currentPatient.nationality,
+      residenceCountry: currentPatient.residenceCountry,
+      socialSecurityNumber: currentPatient.socialSecurityNumber,
       address: currentPatient.address,
+      height: currentPatient.height,
+      weight: currentPatient.weight,
+      profession: currentPatient.profession,
       acceptedTerms: currentPatient.acceptedTerms,
       profilePhoto: _profilePhoto.value ?? currentPatient.profilePhoto,
       emergencyContact: emergencyContactController.text.trim().isEmpty ? null : emergencyContactController.text.trim(),
       emergencyPhone: emergencyPhoneController.text.trim().isEmpty ? null : emergencyPhoneController.text.trim(),
+      fcmToken: currentPatient.fcmToken,
       isAdmin: currentPatient.isAdmin,
       twoFactorCode: currentPatient.twoFactorCode,
       twoFactorExpires: currentPatient.twoFactorExpires,

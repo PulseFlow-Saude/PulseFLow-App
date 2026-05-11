@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'hormonal_controller.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/pulse_blue_screen_shell.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
+import '../../widgets/pulse_health_record_form_widgets.dart';
 import '../../widgets/pulse_side_menu.dart';
-import '../../widgets/pulse_drawer_button.dart';
 
 String _fmtDate(DateTime d) {
   final dd = d.day.toString().padLeft(2, '0');
@@ -22,70 +24,91 @@ class HormonalScreen extends StatelessWidget {
   final TextEditingController valorCtrl = TextEditingController();
   final Rx<DateTime?> dataSel = Rx<DateTime?>(DateTime.now());
   final RxBool mostrarGrafico = false.obs;
-  final LayerLink _link = LayerLink();
-  final RxBool _showSuggestions = false.obs;
 
   @override
   Widget build(BuildContext context) {
     controller.carregarRegistros(pacienteId);
-    return Scaffold(
-      backgroundColor: const Color(0xFF00324A),
-      drawer: const PulseSideMenu(activeItem: PulseNavItem.menu),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF00324A),
-        elevation: 0,
-        title: Text('horm_title'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-        leading: const PulseDrawerButton(iconSize: 22),
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Obx(() {
+    return PulseBlueScaffold(
+      drawer: PulseSideMenu(activeItem: PulseNavItem.menu),
+      header: PulseBlueCenteredTitleHeader(title: 'horm_title'.tr),
+      body: Obx(() {
             return Column(
               children: [
                 if (!mostrarGrafico.value) ...[
                   Expanded(
-                    child: SingleChildScrollView(
+                    child: PulseHealthRecordMaxWidthAlign(
+                      child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
+                      padding: PulseHealthRecordLayout.scrollPadding(context),
                       child: Card(
                         color: const Color(0xFFFFFFFF),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         elevation: 0,
                         child: Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.symmetric(vertical: 20),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text('common_new_record'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600)),
+                            PulseRecordSectionIntro(
+                              icon: Icons.science_rounded,
+                              title: 'horm_title'.tr,
+                              subtitle: 'menu_hormonal_sub'.tr,
+                            ),
                             const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: DropdownMenu<String>(
-                                controller: hormonioCtrl,
-                                requestFocusOnTap: true,
-                                label: Text('horm_hormone_label'.tr),
-                                hintText: 'horm_select_hint'.tr,
-                                enableFilter: true,
-                                enableSearch: true,
-                                menuHeight: 300,
-                                dropdownMenuEntries: controller.hormoniosSugeridos
-                                    .map((h) => DropdownMenuEntry<String>(value: h, label: h))
-                                    .toList(),
-                              ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                PulseRecordFieldLabelRow(
+                                  icon: Icons.biotech_rounded,
+                                  label: 'horm_hormone_label'.tr,
+                                ),
+                                const SizedBox(height: 8),
+                                Theme(
+                                  data: PulseHealthRecordFormStyles.dropdownTheme(context),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: DropdownMenu<String>(
+                                      controller: hormonioCtrl,
+                                      requestFocusOnTap: true,
+                                      hintText: 'horm_select_hint'.tr,
+                                      enableFilter: true,
+                                      enableSearch: true,
+                                      menuHeight: 300,
+                                      expandedInsets: EdgeInsets.zero,
+                                      dropdownMenuEntries: controller.hormoniosSugeridos
+                                          .map((h) => DropdownMenuEntry<String>(value: h, label: h))
+                                          .toList(),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
-                            TextField(
-                              controller: valorCtrl,
-                              decoration: InputDecoration(labelText: 'horm_value_label'.tr, hintText: 'horm_value_hint'.tr),
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            const SizedBox(height: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                PulseRecordFieldLabelRow(
+                                  icon: Icons.analytics_rounded,
+                                  label: 'horm_value_label'.tr,
+                                ),
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: valorCtrl,
+                                  decoration: PulseHealthRecordFormStyles.modernInputDecoration(
+                                    hintText: 'horm_value_hint'.tr,
+                                  ),
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
                             Obx(() {
-                              final s = dataSel.value == null ? 'common_select_date'.tr : _fmtDate(dataSel.value!);
-                              return InkWell(
+                              final placeholder = 'common_select_date'.tr;
+                              final s = dataSel.value == null ? placeholder : _fmtDate(dataSel.value!);
+                              return PulseRecordLabeledDateTile(
+                                label: 'exam_date_label'.tr,
+                                labelIcon: Icons.event_rounded,
+                                isRequired: true,
+                                placeholderText: placeholder,
+                                displayText: s,
                                 onTap: () async {
                                   final now = DateTime.now();
                                   final picked = await showDatePicker(
@@ -96,18 +119,13 @@ class HormonalScreen extends StatelessWidget {
                                   );
                                   if (picked != null) dataSel.value = DateTime(picked.year, picked.month, picked.day);
                                 },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                  decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00324A).withOpacity(0.2))),
-                                  child: Row(children: [const Icon(Icons.event, color: Color(0xFF00324A)), const SizedBox(width: 12), Expanded(child: Text(s, style: const TextStyle(color: Color(0xFF00324A))))]),
-                                ),
                               );
                             }),
                             const SizedBox(height: 20),
                             Row(children: [
                               Expanded(
                                 child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00324A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                                   onPressed: () async {
                                     if (dataSel.value == null) {
                                       Get.snackbar('common_data_required'.tr, 'horm_date_exam_msg'.tr);
@@ -135,9 +153,9 @@ class HormonalScreen extends StatelessWidget {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: OutlinedButton(
-                                  style: OutlinedButton.styleFrom(side: const BorderSide(color: Color(0xFF00324A), width: 2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
+                                  style: OutlinedButton.styleFrom(side: const BorderSide(color: AppTheme.primaryBlue, width: 2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)),
                                   onPressed: () => mostrarGrafico.value = !mostrarGrafico.value,
-                                  child: Obx(() => Text(mostrarGrafico.value ? 'common_view_records'.tr : 'common_view_data'.tr, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600))),
+                                  child: Obx(() => Text(mostrarGrafico.value ? 'common_view_records'.tr : 'common_view_data'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 16, fontWeight: FontWeight.w600))),
                                 ),
                               ),
                             ]),
@@ -146,10 +164,13 @@ class HormonalScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                ),
                 ] else ...[
                   Expanded(
-                    child: SingleChildScrollView(
+                    child: PulseHealthRecordMaxWidthAlign(
+                      child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
+                      padding: PulseHealthRecordLayout.scrollPadding(context),
                       child: Column(children: [
                         _buildFilters(context),
                         const SizedBox(height: 12),
@@ -165,14 +186,14 @@ class HormonalScreen extends StatelessWidget {
                             return Container(
                               margin: const EdgeInsets.only(bottom: 12),
                               padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15))),
+                              decoration: BoxDecoration(color: const Color(0xFFFFFFFF), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.15))),
                               child: Row(children: [
-                                Container(width: 50, height: 50, decoration: BoxDecoration(color: const Color(0xFF00324A), borderRadius: BorderRadius.circular(8)), child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text('${r.data.day}', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)), Text('${r.data.month}'.padLeft(2, '0'), style: const TextStyle(color: Colors.white, fontSize: 10))]))),
+                                Container(width: 50, height: 50, decoration: BoxDecoration(color: AppTheme.primaryBlue, borderRadius: BorderRadius.circular(8)), child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text('${r.data.day}', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)), Text('${r.data.month}'.padLeft(2, '0'), style: const TextStyle(color: Colors.white, fontSize: 10))]))),
                                 const SizedBox(width: 16),
                                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                  Row(children: [const Icon(Icons.science, color: Color(0xFF00324A), size: 16), const SizedBox(width: 8), Flexible(child: Text('${r.hormonio}: ${r.valor.toStringAsFixed(2)}', overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFF00324A), fontSize: 16, fontWeight: FontWeight.w600)))]),
+                                  Row(children: [const Icon(Icons.science, color: AppTheme.primaryBlue, size: 16), const SizedBox(width: 8), Flexible(child: Text('${r.hormonio}: ${r.valor.toStringAsFixed(2)}', overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 16, fontWeight: FontWeight.w600)))]),
                                   const SizedBox(height: 6),
-                                  Row(children: [const Icon(Icons.event, color: Color(0xFF00324A), size: 14), const SizedBox(width: 6), Text(_fmtDate(r.data), style: const TextStyle(color: Color(0xFF00324A), fontSize: 14))]),
+                                  Row(children: [const Icon(Icons.event, color: AppTheme.primaryBlue, size: 14), const SizedBox(width: 6), Text(_fmtDate(r.data), style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 14))]),
                                 ])),
                               ]),
                             );
@@ -181,12 +202,11 @@ class HormonalScreen extends StatelessWidget {
                       ]),
                     ),
                   ),
-                ],
+                ),
               ],
+            ],
             );
-          }),
-        ),
-      ),
+        }),
     );
   }
 }
@@ -203,7 +223,7 @@ class _HormonalChart extends StatelessWidget {
         elevation: 0,
         child: SizedBox(
           height: 220,
-          child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.insights_outlined, size: 48, color: Color(0xFF00324A)), const SizedBox(height: 8), Text('common_no_data_period'.tr, style: const TextStyle(color: Color(0xFF00324A)))])),
+          child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.insights_outlined, size: 48, color: AppTheme.primaryBlue), const SizedBox(height: 8), Text('common_no_data_period'.tr, style: const TextStyle(color: AppTheme.primaryBlue))])),
         ),
       );
     }
@@ -233,13 +253,13 @@ class _HormonalChart extends StatelessWidget {
                   final i = value.toInt();
                   if (i < 0 || i >= sorted.length) return const SizedBox.shrink();
                   final d = sorted[i].data;
-                  return SideTitleWidget(axisSide: meta.axisSide, space: 6, child: Text('${d.day}', style: const TextStyle(color: Color(0xFF00324A), fontSize: 10)));
+                  return SideTitleWidget(axisSide: meta.axisSide, space: 6, child: Text('${d.day}', style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 10)));
                 })),
-                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 36, getTitlesWidget: (value, meta) => Text(value.toStringAsFixed(0), style: const TextStyle(color: Color(0xFF00324A), fontSize: 10)))),
+                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 36, getTitlesWidget: (value, meta) => Text(value.toStringAsFixed(0), style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 10)))),
                 topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
-              borderData: FlBorderData(show: true, border: Border.all(color: const Color(0xFF00324A).withOpacity(0.15), width: 1)),
+              borderData: FlBorderData(show: true, border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.15), width: 1)),
               minX: 0,
               maxX: (sorted.length - 1).toDouble(),
               minY: (sorted.map((e) => e.valor).reduce((a, b) => a < b ? a : b) - 1).clamp(0, double.infinity),
@@ -267,7 +287,7 @@ class _HormonalChart extends StatelessWidget {
 Color _seriesColor(String key) {
   // paleta simples baseada no hash do texto
   final colors = [
-    const Color(0xFF00324A),
+    AppTheme.primaryBlue,
     const Color(0xFF1E88E5),
     const Color(0xFF43A047),
     const Color(0xFFF4511E),
@@ -292,7 +312,7 @@ class _HormonalSelectionBar extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('horm_in_chart'.tr, style: const TextStyle(color: Color(0xFF00324A), fontWeight: FontWeight.w600)),
+            Text('horm_in_chart'.tr, style: const TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -309,8 +329,8 @@ class _HormonalSelectionBar extends StatelessWidget {
                       c.hormoniosSelecionados.remove(h);
                     }
                   },
-                  selectedColor: const Color(0xFF00324A).withOpacity(0.15),
-                  checkmarkColor: const Color(0xFF00324A),
+                  selectedColor: AppTheme.primaryBlue.withOpacity(0.15),
+                  checkmarkColor: AppTheme.primaryBlue,
                 );
               }).toList(),
             ),
