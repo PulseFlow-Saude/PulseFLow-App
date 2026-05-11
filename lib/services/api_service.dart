@@ -461,6 +461,11 @@ class ApiService {
 
       final dataStr = '${data.year.toString().padLeft(4, '0')}-${data.month.toString().padLeft(2, '0')}-${data.day.toString().padLeft(2, '0')}';
 
+      String? pacienteId;
+      try {
+        pacienteId = Get.find<AuthService>().currentUser?.id;
+      } catch (_) {}
+
       final requestBody = {
         'medicoId': medicoId,
         'data': dataStr,
@@ -468,6 +473,7 @@ class ApiService {
         'horaFim': horaFim,
         'tipoConsulta': tipoConsulta,
         'motivoConsulta': motivoConsulta,
+        if (pacienteId != null && pacienteId.isNotEmpty) 'pacienteId': pacienteId,
         if (observacoes != null && observacoes.isNotEmpty) 'observacoes': observacoes,
         if (duracao != null) 'duracao': duracao,
         if (endereco != null) 'endereco': endereco,
@@ -486,8 +492,14 @@ class ApiService {
       } else {
         String errorMessage = 'Erro desconhecido';
         try {
-          final errorData = jsonDecode(response.body);
-          errorMessage = errorData['message'] ?? errorMessage;
+          final decoded = jsonDecode(response.body);
+          if (decoded is Map<String, dynamic>) {
+            errorMessage = decoded['message']?.toString() ??
+                decoded['error']?.toString() ??
+                decoded['erro']?.toString() ??
+                decoded['msg']?.toString() ??
+                errorMessage;
+          }
           
           if (errorMessage.toLowerCase().contains('token inválido') || 
               errorMessage.toLowerCase().contains('token expirado') ||

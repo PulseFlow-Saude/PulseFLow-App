@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'dart:io' show Platform;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import '../config/app_config.dart';
 import 'firebase_bootstrap.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -21,6 +25,11 @@ class NotificationService extends GetxService {
   String? _fcmToken;
   String? get fcmToken => _fcmToken;
 
+  StreamSubscription<RemoteMessage>? _onMessageSubscription;
+  StreamSubscription<RemoteMessage>? _onOpenedSubscription;
+  StreamSubscription<String>? _onTokenRefreshSubscription;
+  bool _fcmListenersAttached = false;
+
   // Notificações locais
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
@@ -31,29 +40,37 @@ class NotificationService extends GetxService {
   @override
   Future<void> onInit() async {
     super.onInit();
+    // Não awaits longos aqui — evita jank quando o Isolate principal já está a pintar/login.
+    unawaited(_bootstrapDeferredNotificationStack());
+  }
 
-         try {
-           await _initializeLocalNotifications();
-         } catch (e) {
-           // Erro ao inicializar notificações locais
-         }
+  Future<void> _bootstrapDeferredNotificationStack() async {
+    await Future<void>.delayed(const Duration(milliseconds: 450));
 
-         try {
-           await _initializeFirebaseMessaging();
-         } catch (e) {
-           // Firebase não disponível
-         }
+    try {
+      await _initializeLocalNotificationsCore();
+    } catch (_) {}
+
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+
+    try {
+      await _requestPermissions();
+    } catch (_) {}
+
+    try {
+      await _initializeFirebaseMessaging();
+    } catch (_) {}
 
     _accessRequestChecker.startPeriodicCheck();
   }
 
-  /// Inicializar notificações locais
-  Future<void> _initializeLocalNotifications() async {
+  /// Sem pedir permissão no próprio Darwin init (combinado com atrasos evita avalanche no arranque).
+  Future<void> _initializeLocalNotificationsCore() async {
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
     const initSettings = InitializationSettings(
@@ -67,7 +84,6 @@ class NotificationService extends GetxService {
     );
 
     await NotificationChannels.registerAllChannels(_localNotifications);
-    await _requestPermissions();
   }
 
   /// Inicializar Firebase Messaging
@@ -75,6 +91,7 @@ class NotificationService extends GetxService {
     if (!AppConfig.useFirebase) return;
     await FirebaseBootstrap.ensureInitialized();
     if (!FirebaseBootstrap.isReady) return;
+    if (_fcmListenersAttached) return;
     try {
       _firebaseMessaging = FirebaseMessaging.instance;
       _firebaseAvailable = true;
@@ -89,70 +106,128 @@ class NotificationService extends GetxService {
         sound: true,
       );
 
+      // iOS em foreground: com alert=true o sistema **e** [onMessage] mostravam notificação = duplicado.
+      // Só a notificação local (som/alerta vêm do [NotificationBuilders]).
       await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-        alert: true,
+        alert: false,
         badge: true,
-        sound: true,
+        sound: false,
       );
 
-      if (Platform.isIOS) {
-        await _waitForApnsToken();
-      }
-
-      await _obtainAndPersistFcmToken();
-      _firebaseMessaging!.onTokenRefresh.listen((newToken) async {
-        _fcmToken = newToken;
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('fcm_token', newToken);
-      });
-
-      FirebaseMessaging.onMessage.listen(
-        (message) => FirebaseHandlers.handleForegroundMessage(message, _localNotifications),
+      await _onTokenRefreshSubscription?.cancel();
+      _onTokenRefreshSubscription = _firebaseMessaging!.onTokenRefresh.listen(
+        (newToken) async {
+          try {
+            _fcmToken = newToken;
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('fcm_token', newToken);
+          } catch (e, st) {
+            if (kDebugMode) {
+              debugPrint('[Oryon][FCM] onTokenRefresh: $e\n$st');
+            }
+          }
+        },
       );
-      
-      FirebaseMessaging.onMessageOpenedApp.listen(FirebaseHandlers.handleBackgroundMessage);
 
-      RemoteMessage? initialMessage = await _firebaseMessaging!.getInitialMessage();
+      await _onMessageSubscription?.cancel();
+      _onMessageSubscription = FirebaseMessaging.onMessage.listen(
+        (message) => FirebaseHandlers.handleForegroundMessage(
+          message,
+          _localNotifications,
+        ),
+      );
+
+      await _onOpenedSubscription?.cancel();
+      _onOpenedSubscription =
+          FirebaseMessaging.onMessageOpenedApp.listen(FirebaseHandlers.handleBackgroundMessage);
+
+      final RemoteMessage? initialMessage =
+          await _firebaseMessaging!.getInitialMessage();
       if (initialMessage != null) {
         FirebaseHandlers.handleBackgroundMessage(initialMessage);
       }
+
+      _fcmListenersAttached = true;
+
+      // APNS + getToken podem falhar ou demorar — nunca deixar exceção solta (unawaited).
+      unawaited(_iosApnsAndFcmTokenWorkSafe());
     } catch (e) {
+      _detachFcmListeners();
       _firebaseAvailable = false;
+    }
+  }
+
+  void _detachFcmListeners() {
+    _onMessageSubscription?.cancel();
+    _onOpenedSubscription?.cancel();
+    _onTokenRefreshSubscription?.cancel();
+    _onMessageSubscription = null;
+    _onOpenedSubscription = null;
+    _onTokenRefreshSubscription = null;
+    _fcmListenersAttached = false;
+  }
+
+  Future<void> _iosApnsAndFcmTokenWorkSafe() async {
+    try {
+      await _iosApnsAndFcmTokenWork();
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('[Oryon][FCM] _iosApnsAndFcmTokenWork: $e\n$st');
+      }
+    }
+  }
+
+  Future<void> _iosApnsAndFcmTokenWork() async {
+    if (_firebaseMessaging == null) return;
+    if (Platform.isIOS) {
+      for (var i = 0; i < 8; i++) {
+        final apnsToken = await _firebaseMessaging!.getAPNSToken();
+        if (apnsToken != null && apnsToken.isNotEmpty) break;
+        await Future<void>.delayed(const Duration(milliseconds: 400));
+      }
+    }
+    await _obtainAndPersistFcmToken();
+    // Segunda tentativa após rede/APNS (erro "unknown" costuma ser timing no simulador).
+    if (_fcmToken == null || _fcmToken!.isEmpty) {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      await _obtainAndPersistFcmToken();
     }
   }
 
   Future<void> _obtainAndPersistFcmToken() async {
     if (_firebaseMessaging == null) return;
-    final token = await _firebaseMessaging!.getToken();
-    if (token == null || token.isEmpty) return;
-    _fcmToken = token;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('fcm_token', token);
-  }
-
-  Future<void> _waitForApnsToken() async {
-    if (_firebaseMessaging == null || !Platform.isIOS) return;
-    for (var i = 0; i < 8; i++) {
-      final apnsToken = await _firebaseMessaging!.getAPNSToken();
-      if (apnsToken != null && apnsToken.isNotEmpty) return;
-      await Future<void>.delayed(const Duration(milliseconds: 500));
+    try {
+      final token = await _firebaseMessaging!.getToken();
+      if (token == null || token.isEmpty) return;
+      _fcmToken = token;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('fcm_token', token);
+    } on FirebaseException catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          '[Oryon][FCM] getToken FirebaseException: ${e.code} ${e.message}',
+        );
+      }
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('[Oryon][FCM] getToken: $e\n$st');
+      }
     }
   }
 
-         /// Solicitar permissões
-         Future<void> _requestPermissions() async {
-           final androidResult = await _localNotifications
-               .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-               ?.requestNotificationsPermission();
+  Future<void> _requestPermissions() async {
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
 
-           final iosResult = await _localNotifications
-               .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
-               ?.requestPermissions(
-                 alert: true,
-                 badge: true,
-                 sound: true,
-               );
-         }
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+  }
 
   // ==================== NOTIFICAÇÕES PÚBLICAS ====================
 
@@ -176,8 +251,11 @@ class NotificationService extends GetxService {
       viewRequestLabel: viewRequest,
     );
 
+    // Id estável por pedido — nova chamada substitui a mesma notificação em vez de empilhar.
+    final notifId = (requestId ?? doctorName + specialty).hashCode & 0x7fffffff;
+
     await _localNotifications.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      notifId == 0 ? 1 : notifId,
       '🩺 ${'notif_access_title_upper'.tr}',
       bodyMsg,
       notificationDetails,
@@ -319,6 +397,7 @@ class NotificationService extends GetxService {
 
   @override
   void onClose() {
+    _detachFcmListeners();
     _accessRequestChecker.dispose();
     super.onClose();
   }

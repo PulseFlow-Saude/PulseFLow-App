@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../models/patient.dart';
+import '../../utils/residence_date_format.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../services/api_service.dart';
@@ -54,7 +55,10 @@ class ProfileController extends GetxController {
   Patient? get patient => _patient.value;
   String? get profilePhoto => _profilePhoto.value;
   bool get isEditing => _isEditing.value;
-  String get birthDateDisplay => _formatDate(_patient.value?.birthDate);
+  String get birthDateDisplay => ResidenceDateFormat.formatDate(
+        _patient.value?.birthDate,
+        _patient.value?.residenceCountry,
+      );
 
   @override
   void onInit() {
@@ -182,13 +186,9 @@ class ProfileController extends GetxController {
     _populateControllers(current);
   }
 
-  /// EUA: documento é SSN (`socialSecurityNumber`), não CPF.
-  bool patientShowsUsSocialSecurity(Patient? p) {
-    if (p == null) return false;
-    if (p.residenceCountry == 'US') return true;
-    final ssn = p.socialSecurityNumber?.trim();
-    return ssn != null && ssn.isNotEmpty;
-  }
+  /// Residência EUA: exibir apenas SSN, sem CPF/RG.
+  bool patientShowsUsSocialSecurity(Patient? p) =>
+      (p?.residenceCountry ?? '').toUpperCase() == 'US';
 
   static String formatSsnDisplay(String digitsOrMasked) {
     final d = digitsOrMasked.replaceAll(RegExp(r'\D'), '');
@@ -200,22 +200,22 @@ class ProfileController extends GetxController {
     nameController.text = data.name;
     emailController.text = data.email;
     phoneController.text = data.phone ?? '';
-    birthDateController.text = _formatDate(data.birthDate);
-    final ssn = data.socialSecurityNumber?.trim();
-    if (ssn != null && ssn.isNotEmpty) {
-      cpfController.text = ProfileController.formatSsnDisplay(ssn);
+    birthDateController.text = ResidenceDateFormat.formatDate(
+      data.birthDate,
+      data.residenceCountry,
+    );
+    if (patientShowsUsSocialSecurity(data)) {
+      final ssn = data.socialSecurityNumber?.trim();
+      cpfController.text = (ssn != null && ssn.isNotEmpty)
+          ? ProfileController.formatSsnDisplay(ssn)
+          : '';
+      rgController.text = '';
     } else {
       cpfController.text = data.cpf;
+      rgController.text = data.rg;
     }
-    rgController.text = data.rg;
     emergencyContactController.text = data.emergencyContact ?? '';
     emergencyPhoneController.text = data.emergencyPhone ?? '';
-  }
-
-  // Formata data para exibição
-  String _formatDate(DateTime? date) {
-    if (date == null) return '';
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   // Seleciona foto da galeria
@@ -400,6 +400,8 @@ class ProfileController extends GetxController {
       return;
     }
 
+    final isUs = patientShowsUsSocialSecurity(currentPatient);
+
     // Cria o paciente atualizado
     final updatedPatient = Patient(
       id: currentPatient.id,
@@ -409,8 +411,12 @@ class ProfileController extends GetxController {
       phone: phoneController.text.trim().isEmpty ? '' : phoneController.text.trim(),
       secondaryPhone: currentPatient.secondaryPhone,
       birthDate: currentPatient.birthDate,
-      cpf: cpfController.text.trim().isEmpty ? '' : cpfController.text.trim(),
-      rg: rgController.text.trim().isEmpty ? '' : rgController.text.trim(),
+      cpf: isUs
+          ? currentPatient.cpf
+          : (cpfController.text.trim().isEmpty ? '' : cpfController.text.trim()),
+      rg: isUs
+          ? currentPatient.rg
+          : (rgController.text.trim().isEmpty ? '' : rgController.text.trim()),
       gender: currentPatient.gender,
       maritalStatus: currentPatient.maritalStatus,
       nationality: currentPatient.nationality,

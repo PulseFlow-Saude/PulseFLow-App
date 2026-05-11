@@ -11,17 +11,37 @@ import 'notification_storage.dart';
 
 /// Handlers para mensagens Firebase
 class FirebaseHandlers {
+  static final List<_DedupeEntry> _recentForeground = [];
+  static const _dedupeWindow = Duration(seconds: 4);
+
   /// Handler para mensagens em foreground
   static void handleForegroundMessage(
     RemoteMessage message,
     FlutterLocalNotificationsPlugin localNotifications,
   ) {
+    if (_isDuplicateForegroundDelivery(message)) return;
+
     _showLocalNotification(
       localNotifications,
       message.notification?.title ?? 'Oryon Health',
       message.notification?.body ?? 'notif_new_message'.tr,
       message.data,
     );
+  }
+
+  static bool _isDuplicateForegroundDelivery(RemoteMessage message) {
+    final id = message.messageId ??
+        '${message.sentTime?.millisecondsSinceEpoch}_${message.notification?.title}_${message.notification?.body}';
+    final now = DateTime.now();
+    _recentForeground.removeWhere(
+      (e) => now.difference(e.at) > _dedupeWindow,
+    );
+    if (_recentForeground.any((e) => e.id == id)) return true;
+    _recentForeground.add(_DedupeEntry(id, now));
+    while (_recentForeground.length > 32) {
+      _recentForeground.removeAt(0);
+    }
+    return false;
   }
 
   /// Handler para mensagens em background (app minimizado)
@@ -41,8 +61,11 @@ class FirebaseHandlers {
     String body,
     Map<String, dynamic> data,
   ) async {
+    final stableKey = data['notificationId']?.toString() ?? '${title}_$body';
+    final nid = stableKey.hashCode & 0x7fffffff;
+
     await plugin.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      nid == 0 ? 1 : nid,
       title,
       body,
       NotificationBuilders.createGeneralNotification(),
@@ -62,6 +85,12 @@ class FirebaseHandlers {
       link: link,
     );
   }
+}
+
+class _DedupeEntry {
+  _DedupeEntry(this.id, this.at);
+  final String id;
+  final DateTime at;
 }
 
 /// Handler global para mensagens em background (app fechado)

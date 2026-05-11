@@ -13,24 +13,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeIn);
-    _fadeController.forward();
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,10 +40,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             ),
             child: SafeArea(
               bottom: false,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: _buildContent(context, isLandscape, size),
-              ),
+              child: _buildContent(context, isLandscape, size),
             ),
           ),
         );

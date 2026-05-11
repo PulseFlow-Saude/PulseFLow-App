@@ -12,6 +12,8 @@ import '../../widgets/pulse_blue_screen_shell.dart';
 import '../../services/auth_service.dart';
 import '../home/home_controller.dart';
 import '../../utils/greeting_utils.dart';
+import '../../utils/residence_date_format.dart';
+import '../institutional/settings_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -174,7 +176,10 @@ class ProfileScreen extends StatelessWidget {
       final isEditing = controller.isEditing;
       final patient = controller.patient;
       final fullName = _displayValue(patient?.name);
-      final createdAt = _formatDateDisplay(patient?.createdAt);
+      final createdAt = _formatDateDisplay(
+        patient?.createdAt,
+        patient?.residenceCountry,
+      );
       final greeting = _resolveGreeting();
       final displayName = _combineNames(
         _extractFirstName(patient?.name),
@@ -355,23 +360,28 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Builder(builder: (_) {
               final p = controller.patient;
-              final showSsn =
-                  controller.patientShowsUsSocialSecurity(p);
+              final showSsn = controller.patientShowsUsSocialSecurity(p);
+              if (showSsn) {
+                return _buildFieldTile(
+                  label: 'profile_ssn_us'.tr,
+                  controller: controller.cpfController,
+                  keyboardType: TextInputType.number,
+                  isEditing: false,
+                );
+              }
               return _buildFieldRow(
                 children: [
                   _buildFieldTile(
-                    label:
-                        showSsn ? 'profile_ssn_us'.tr : 'profile_cpf'.tr,
+                    label: 'profile_cpf'.tr,
                     controller: controller.cpfController,
                     keyboardType: TextInputType.number,
                     isEditing: false,
                   ),
-                  if (!showSsn)
-                    _buildFieldTile(
-                      label: 'profile_rg'.tr,
-                      controller: controller.rgController,
-                      isEditing: isEditing,
-                    ),
+                  _buildFieldTile(
+                    label: 'profile_rg'.tr,
+                    controller: controller.rgController,
+                    isEditing: isEditing,
+                  ),
                 ],
               );
             }),
@@ -760,12 +770,9 @@ class ProfileScreen extends StatelessWidget {
     return parts.length > 1 ? parts.last : 'profile_lastname_not_informed'.tr;
   }
 
-  String _formatDateDisplay(DateTime? date) {
+  String _formatDateDisplay(DateTime? date, [String? residenceCountry]) {
     if (date == null) return 'profile_not_informed'.tr;
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final year = date.year.toString();
-    return '$day/$month/$year';
+    return ResidenceDateFormat.formatDate(date, residenceCountry);
   }
 
   String _combineNames(String firstName, String lastName, String fullName) {
@@ -1160,16 +1167,26 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Future<void> _selectDate(ProfileController controller) async {
+    final appLocale = Get.isRegistered<SettingsController>()
+        ? Get.find<SettingsController>().effectiveLocale
+        : const Locale('pt', 'BR');
+    final pickerLocale = ResidenceDateFormat.datePickerLocale(
+      residenceCountry: controller.patient?.residenceCountry,
+      appLocale: appLocale,
+    );
     final DateTime? picked = await showDatePicker(
       context: Get.context!,
       initialDate: DateTime.now().subtract(const Duration(days: 365 * 25)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      locale: pickerLocale,
     );
-    
+
     if (picked != null) {
-      controller.birthDateController.text = 
-          '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+      controller.birthDateController.text = ResidenceDateFormat.formatDate(
+        picked,
+        controller.patient?.residenceCountry,
+      );
     }
   }
 }

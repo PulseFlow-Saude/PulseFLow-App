@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+/// Tipografia só com [TextStyle] — evita [GoogleFonts] no primeiro layout (custoso até cache).
 class AppTheme {
   // Cores principais
   static const Color primaryBlue = Color(0xFF00324A); // Azul principal
@@ -19,48 +19,47 @@ class AppTheme {
   static const Color error = Color(0xFFE53935);
   static const Color warning = Color(0xFFFFA726);
 
-  // Estilos de texto
-  static TextStyle get headlineSmall => GoogleFonts.montserrat(
+  static TextStyle get headlineSmall => const TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.bold,
         color: textPrimary,
         letterSpacing: 0.5,
       );
 
-  static TextStyle get titleLarge => GoogleFonts.montserrat(
+  static TextStyle get titleLarge => const TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.bold,
         color: textPrimary,
         letterSpacing: 0.5,
       );
 
-  static TextStyle get titleMedium => GoogleFonts.montserrat(
+  static TextStyle get titleMedium => const TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.w600,
         color: textPrimary,
         letterSpacing: 0.25,
       );
 
-  static TextStyle get titleSmall => GoogleFonts.montserrat(
+  static TextStyle get titleSmall => const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: textPrimary,
         letterSpacing: 0.15,
       );
 
-  static TextStyle get bodyLarge => GoogleFonts.montserrat(
+  static TextStyle get bodyLarge => const TextStyle(
         fontSize: 16,
         color: textPrimary,
         letterSpacing: 0.15,
       );
 
-  static TextStyle get bodyMedium => GoogleFonts.montserrat(
+  static TextStyle get bodyMedium => const TextStyle(
         fontSize: 14,
         color: textSecondary,
         letterSpacing: 0.25,
       );
 
-  static TextStyle get bodySmall => GoogleFonts.montserrat(
+  static TextStyle get bodySmall => const TextStyle(
         fontSize: 12,
         color: textSecondary,
         letterSpacing: 0.4,
@@ -128,13 +127,21 @@ class AppTheme {
     ],
   );
 
-  static final SystemUiOverlayStyle blueSystemOverlayStyle = SystemUiOverlayStyle.light.copyWith(
+  /// Hora, bateria e ícones da status bar em **branco/claro** (iPhone e Android).
+  ///
+  /// iOS: [statusBarBrightness] `Brightness.dark` corresponde a conteúdo **claro** na barra de estado.
+  /// Usar com [AnnotatedRegion] na raiz do app e com [AppBarTheme.systemOverlayStyle].
+  static final SystemUiOverlayStyle lightStatusBarOverlay =
+      SystemUiOverlayStyle.light.copyWith(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
     systemNavigationBarColor: primaryBlue,
     systemNavigationBarIconBrightness: Brightness.light,
   );
+
+  /// Nome legado — mesmo que [lightStatusBarOverlay].
+  static SystemUiOverlayStyle get blueSystemOverlayStyle => lightStatusBarOverlay;
 
   /// Mesmo gradiente da área superior da home (telas com topo azul).
   static BoxDecoration get blueScreenGradientDecoration => BoxDecoration(

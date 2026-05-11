@@ -31,6 +31,7 @@ abstract class Routes {
   static const HEART_RATE_HISTORY = '/heart-rate-history';
   static const STEPS_HISTORY = '/steps-history';
   static const SLEEP_HISTORY = '/sleep-history';
+  static const OXYGEN_RESPIRATORY_HISTORY = '/oxygen-respiratory-history';
   static const EXAME_UPLOAD = '/exame-upload';
   static const EXAME_LIST = '/exame-list';
   static const HORMONAL = '/hormonal';

@@ -882,15 +882,16 @@ class AppointmentSchedulerController extends GetxController {
       
       String errorMessage = e.toString().replaceAll('Exception: ', '');
       
-      if (errorMessage.toLowerCase().contains('já existe') || 
-          errorMessage.toLowerCase().contains('horário') ||
-          errorMessage.toLowerCase().contains('conflito')) {
+      final lower = errorMessage.toLowerCase();
+      if (lower.contains('já existe') ||
+          lower.contains('horário') ||
+          lower.contains('conflito')) {
         errorMessage = 'appt_slot_unavailable_msg'.tr;
-      } else if (errorMessage.toLowerCase().contains('token') || 
-                 errorMessage.toLowerCase().contains('sessão')) {
+      } else if (lower.contains('conexão ativa') || lower.contains('conexao ativa')) {
+        errorMessage = 'appt_error_server_active_connection'.tr;
+      } else if (lower.contains('token') || lower.contains('sessão')) {
         errorMessage = 'appt_session_expired'.tr;
-      } else if (errorMessage.toLowerCase().contains('data') && 
-                 errorMessage.toLowerCase().contains('futura')) {
+      } else if (lower.contains('data') && lower.contains('futura')) {
         errorMessage = 'appt_date_must_be_future'.tr;
       }
       

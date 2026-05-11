@@ -1,8 +1,12 @@
+import 'dart:ui' show Locale;
+
 import 'package:get/get.dart';
 
-/// Mapeamento de especialidades médicas PT -> EN para exibição traduzida.
-/// Usado quando a API retorna nomes em português e o app está em inglês.
-/// Suporta variações de capitalização e nomes alternativos.
+import '../screens/institutional/settings_controller.dart';
+
+/// Mapeamento de especialidades médicas PT ↔ EN para exibição no idioma do app.
+/// A API pode enviar nomes em português ou em inglês; o texto exibido segue
+/// [SettingsController.effectiveLocale] (alinhado ao [GetMaterialApp.locale]).
 class SpecialtyTranslations {
   static const Map<String, String> _ptToEn = {
     'Acupuntura': 'Acupuncture',
@@ -127,18 +131,82 @@ class SpecialtyTranslations {
     return _normalizedLookup!;
   }
 
+  /// PT normalizado → forma canônica PT (primeira chave do mapa).
+  static Map<String, String>? _ptNormToCanonCache;
+
+  static Map<String, String> get _ptNormToCanon {
+    _ptNormToCanonCache ??= () {
+      final m = <String, String>{};
+      for (final key in _ptToEn.keys) {
+        final nk = _normalizeKey(key);
+        m.putIfAbsent(nk, () => key);
+      }
+      return m;
+    }();
+    return _ptNormToCanonCache!;
+  }
+
+  /// EN normalizado → inglês canônico (valor do mapa).
+  static Map<String, String>? _enNormToEnCache;
+
+  static Map<String, String> get _enNormToEn {
+    _enNormToEnCache ??= () {
+      final m = <String, String>{};
+      for (final e in _ptToEn.entries) {
+        final nk = _normalizeKey(e.value);
+        m.putIfAbsent(nk, () => e.value);
+      }
+      return m;
+    }();
+    return _enNormToEnCache!;
+  }
+
+  /// EN normalizado → PT canônico (chave do mapa).
+  static Map<String, String>? _enNormToPtCache;
+
+  static Map<String, String> get _enNormToPt {
+    _enNormToPtCache ??= () {
+      final m = <String, String>{};
+      for (final e in _ptToEn.entries) {
+        final nk = _normalizeKey(e.value);
+        m.putIfAbsent(nk, () => e.key);
+      }
+      return m;
+    }();
+    return _enNormToPtCache!;
+  }
+
   static String _normalizeKey(String s) =>
       s.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
 
-  /// Retorna o nome da especialidade no idioma atual do app.
-  /// Se o app está em inglês e há tradução, retorna em inglês; senão retorna o original.
+  static Locale _effectiveAppLocale() {
+    try {
+      if (Get.isRegistered<SettingsController>()) {
+        return Get.find<SettingsController>().effectiveLocale;
+      }
+    } catch (_) {}
+    return Get.locale ?? const Locale('pt', 'BR');
+  }
+
+  /// Retorna o nome da especialidade no idioma atual do app (pt / en).
   static String translate(String? specialtyName) {
     if (specialtyName == null || specialtyName.isEmpty) return specialtyName ?? '';
-    final locale = Get.locale;
-    final isEnglish = locale != null &&
-        (locale.languageCode == 'en' || locale.toString().startsWith('en_'));
-    if (!isEnglish) return specialtyName;
+    final locale = _effectiveAppLocale();
+    final lang = locale.languageCode.toLowerCase();
     final trimmed = specialtyName.trim();
-    return _ptToEn[trimmed] ?? _normalizedMap[_normalizeKey(trimmed)] ?? trimmed;
+    final nk = _normalizeKey(trimmed);
+
+    if (lang == 'en') {
+      final fromPt = _ptToEn[trimmed] ?? _normalizedMap[nk];
+      if (fromPt != null) return fromPt;
+      return _enNormToEn[nk] ?? trimmed;
+    }
+    if (lang == 'pt') {
+      if (_ptToEn.containsKey(trimmed)) return trimmed;
+      final canonPt = _ptNormToCanon[nk];
+      if (canonPt != null) return canonPt;
+      return _enNormToPt[nk] ?? trimmed;
+    }
+    return trimmed;
   }
 }

@@ -138,7 +138,6 @@ class SettingsController extends GetxController {
     darkTheme.value = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_darkThemeKey, value);
-    Get.changeThemeMode(value ? ThemeMode.dark : ThemeMode.light);
   }
 
   Future<void> changeLanguage(String value) async {
@@ -151,6 +150,7 @@ class SettingsController extends GetxController {
             value.split('_').first,
             value.split('_').length > 1 ? value.split('_')[1] : '',
           );
+    Get.locale = locale;
     Get.updateLocale(locale);
     try {
       await NotificationService.instance.reregisterChannelsForCurrentLocale();

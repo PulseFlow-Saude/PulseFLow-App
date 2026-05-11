@@ -56,7 +56,7 @@ class _ProfessionalRegistrationScreenState extends State<ProfessionalRegistratio
     final isLandscape = size.width > size.height;
     
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

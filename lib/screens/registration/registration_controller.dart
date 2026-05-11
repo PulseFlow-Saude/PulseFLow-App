@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'dart:io';
 import 'dart:convert';
@@ -9,6 +8,7 @@ import '../../data/us_state_codes.dart';
 import '../../data/world_nationality_display.dart';
 import '../../models/patient.dart';
 import '../../utils/patient_catalog_normalize.dart';
+import '../../utils/residence_date_format.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
 import '../institutional/settings_controller.dart';
@@ -154,6 +154,14 @@ class RegistrationController extends GetxController with SafeControllerMixin {
     neighborhoodController.clear();
     cityController.clear();
     state.value = null;
+    _syncBirthDateDisplayFromSelection();
+  }
+
+  void _syncBirthDateDisplayFromSelection() {
+    final d = selectedDate.value;
+    if (d == null) return;
+    birthDateController.text =
+        ResidenceDateFormat.formatDate(d, residenceCountry.value);
   }
 
   // Validators (usam chaves de tradução via validate*)
@@ -475,13 +483,18 @@ class RegistrationController extends GetxController with SafeControllerMixin {
 
   Future<void> selectDate(BuildContext context) async {
     try {
+      final appLocale = Get.find<SettingsController>().effectiveLocale;
+      final pickerLocale = ResidenceDateFormat.datePickerLocale(
+        residenceCountry: residenceCountry.value,
+        appLocale: appLocale,
+      );
       final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: DateTime.now().subtract(
             const Duration(days: 365 * 18)), // Começa com 18 anos atrás
         firstDate: DateTime(1900),
         lastDate: DateTime.now(),
-        locale: Get.find<SettingsController>().effectiveLocale,
+        locale: pickerLocale,
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
@@ -499,7 +512,8 @@ class RegistrationController extends GetxController with SafeControllerMixin {
 
       if (picked != null) {
         selectedDate.value = picked;
-        birthDateController.text = DateFormat('dd/MM/yyyy').format(picked);
+        birthDateController.text =
+            ResidenceDateFormat.formatDate(picked, residenceCountry.value);
       }
     } catch (e) {
       Get.snackbar(

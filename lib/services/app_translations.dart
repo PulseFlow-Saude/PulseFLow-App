@@ -30,6 +30,7 @@ class AppTranslations extends Translations {
           'menu_profile': 'Perfil',
           'menu_settings': 'Configurações',
           'menu_institutional': 'Institucional',
+          'splash_tagline': 'Cuidado integrado à sua saúde',
           'inst_about_title': 'Sobre nós',
           'inst_about_subtitle': 'Conheça o ecossistema Oryon Health',
           'inst_about_intro':
@@ -696,6 +697,8 @@ class AppTranslations extends Translations {
           'appt_booked_success': 'Consulta agendada',
           'appt_booked_success_msg': 'Seu horário com @name foi reservado com sucesso.',
           'appt_error_booking': 'Erro ao agendar',
+          'appt_error_server_active_connection':
+              'O servidor exige conexão ativa com o médico para agendar. Peça ao time da API para permitir agendamento sem essa exigência.',
           'appt_session_expired': 'Sua sessão expirou. Por favor, faça login novamente.',
           'appt_cancelled_success': 'Consulta cancelada',
           'appt_cancelled_success_msg': 'Seu agendamento foi cancelado com sucesso.',
@@ -1279,6 +1282,7 @@ class AppTranslations extends Translations {
           'menu_profile': 'Profile',
           'menu_settings': 'Settings',
           'menu_institutional': 'Institutional',
+          'splash_tagline': 'Integrated care for your health',
           'inst_about_title': 'About us',
           'inst_about_subtitle': 'Meet the Oryon Health ecosystem',
           'inst_about_intro':
@@ -1943,6 +1947,8 @@ class AppTranslations extends Translations {
           'appt_booked_success': 'Appointment booked',
           'appt_booked_success_msg': 'Your appointment with @name has been successfully booked.',
           'appt_error_booking': 'Error booking',
+          'appt_error_server_active_connection':
+              'The server requires an active doctor connection to book. Ask your API team to allow scheduling without that requirement.',
           'appt_session_expired': 'Your session has expired. Please log in again.',
           'appt_cancelled_success': 'Appointment cancelled',
           'appt_cancelled_success_msg': 'Your appointment has been successfully cancelled.',
