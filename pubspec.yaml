@@ -43,6 +43,7 @@ dependencies:
   table_calendar: ^3.0.9
   pdf: ^3.10.7
   package_info_plus: ^8.0.0
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:

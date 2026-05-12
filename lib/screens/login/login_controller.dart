@@ -77,10 +77,23 @@ class LoginController extends GetxController with SafeControllerMixin {
       
       // Salvar credenciais se "Lembrar-me" estiver ativo
       await saveCredentials();
-      
+
+      final email = emailController.text.trim();
+      await _authService.clearBiometricCredentialsIfEmailMismatch(email);
+
+      if (await _authService.biometricStoredEmailMatches(email)) {
+        final patient = await _authService.tryLoginWithBiometric();
+        if (patient != null && patient.id != null) {
+          final pacienteController = Get.find<PacienteController>();
+          pacienteController.setPatientId(patient.id!);
+          Get.offAllNamed('/home');
+        }
+        return;
+      }
+
       // Novo fluxo: login inicial, gera e envia código 2FA
       final patientId = await _authService.loginWith2FA(
-        emailController.text.trim(),
+        email,
         passwordController.text,
       );
       
@@ -96,6 +109,7 @@ class LoginController extends GetxController with SafeControllerMixin {
         final args = <String, dynamic>{
           'patientId': patientId,
           'method': 'email',
+          'loginPassword': passwordController.text,
         };
         final plain = _authService.plaintext2FACodeForTesting;
         if (plain != null) {
@@ -128,4 +142,3 @@ class LoginController extends GetxController with SafeControllerMixin {
     }
   }
 } 
-

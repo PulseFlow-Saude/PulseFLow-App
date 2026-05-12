@@ -3,8 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'login_controller.dart';
+import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/language_icon_button.dart';
+import '../../widgets/round_progress_indicator.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -62,20 +64,19 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ],
       );
-    } else {
-      return Column(
-        children: [
-          Expanded(
-            flex: 2,
-            child: _buildLogoSection(context, size),
-          ),
-          Expanded(
-            flex: 5,
-            child: _buildFormSection(context, isLandscape, size),
-          ),
-        ],
-      );
     }
+    return Column(
+      children: [
+        Expanded(
+          flex: 2,
+          child: _buildLogoSection(context, size),
+        ),
+        Expanded(
+          flex: 5,
+          child: _buildFormSection(context, isLandscape, size),
+        ),
+      ],
+    );
   }
 
   Widget _buildLogoSection(BuildContext context, Size size) {
@@ -376,9 +377,20 @@ class _LoginScreenState extends State<LoginScreen> {
           child: ElevatedButton(
             onPressed: Get.find<LoginController>().isLoading.value
                 ? null
-                : () {
+                : () async {
+                    final ctrl = Get.find<LoginController>();
+                    final auth = Get.find<AuthService>();
+                    final email = ctrl.emailController.text.trim();
+                    if (email.isEmpty || !GetUtils.isEmail(email)) {
+                      _formKey.currentState?.validate();
+                      return;
+                    }
+                    if (await auth.biometricStoredEmailMatches(email)) {
+                      await ctrl.login();
+                      return;
+                    }
                     if (!_formKey.currentState!.validate()) return;
-                    Get.find<LoginController>().login();
+                    await ctrl.login();
                   },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
@@ -386,13 +398,10 @@ class _LoginScreenState extends State<LoginScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
             child: Get.find<LoginController>().isLoading.value
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
+                ? const RoundProgressIndicator(
+                    dimension: 24,
+                    strokeWidth: 3,
+                    color: Colors.white,
                   )
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,

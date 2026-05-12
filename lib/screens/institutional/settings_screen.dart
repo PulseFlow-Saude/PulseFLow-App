@@ -8,10 +8,24 @@ void _showLanguagePicker(BuildContext context) {
   LanguageIconButton.showLanguageModal(context);
 }
 
-class SettingsScreen extends StatelessWidget {
-  SettingsScreen({super.key});
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
 
-  final SettingsController controller = Get.find<SettingsController>();
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  late final SettingsController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<SettingsController>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.refreshBiometricLoginFlag();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +101,13 @@ class SettingsScreen extends StatelessWidget {
         _SettingsSection(
           title: 'inst_settings_section_account'.tr,
           children: [
+            Obx(() => _ToggleCard(
+                  label: 'inst_settings_biometric_label'.tr,
+                  description: 'inst_settings_biometric_desc'.tr,
+                  icon: Icons.fingerprint_rounded,
+                  value: controller.biometricLoginEnabled.value,
+                  onChanged: controller.toggleBiometricLogin,
+                )),
             Obx(() => _DangerCard(
                   label: 'inst_settings_delete_label'.tr,
                   description: 'inst_settings_delete_desc'.tr,

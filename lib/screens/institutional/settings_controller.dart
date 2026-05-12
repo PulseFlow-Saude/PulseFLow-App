@@ -8,6 +8,7 @@ import '../../services/notification_service.dart';
 import '../../services/notifications/notification_settings_constants.dart';
 import '../../services/patient_notification_prefs.dart';
 import '../../services/auth_service.dart';
+import '../../services/biometric_login_service.dart';
 import '../../routes/app_routes.dart';
 
 class SettingsController extends GetxController {
@@ -33,6 +34,7 @@ class SettingsController extends GetxController {
 
   final AuthService _authService = Get.find<AuthService>();
   final isDeletingAccount = false.obs;
+  final biometricLoginEnabled = false.obs;
 
   Completer<void>? _prefsLoadedCompleter;
 
@@ -49,6 +51,20 @@ class SettingsController extends GetxController {
     super.onInit();
     _prefsLoadedCompleter = Completer<void>();
     // Preferências: [ensurePreferencesLoaded] em main() (evita corrida / duplo load).
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    unawaited(refreshBiometricLoginFlag());
+  }
+
+  Future<void> refreshBiometricLoginFlag() async {
+    try {
+      biometricLoginEnabled.value = await _authService.biometricLoginEnabledIsOn();
+    } catch (_) {
+      biometricLoginEnabled.value = false;
+    }
   }
 
   /// Garante que as preferências foram carregadas (para uso em main antes de runApp).
@@ -133,6 +149,127 @@ class SettingsController extends GetxController {
     accessLogsEmail.value = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(PatientNotificationPrefs.accessLogsEmailKey, value);
+  }
+
+  Future<void> toggleBiometricLogin(bool value) async {
+    if (!value) {
+      await _authService.disableBiometricStoredCredentials();
+      biometricLoginEnabled.value = false;
+      return;
+    }
+
+    final supported = await BiometricLoginService.instance.isDeviceSupported;
+    if (!supported) {
+      Get.snackbar(
+        'auth_biometric_unavailable_title'.tr,
+        'auth_biometric_unavailable_body'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange.shade800,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    final plain = await _promptCurrentPasswordForBiometric();
+    if (plain == null || plain.isEmpty) {
+      return;
+    }
+
+    final valid = await _authService.verifyPasswordForCurrentUser(plain);
+    if (!valid) {
+      Get.snackbar(
+        'auth_error'.tr,
+        'inst_settings_biometric_wrong_password'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade600,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    final ok = await BiometricLoginService.instance.authenticate(
+      localizedReason: 'auth_biometric_reason_enable'.tr,
+    );
+    if (!ok) {
+      return;
+    }
+
+    final email = _authService.currentUser?.email.trim() ?? '';
+    if (email.isEmpty) {
+      Get.snackbar(
+        'auth_error'.tr,
+        'auth_email_invalid'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade600,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    await _authService.enableBiometricStoredCredentials(email, plain);
+    biometricLoginEnabled.value = true;
+
+    Get.snackbar(
+      'auth_biometric_enabled_title'.tr,
+      'auth_biometric_enabled_body'.tr,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.green.shade700,
+      colorText: Colors.white,
+    );
+  }
+
+  Future<String?> _promptCurrentPasswordForBiometric() async {
+    final ctrl = TextEditingController();
+    var obscure = true;
+    final result = await Get.dialog<String?>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'inst_settings_biometric_dialog_title'.tr,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: StatefulBuilder(
+          builder: (context, setSt) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('inst_settings_biometric_dialog_desc'.tr),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: ctrl,
+                  obscureText: obscure,
+                  decoration: InputDecoration(
+                    labelText: 'auth_password'.tr,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      ),
+                      onPressed: () => setSt(() => obscure = !obscure),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: null),
+            child: Text('inst_settings_delete_confirm_cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: ctrl.text.trim()),
+            child: Text('inst_settings_biometric_dialog_confirm'.tr),
+          ),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (result == null || result.isEmpty) {
+      return null;
+    }
+    return result;
   }
 
   Future<void> toggleDarkTheme(bool value) async {

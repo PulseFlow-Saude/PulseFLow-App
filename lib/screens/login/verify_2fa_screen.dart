@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/round_progress_indicator.dart';
+import 'widgets/biometric_first_login_sheet.dart';
 
 class Verify2FAScreen extends StatefulWidget {
   final String patientId;
@@ -27,6 +29,8 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
   String? _error;
   late String _patientId;
   String? _patientEmail;
+  /// Senha do passo anterior (só em memória) para opcionalmente guardar login biométrico.
+  String? _loginPassword;
   /// Modo EMAIL_2FA_SKIP_SMTP: código visível na UI (sem SMTP).
   String? _plaintextCode;
   late AnimationController _animationController;
@@ -66,6 +70,10 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
       if (pc is String && pc.isNotEmpty) {
         _plaintextCode = pc;
       }
+      final lp = arguments['loginPassword'];
+      if (lp is String && lp.isNotEmpty) {
+        _loginPassword = lp;
+      }
     }
     
     if (_patientId.isEmpty) {
@@ -99,6 +107,8 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
       });
       return;
     }
+
+    FocusManager.instance.primaryFocus?.unfocus();
 
     setState(() {
       _isResending = true;
@@ -450,6 +460,10 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
                       ),
                     ),
                     onFieldSubmitted: (_) => _submitCode(),
+                    onChanged: (value) {
+                      if (value.length != 6) return;
+                      FocusManager.instance.primaryFocus?.unfocus();
+                    },
                     validator: (value) {
                       final sanitizedValue = value?.trim() ?? '';
                       if (sanitizedValue.isEmpty) {
@@ -507,31 +521,35 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
                           ),
                         ],
                       ),
-                      child: ElevatedButton.icon(
+                      child: ElevatedButton(
                         onPressed: _isLoading ? null : _submitCode,
-                        icon: _isLoading
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Icon(Icons.verified_rounded, color: Colors.white),
-                        label: Text(
-                          _isLoading ? 'auth_2fa_verifying'.tr : 'auth_2fa_verify'.tr,
-                          style: AppTheme.titleSmall.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (_isLoading)
+                              const RoundProgressIndicator(
+                                dimension: 22,
+                                strokeWidth: 2.8,
+                                color: Colors.white,
+                              )
+                            else
+                              const Icon(Icons.verified_rounded, color: Colors.white),
+                            const SizedBox(width: 10),
+                            Text(
+                              _isLoading ? 'auth_2fa_verifying'.tr : 'auth_2fa_verify'.tr,
+                              style: AppTheme.titleSmall.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -540,15 +558,10 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
                   TextButton.icon(
                     onPressed: _isResending ? null : _resendCode,
                     icon: _isResending
-                        ? SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppTheme.primaryBlue.withValues(alpha: 0.85),
-                              ),
-                            ),
+                        ? RoundProgressIndicator(
+                            dimension: 18,
+                            strokeWidth: 2.6,
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.85),
                           )
                         : Icon(
                             Icons.refresh_rounded,
@@ -580,6 +593,8 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
       return;
     }
 
+    FocusManager.instance.primaryFocus?.unfocus();
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -591,7 +606,33 @@ class _Verify2FAScreenState extends State<Verify2FAScreen>
         _codeController.text.trim(),
       );
       if (!mounted) return;
-      Get.offAllNamed('/home');
+
+      final offer = await AuthService.instance.shouldOfferBiometricSetupAfterFirst2FA();
+      final pwd = _loginPassword;
+      if (offer && pwd != null && pwd.isNotEmpty) {
+        await showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          isDismissible: false,
+          enableDrag: false,
+          builder: (ctx) {
+            return BiometricFirstLoginSheet(
+              email: _patientEmail ?? '',
+              password: pwd,
+              onFinished: () {
+                Navigator.of(ctx).pop();
+                Get.offAllNamed('/home');
+              },
+            );
+          },
+        );
+      } else {
+        if (offer) {
+          await AuthService.instance.markBiometricFirstLoginPromptShown();
+        }
+        Get.offAllNamed('/home');
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {

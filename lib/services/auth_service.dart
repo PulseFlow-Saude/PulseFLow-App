@@ -15,11 +15,16 @@ import 'dart:math';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'email_translations_helper.dart';
-
+import 'biometric_login_service.dart';
 
 class AuthService extends GetxController {
   static AuthService get instance => Get.find<AuthService>();
   final _storage = const FlutterSecureStorage();
+
+  static const _kBioLoginEnabled = 'bio_login_enabled';
+  static const _kBioFirstPromptDone = 'bio_first_login_prompt_done';
+  static const _kBioSavedEmail = 'bio_saved_email';
+  static const _kBioSavedPassword = 'bio_saved_password';
 
   /// Quando [AppConfig.email2faSkipSmtp] está ativo: código mostrado na UI em vez de e-mail.
   String? _plaintext2FACodeForTesting;
@@ -672,6 +677,145 @@ class AuthService extends GetxController {
     }
   }
 
+  Future<void> _finishAuthenticatedSession(Patient patient) async {
+    final token = _generateToken(patient);
+    await _storage.write(key: 'auth_token', value: token);
+    _token.value = token;
+    _isAuthenticated.value = true;
+    _currentUser.value = patient;
+    await updateFcmToken();
+  }
+
+  /// Login com e-mail e senha sem segunda etapa (após biometria neste dispositivo).
+  Future<Patient> loginSkipTwoFactorWithPassword(String email, String password) async {
+    if (AppConfig.useApiForAuth) {
+      return _loginViaApi(email, password);
+    }
+
+    final patient = await _databaseService.getPatientByEmail(email);
+    if (patient == null) {
+      throw 'Paciente não encontrado. Verifique se digitou corretamente o e-mail, incluindo maiúsculas e minúsculas.';
+    }
+    if (patient.passwordResetRequired) {
+      throw 'Sua senha foi atualizada. Por favor, use a funcionalidade "Esqueci minha senha" para redefinir.';
+    }
+    final isValidPassword = await _encryptionService.verifyPassword(
+      password,
+      patient.password,
+    );
+    if (!isValidPassword) {
+      throw 'Senha incorreta. Verifique se digitou corretamente, incluindo maiúsculas e minúsculas.';
+    }
+
+    clearPlaintext2FACodeForTesting();
+    if (patient.id != null) {
+      await _databaseService.clearTwoFactorCode(patient.id!);
+    }
+
+    await _finishAuthenticatedSession(patient);
+    return patient;
+  }
+
+  Future<bool> biometricLoginEnabledIsOn() async {
+    final flag = await _storage.read(key: _kBioLoginEnabled);
+    if (flag != 'true') return false;
+    final email = await _storage.read(key: _kBioSavedEmail);
+    final pass = await _storage.read(key: _kBioSavedPassword);
+    return email != null &&
+        email.isNotEmpty &&
+        pass != null &&
+        pass.isNotEmpty;
+  }
+
+  Future<bool> biometricStoredEmailMatches(String email) async {
+    if (!await biometricLoginEnabledIsOn()) return false;
+    final stored = await _storage.read(key: _kBioSavedEmail);
+    if (stored == null || stored.isEmpty) return false;
+    return stored.trim() == email.trim();
+  }
+
+  /// Oferta do sheet após 2FA (apenas modo MongoDB com 2FA no app).
+  Future<bool> shouldOfferBiometricSetupAfterFirst2FA() async {
+    if (AppConfig.useApiForAuth) return false;
+    final done = await _storage.read(key: _kBioFirstPromptDone);
+    if (done == 'true') return false;
+    return await BiometricLoginService.instance.isDeviceSupported;
+  }
+
+  Future<void> markBiometricFirstLoginPromptShown() async {
+    await _storage.write(key: _kBioFirstPromptDone, value: 'true');
+  }
+
+  Future<void> enableBiometricStoredCredentials(String email, String password) async {
+    await _storage.write(key: _kBioSavedEmail, value: email.trim());
+    await _storage.write(key: _kBioSavedPassword, value: password);
+    await _storage.write(key: _kBioLoginEnabled, value: 'true');
+    await _storage.write(key: _kBioFirstPromptDone, value: 'true');
+  }
+
+  /// Remove credenciais biométricas. [resetFirstLoginPrompt] ao mudar de conta no mesmo dispositivo.
+  Future<void> disableBiometricStoredCredentials({bool resetFirstLoginPrompt = false}) async {
+    await _storage.delete(key: _kBioSavedEmail);
+    await _storage.delete(key: _kBioSavedPassword);
+    await _storage.write(key: _kBioLoginEnabled, value: 'false');
+    if (resetFirstLoginPrompt) {
+      await _storage.delete(key: _kBioFirstPromptDone);
+    }
+  }
+
+  Future<void> clearBiometricCredentialsIfEmailMismatch(String email) async {
+    final saved = await _storage.read(key: _kBioSavedEmail);
+    if (saved != null && saved.isNotEmpty && saved != email.trim()) {
+      await disableBiometricStoredCredentials(resetFirstLoginPrompt: true);
+    }
+  }
+
+  Future<Patient?> tryLoginWithBiometric() async {
+    if (!await biometricLoginEnabledIsOn()) return null;
+    final email = await _storage.read(key: _kBioSavedEmail);
+    final password = await _storage.read(key: _kBioSavedPassword);
+    if (email == null || password == null) return null;
+
+    final ok = await BiometricLoginService.instance.authenticate(
+      localizedReason: 'auth_biometric_reason_login'.tr,
+    );
+    if (!ok) return null;
+
+    return loginSkipTwoFactorWithPassword(email, password);
+  }
+
+  Future<bool> verifyPasswordForCurrentUser(String plainPassword) async {
+    final user = _currentUser.value;
+    if (user == null || user.id == null) return false;
+    final email = user.email.trim();
+    if (email.isEmpty) return false;
+
+    if (AppConfig.useApiForAuth) {
+      return _verifyApiPassword(email, plainPassword);
+    }
+
+    final patient = await _databaseService.getPatientById(ObjectId.parse(user.id!));
+    if (patient == null) return false;
+    return await _encryptionService.verifyPassword(plainPassword, patient.password);
+  }
+
+  Future<bool> _verifyApiPassword(String email, String password) async {
+    final baseUrl = AppConfig.apiBaseUrl;
+    if (baseUrl.isEmpty) return false;
+    try {
+      final response = await http
+          .post(
+            Uri.parse(AppConfig.apiPacienteAuthUrl('login')),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email, 'senha': password}),
+          )
+          .timeout(const Duration(seconds: 15));
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
   // Valida o código 2FA e finaliza o login (ou finaliza login direto para admin)
   // Para usuários admin: ignora o código e finaliza login diretamente
   // Para usuários normais: valida o código 2FA antes de finalizar
@@ -681,18 +825,8 @@ class AuthService extends GetxController {
     
     // Se o usuário for admin, valida diretamente sem verificar código 2FA
     if (patient.isAdmin) {
-    // Gera o token JWT e autentica
-    final token = _generateToken(patient);
-    await _storage.write(key: 'auth_token', value: token);
-    _token.value = token;
-    _isAuthenticated.value = true;
-    _currentUser.value = patient;
-    
-    // Atualizar FCM Token após login
-    await updateFcmToken();
-    
-    // Retorna o paciente autenticado (redirecionamento será feito no controller)
-    return patient;
+      await _finishAuthenticatedSession(patient);
+      return patient;
     }
     
     // Para usuários não-admin, valida o código 2FA
@@ -701,17 +835,7 @@ class AuthService extends GetxController {
 
     clearPlaintext2FACodeForTesting();
 
-    // Gera o token JWT e autentica
-    final token = _generateToken(patient);
-    await _storage.write(key: 'auth_token', value: token);
-    _token.value = token;
-    _isAuthenticated.value = true;
-    _currentUser.value = patient;
-    
-    // Atualizar FCM Token após login
-    await updateFcmToken();
-    
-    // Retorna o paciente autenticado (redirecionamento será feito na tela)
+    await _finishAuthenticatedSession(patient);
     return patient;
   }
 
@@ -988,6 +1112,7 @@ class AuthService extends GetxController {
       }
       final objectId = ObjectId.parse(user.id!);
       await _databaseService.deletePatient(objectId);
+      await disableBiometricStoredCredentials(resetFirstLoginPrompt: true);
       await logout();
     } catch (e) {
       rethrow;
@@ -1007,6 +1132,7 @@ class AuthService extends GetxController {
       await _storage.delete(key: 'remember_me');
       await _storage.delete(key: 'saved_email');
       await _storage.delete(key: 'saved_password');
+      // Mantém preferência de biometria e credenciais para reentrada sem 2FA neste dispositivo.
     } catch (e) {
       rethrow;
     }

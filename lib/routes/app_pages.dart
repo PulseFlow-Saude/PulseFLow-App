@@ -407,7 +407,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.SETTINGS,
-      page: () => SettingsScreen(),
+      page: () => const SettingsScreen(),
       transition: Transition.cupertino,
       transitionDuration: _kRouteTransition,
       curve: Curves.fastOutSlowIn,
