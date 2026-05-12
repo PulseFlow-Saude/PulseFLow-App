@@ -87,6 +87,7 @@ class ApiService {
     required String patientId,
     required String accessCode,
     required DateTime expiresAt,
+    bool accessLogEmail = false,
   }) async {
     try {
       final url = '$baseUrl/api/access-code/gerar';
@@ -98,7 +99,9 @@ class ApiService {
       final requestBody = {
         'patientId': patientId,
         'accessCode': accessCode,
-        'expiresAt': expiresAt.toIso8601String(),
+        // UTC explícito: ISO local sem Z no servidor (ex. Render UTC) deslocava a expiração.
+        'expiresAt': expiresAt.toUtc().toIso8601String(),
+        'accessLogEmail': accessLogEmail,
       };
 
       final headers = await _getAuthHeaders();
@@ -372,6 +375,43 @@ class ApiService {
 
       return response.statusCode == 200;
     } catch (e) {
+      return false;
+    }
+  }
+
+  /// Pedido ao servidor para enviar e-mail ao paciente quando o médico fica ligado via Chave Oryon.
+  /// Respeita [AppConfig.apiAccessCodeNotifyAccessEmailPath]; se o path estiver vazio, não faz chamada.
+  Future<bool> notificarPacienteAcessoMedicoConectado({
+    required String patientId,
+    String? medicoNome,
+    String? medicoEspecialidade,
+  }) async {
+    final path = AppConfig.apiAccessCodeNotifyAccessEmailPath;
+    if (path.isEmpty) return false;
+    try {
+      final headers = await _getAuthHeaders();
+      if (!headers.containsKey('Authorization')) {
+        return false;
+      }
+      final root = baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+      final uri = Uri.parse('$root$path');
+      final body = <String, dynamic>{
+        'patientId': patientId,
+        if (medicoNome != null && medicoNome.isNotEmpty) 'medicoNome': medicoNome,
+        if (medicoEspecialidade != null && medicoEspecialidade.isNotEmpty)
+          'medicoEspecialidade': medicoEspecialidade,
+      };
+      final response = await _httpClient
+          .post(
+            uri,
+            headers: headers,
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 20));
+      return response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 204;
+    } catch (_) {
       return false;
     }
   }

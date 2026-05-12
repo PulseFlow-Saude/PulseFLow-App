@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'notifications/notification_channels.dart';
 import 'notifications/notification_builders.dart';
+import 'notifications/notification_settings_constants.dart';
 import 'notifications/firebase_handlers.dart';
 import 'notifications/access_request_checker.dart';
 import 'notifications/notification_storage.dart';
@@ -29,6 +30,7 @@ class NotificationService extends GetxService {
   StreamSubscription<RemoteMessage>? _onOpenedSubscription;
   StreamSubscription<String>? _onTokenRefreshSubscription;
   bool _fcmListenersAttached = false;
+  Future<void>? _fcmSetupInFlight;
 
   // Notificações locais
   final FlutterLocalNotificationsPlugin _localNotifications =
@@ -61,6 +63,10 @@ class NotificationService extends GetxService {
       await _initializeFirebaseMessaging();
     } catch (_) {}
 
+    try {
+      await syncPreferenceTopicsWithPrefs();
+    } catch (_) {}
+
     _accessRequestChecker.startPeriodicCheck();
   }
 
@@ -86,12 +92,28 @@ class NotificationService extends GetxService {
     await NotificationChannels.registerAllChannels(_localNotifications);
   }
 
-  /// Inicializar Firebase Messaging
+  /// Inicializar Firebase Messaging (uma instalação em voo; chamadas paralelas aguardam a mesma).
   Future<void> _initializeFirebaseMessaging() async {
     if (!AppConfig.useFirebase) return;
     await FirebaseBootstrap.ensureInitialized();
     if (!FirebaseBootstrap.isReady) return;
     if (_fcmListenersAttached) return;
+
+    if (_fcmSetupInFlight != null) {
+      await _fcmSetupInFlight;
+      if (_fcmListenersAttached) return;
+      // Falha anterior: permite nova tentativa.
+    }
+
+    _fcmSetupInFlight = _attachFirebaseMessaging();
+    try {
+      await _fcmSetupInFlight;
+    } finally {
+      _fcmSetupInFlight = null;
+    }
+  }
+
+  Future<void> _attachFirebaseMessaging() async {
     try {
       _firebaseMessaging = FirebaseMessaging.instance;
       _firebaseAvailable = true;
@@ -131,10 +153,14 @@ class NotificationService extends GetxService {
 
       await _onMessageSubscription?.cancel();
       _onMessageSubscription = FirebaseMessaging.onMessage.listen(
-        (message) => FirebaseHandlers.handleForegroundMessage(
-          message,
-          _localNotifications,
-        ),
+        (message) {
+          unawaited(
+            FirebaseHandlers.handleForegroundMessage(
+              message,
+              _localNotifications,
+            ),
+          );
+        },
       );
 
       await _onOpenedSubscription?.cancel();
@@ -154,6 +180,7 @@ class NotificationService extends GetxService {
     } catch (e) {
       _detachFcmListeners();
       _firebaseAvailable = false;
+      _firebaseMessaging = null;
     }
   }
 
@@ -361,15 +388,55 @@ class NotificationService extends GetxService {
     }
   }
 
+  /// Alinha subscrições FCM com [SharedPreferences] (alertas críticos, resumo diário, lembretes).
+  ///
+  /// Chamar após login ou arranque; o ecrã de definições continua a atualizar tópico a tópico.
+  Future<void> syncPreferenceTopicsWithPrefs() async {
+    if (!AppConfig.useFirebase) return;
+    await _initializeFirebaseMessaging();
+    final messaging = _firebaseMessaging;
+    if (messaging == null || !_firebaseAvailable) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    Future<void> row(String prefsKey, String topic, bool defaultOn) async {
+      final on = prefs.getBool(prefsKey) ?? defaultOn;
+      if (on) {
+        await messaging.subscribeToTopic(topic);
+      } else {
+        await messaging.unsubscribeFromTopic(topic);
+      }
+    }
+
+    await row(
+      NotificationSettingsPrefs.criticalAlertsKey,
+      NotificationSettingsPrefs.criticalTopic,
+      true,
+    );
+    await row(
+      NotificationSettingsPrefs.dailySummaryKey,
+      NotificationSettingsPrefs.dailyTopic,
+      true,
+    );
+    await row(
+      NotificationSettingsPrefs.smartRemindersKey,
+      NotificationSettingsPrefs.smartTopic,
+      false,
+    );
+  }
+
   /// Inscrever-se em tópico
   Future<void> subscribeToTopic(String topic) async {
-    if (_firebaseMessaging == null) return;
+    if (!AppConfig.useFirebase) return;
+    await _initializeFirebaseMessaging();
+    if (_firebaseMessaging == null || !_firebaseAvailable) return;
     await _firebaseMessaging!.subscribeToTopic(topic);
   }
 
   /// Desinscrever-se de tópico
   Future<void> unsubscribeFromTopic(String topic) async {
-    if (_firebaseMessaging == null) return;
+    if (!AppConfig.useFirebase) return;
+    await _initializeFirebaseMessaging();
+    if (_firebaseMessaging == null || !_firebaseAvailable) return;
     await _firebaseMessaging!.unsubscribeFromTopic(topic);
   }
 

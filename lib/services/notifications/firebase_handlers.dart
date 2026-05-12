@@ -7,6 +7,7 @@ import '../../config/app_config.dart';
 import '../../firebase_options.dart';
 import 'notification_channels.dart';
 import 'notification_builders.dart';
+import 'notification_settings_constants.dart';
 import 'notification_storage.dart';
 
 /// Handlers para mensagens Firebase
@@ -14,18 +15,27 @@ class FirebaseHandlers {
   static final List<_DedupeEntry> _recentForeground = [];
   static const _dedupeWindow = Duration(seconds: 4);
 
+  static Map<String, dynamic> _stringKeyedData(RemoteMessage message) {
+    return Map<String, dynamic>.from(message.data);
+  }
+
   /// Handler para mensagens em foreground
-  static void handleForegroundMessage(
+  static Future<void> handleForegroundMessage(
     RemoteMessage message,
     FlutterLocalNotificationsPlugin localNotifications,
-  ) {
+  ) async {
     if (_isDuplicateForegroundDelivery(message)) return;
 
-    _showLocalNotification(
+    final data = _stringKeyedData(message);
+    if (!await NotificationSettingsPrefs.shouldDeliverForFcmData(data)) {
+      return;
+    }
+
+    await _showLocalNotification(
       localNotifications,
       message.notification?.title ?? 'Oryon Health',
       message.notification?.body ?? 'notif_new_message'.tr,
-      message.data,
+      data,
     );
   }
 
@@ -117,18 +127,23 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       ?.createNotificationChannel(NotificationChannels.generalChannelForBackground);
 
   // Exibir notificação
+  final data = Map<String, dynamic>.from(message.data);
+  if (!await NotificationSettingsPrefs.shouldDeliverForFcmData(data)) {
+    return;
+  }
+
   await localNotifications.show(
     DateTime.now().millisecondsSinceEpoch.remainder(100000),
     message.notification?.title ?? 'Oryon Health',
     message.notification?.body ?? 'Nova mensagem',
     NotificationBuilders.createBackgroundMessageNotification(),
-    payload: message.data.toString(),
+    payload: data.toString(),
   );
 
   final notificationId =
-      message.data['notificationId']?.toString() ?? 'fcm_${DateTime.now().millisecondsSinceEpoch}';
-  final type = message.data['type']?.toString() ?? 'updates';
-  final link = message.data['link']?.toString();
+      data['notificationId']?.toString() ?? 'fcm_${DateTime.now().millisecondsSinceEpoch}';
+  final type = data['type']?.toString() ?? 'updates';
+  final link = data['link']?.toString();
 
   await NotificationStorage.addNotification(
     id: notificationId,

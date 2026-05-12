@@ -1,7 +1,7 @@
 name: pulseflow_app
 description: Oryon Health — aplicativo Flutter para gestão de pacientes com integração MongoDB.
 publish_to: 'none'
-version: 2.0.1
+version: 2.0.0+3
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -60,6 +60,10 @@ flutter:
 # Ícone na grelha do telemóvel: use uma imagem quadrada (1024×1024 recomendado),
 # depois execute: dart run flutter_launcher_icons
 # (Atualizar só no Xcode sem este comando deixa os PNGs em AppIcon.appiconset desatualizados.)
+#
+# iOS: o AppIcon no Xcode tem 1024pt Light (opaco), Dark (fundo transparente, HIG)
+# e Tinted (escala de cinzas opaca). `dart run flutter_launcher_icons` pode
+# sobrescrever esse conjunto — regenere o Dark/Tinted manualmente se precisar.
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true

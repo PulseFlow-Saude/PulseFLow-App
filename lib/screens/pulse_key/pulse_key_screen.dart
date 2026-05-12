@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/patient_notification_prefs.dart';
 import '../../widgets/pulse_bottom_navigation.dart' show PulseNavItem;
 import '../../widgets/pulse_side_menu.dart';
 
@@ -32,6 +33,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
   int _tempoConectado = 0;
   bool _isLoadingConexao = false;
   bool _isDesconectando = false;
+  bool _accessEmailSessionHandled = false;
 
   @override
   void initState() {
@@ -108,10 +110,13 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
         return;
       }
 
+      final accessLogEmail =
+          await PatientNotificationPrefs.isAccessLogEmailEnabled();
       await _apiService.sendAccessCode(
         patientId: currentUser.id!,
         accessCode: code,
         expiresAt: expiresAt,
+        accessLogEmail: accessLogEmail,
       );
       
       print('✅ [PulseKeyScreen] Código sincronizado com sucesso');
@@ -197,21 +202,27 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
   Future<void> _checkConnection() async {
     final currentUser = _authService.currentUser;
     if (currentUser?.id == null) return;
-    
+
+    final wasConnected = _isMedicoConectado;
+
     setState(() {
       _isLoadingConexao = true;
     });
-    
+
     try {
       final conexao = await _apiService.verificarConexaoMedico(currentUser!.id!);
-      
+
       if (mounted && conexao != null) {
+        final nowConnected = conexao['conectado'] == true;
+        final medico = conexao['medico'] as Map<String, dynamic>?;
+        final nome = medico?['nome'] as String?;
+        final esp = medico?['especialidade'] as String?;
+
         setState(() {
-          _isMedicoConectado = conexao['conectado'] == true;
-          if (_isMedicoConectado) {
-            final medico = conexao['medico'] as Map<String, dynamic>?;
-            _medicoNome = medico?['nome'] as String?;
-            _medicoEspecialidade = medico?['especialidade'] as String?;
+          _isMedicoConectado = nowConnected;
+          if (nowConnected) {
+            _medicoNome = nome;
+            _medicoEspecialidade = esp;
             _tempoConectado = conexao['tempoConectado'] as int? ?? 0;
           } else {
             _medicoNome = null;
@@ -220,6 +231,14 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
           }
           _isLoadingConexao = false;
         });
+
+        if (!wasConnected && nowConnected) {
+          _onMedicoAcabouDeConectar(
+            patientId: currentUser.id!,
+            nome: nome,
+            esp: esp,
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -228,6 +247,27 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
         });
       }
     }
+  }
+
+  void _onMedicoAcabouDeConectar({
+    required String patientId,
+    String? nome,
+    String? esp,
+  }) {
+    if (_accessEmailSessionHandled) return;
+    _accessEmailSessionHandled = true;
+    unawaited(() async {
+      try {
+        if (!await PatientNotificationPrefs.isAccessLogEmailEnabled()) {
+          return;
+        }
+        await _apiService.notificarPacienteAcessoMedicoConectado(
+          patientId: patientId,
+          medicoNome: nome,
+          medicoEspecialidade: esp,
+        );
+      } catch (_) {}
+    }());
   }
   
   void _startConnectionTimer() {
@@ -259,6 +299,7 @@ class _PulseKeyScreenState extends State<PulseKeyScreen> {
             _medicoNome = null;
             _medicoEspecialidade = null;
             _tempoConectado = 0;
+            _accessEmailSessionHandled = false;
           });
           
           Get.snackbar(

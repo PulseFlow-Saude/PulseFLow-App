@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/notification_service.dart';
+import '../../services/notifications/notification_settings_constants.dart';
+import '../../services/patient_notification_prefs.dart';
 import '../../services/auth_service.dart';
 import '../../routes/app_routes.dart';
 
@@ -19,12 +21,7 @@ class SettingsController extends GetxController {
   final darkTheme = false.obs;
   final language = 'system'.obs;
 
-  static const _criticalAlertsKey = 'settings_critical_alerts';
-  static const _dailySummaryKey = 'settings_daily_summary';
-  static const _smartRemindersKey = 'settings_smart_reminders';
-
   static const _dataVisibilityKey = 'settings_data_visibility';
-  static const _accessLogsEmailKey = 'settings_access_logs_email';
 
   static const _darkThemeKey = 'settings_dark_theme';
   static const _languageKey = 'settings_language';
@@ -63,11 +60,15 @@ class SettingsController extends GetxController {
   Future<void> _loadPreferences() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      criticalAlerts.value = prefs.getBool(_criticalAlertsKey) ?? true;
-      dailySummary.value = prefs.getBool(_dailySummaryKey) ?? true;
-      smartReminders.value = prefs.getBool(_smartRemindersKey) ?? false;
+      criticalAlerts.value =
+          prefs.getBool(NotificationSettingsPrefs.criticalAlertsKey) ?? true;
+      dailySummary.value =
+          prefs.getBool(NotificationSettingsPrefs.dailySummaryKey) ?? true;
+      smartReminders.value =
+          prefs.getBool(NotificationSettingsPrefs.smartRemindersKey) ?? false;
       dataVisibility.value = prefs.getBool(_dataVisibilityKey) ?? true;
-      accessLogsEmail.value = prefs.getBool(_accessLogsEmailKey) ?? false;
+      accessLogsEmail.value =
+          prefs.getBool(PatientNotificationPrefs.accessLogsEmailKey) ?? false;
       darkTheme.value = prefs.getBool(_darkThemeKey) ?? false;
       final savedLang = prefs.getString(_languageKey) ?? 'system';
       language.value =
@@ -104,22 +105,22 @@ class SettingsController extends GetxController {
   Future<void> toggleCriticalAlerts(bool value) async {
     criticalAlerts.value = value;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_criticalAlertsKey, value);
-    await _updateTopic('alerts_critical', value);
+    await prefs.setBool(NotificationSettingsPrefs.criticalAlertsKey, value);
+    await _updateTopic(NotificationSettingsPrefs.criticalTopic, value);
   }
 
   Future<void> toggleDailySummary(bool value) async {
     dailySummary.value = value;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_dailySummaryKey, value);
-    await _updateTopic('alerts_daily_summary', value);
+    await prefs.setBool(NotificationSettingsPrefs.dailySummaryKey, value);
+    await _updateTopic(NotificationSettingsPrefs.dailyTopic, value);
   }
 
   Future<void> toggleSmartReminders(bool value) async {
     smartReminders.value = value;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_smartRemindersKey, value);
-    await _updateTopic('alerts_smart_reminders', value);
+    await prefs.setBool(NotificationSettingsPrefs.smartRemindersKey, value);
+    await _updateTopic(NotificationSettingsPrefs.smartTopic, value);
   }
 
   Future<void> toggleDataVisibility(bool value) async {
@@ -131,7 +132,7 @@ class SettingsController extends GetxController {
   Future<void> toggleAccessLogsEmail(bool value) async {
     accessLogsEmail.value = value;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_accessLogsEmailKey, value);
+    await prefs.setBool(PatientNotificationPrefs.accessLogsEmailKey, value);
   }
 
   Future<void> toggleDarkTheme(bool value) async {
