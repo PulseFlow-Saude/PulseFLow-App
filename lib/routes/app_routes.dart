@@ -27,7 +27,6 @@ abstract class Routes {
   static const MENSTRUACAO_HISTORY = '/menstruacao-history';
   static const PULSE_KEY = '/pulse-key';
   static const SMARTWATCH = '/smartwatch';
-  static const HEALTH_HISTORY = '/health-history';
   static const HEART_RATE_HISTORY = '/heart-rate-history';
   static const STEPS_HISTORY = '/steps-history';
   static const SLEEP_HISTORY = '/sleep-history';

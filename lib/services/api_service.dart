@@ -102,6 +102,8 @@ class ApiService {
         // UTC explícito: ISO local sem Z no servidor (ex. Render UTC) deslocava a expiração.
         'expiresAt': expiresAt.toUtc().toIso8601String(),
         'accessLogEmail': accessLogEmail,
+        // Idioma dos e-mails da Chave Oryon (pt-BR | en), alinhado ao app.
+        'appLocale': (Get.locale?.languageCode == 'en') ? 'en' : 'pt-BR',
       };
 
       final headers = await _getAuthHeaders();

@@ -4,9 +4,6 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
-	<!-- Skia pode ser mais estável que Impeller em alguns dispositivos iOS beta / ecrã preto ao arrancar -->
-	<key>FLTEnableImpeller</key>
-	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -27,6 +24,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FLTEnableImpeller</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -70,6 +69,8 @@
 	<string>Este aplicativo precisa acessar a câmera para capturar fotos de documentos e exames médicos.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>O Oryon Health pode usar Face ID para opcionalmente facilitar o acesso quando suportado.</string>
+	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
+	<string>Este app precisa acessar seus dados de saúde para fornecer insights personalizados sobre sua frequência cardíaca, sono e atividade física.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Este app precisa acessar seus dados de saúde para fornecer insights personalizados sobre sua frequência cardíaca, sono e atividade física.</string>
 	<key>NSHealthUpdateUsageDescription</key>
@@ -95,7 +96,6 @@
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
-	<!-- O Main.storyboard instala FlutterViewController; sem esta chave o iOS pode não montar o UIKit root e o Flutter fica com ecrã preto -->
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIStatusBarStyle</key>
@@ -113,7 +113,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<!-- true: o Flutter aplica [SystemUiOverlayStyle] / [AnnotatedRegion] em todas as rotas (hora e bateria brancos). -->
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 </dict>

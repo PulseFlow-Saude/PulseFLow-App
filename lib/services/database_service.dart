@@ -9,6 +9,7 @@ import '../models/crise_gastrite.dart';
 import '../models/menstruacao.dart';
 import '../models/exame.dart';
 import '../models/health_data.dart';
+import '../utils/health_metric_chart_utils.dart';
 import '../config/database_config.dart';
 
 class DatabaseService {
@@ -1355,50 +1356,149 @@ class DatabaseService {
     return _db!.collection(collectionName);
   }
 
+  /// Documentos em `batimentos` / `passos` / `insonias` podem ter `pacienteId` como [ObjectId] ou [String].
+  Future<List<Map<String, dynamic>>> fetchPatientMetricDocuments(
+    String collectionName,
+    String patientId,
+  ) async {
+    await _ensureConnection();
+    final collection = _db!.collection(collectionName);
+    final merged = <Map<String, dynamic>>[];
+    try {
+      final objId = ObjectId.parse(patientId);
+      final list = await collection.find(where.eq('pacienteId', objId)).toList();
+      merged.addAll(list.map((e) => Map<String, dynamic>.from(e)));
+    } catch (_) {}
+    final list2 =
+        await collection.find(where.eq('pacienteId', patientId)).toList();
+    merged.addAll(list2.map((e) => Map<String, dynamic>.from(e)));
+
+    final seen = <String>{};
+    final out = <Map<String, dynamic>>[];
+    for (final m in merged) {
+      final id = m['_id']?.toString() ?? '';
+      if (id.isEmpty || seen.contains(id)) continue;
+      seen.add(id);
+      out.add(m);
+    }
+    return out;
+  }
+
+  /// Menor e maior `data` na coleção para o paciente (via [\$min] / [\$max]; não descarrega todos os docs).
+  Future<({DateTime? min, DateTime? max})> getPatientMetricDateBounds(
+    String collectionName,
+    String patientId,
+  ) async {
+    await _ensureConnection();
+    final collection = _db!.collection(collectionName);
+
+    DateTime? minDay;
+    DateTime? maxDt;
+
+    Future<void> runMatch(Object pacienteMatch) async {
+      final pipeline = <Map<String, Object>>[
+        <String, Object>{
+          r'$match': <String, Object>{'pacienteId': pacienteMatch},
+        },
+        <String, Object>{
+          r'$group': <String, Object>{
+            '_id': <String, Object>{r'$literal': 1},
+            'minData': <String, Object>{r'$min': r'$data'},
+            'maxData': <String, Object>{r'$max': r'$data'},
+          },
+        },
+      ];
+      final list = await collection.aggregateToStream(pipeline).toList();
+      if (list.isEmpty) return;
+      final row = Map<String, dynamic>.from(list.first);
+      final minD = coerceMongoDateField(row['minData']);
+      final maxD = coerceMongoDateField(row['maxData']);
+      if (minD != null) {
+        final day = DateTime(minD.year, minD.month, minD.day);
+        if (minDay == null || day.isBefore(minDay!)) {
+          minDay = day;
+        }
+      }
+      if (maxD != null) {
+        if (maxDt == null || maxD.isAfter(maxDt!)) {
+          maxDt = maxD;
+        }
+      }
+    }
+
+    try {
+      await runMatch(ObjectId.parse(patientId));
+    } catch (_) {}
+    await runMatch(patientId);
+
+    return (min: minDay, max: maxDt);
+  }
+
+  /// Data mais antiga entre batimentos, passos e insonias (para ecrã agregado).
+  Future<DateTime?> getPatientOldestMetricDateAcrossCollections(
+    String patientId,
+  ) async {
+    DateTime? oldest;
+    const collections = ['batimentos', 'passos', 'insonias'];
+    for (final c in collections) {
+      final b = await getPatientMetricDateBounds(c, patientId);
+      if (b.min != null) {
+        if (oldest == null || b.min!.isBefore(oldest!)) {
+          oldest = b.min;
+        }
+      }
+    }
+    return oldest;
+  }
+
+  static String _dataTypeForMetricCollection(String collectionName) {
+    switch (collectionName) {
+      case 'batimentos':
+        return 'heartRate';
+      case 'passos':
+        return 'steps';
+      case 'insonias':
+        return 'sleep';
+      default:
+        return '';
+    }
+  }
+
+  static bool _calendarDayInRange(
+    DateTime d,
+    DateTime rangeStart,
+    DateTime rangeEnd,
+  ) {
+    final day = DateTime(d.year, d.month, d.day);
+    final s = DateTime(rangeStart.year, rangeStart.month, rangeStart.day);
+    final e = DateTime(rangeEnd.year, rangeEnd.month, rangeEnd.day);
+    return !day.isBefore(s) && !day.isAfter(e);
+  }
+
   // Obter dados de saúde por paciente
   Future<List<HealthData>> getHealthDataByPatientId(String patientId) async {
     try {
       await _ensureConnection();
-      
+
       final collections = ['batimentos', 'passos', 'insonias'];
-      final allData = <Map<String, dynamic>>[];
-      
+      final results = <HealthData>[];
+      final seenIds = <String>{};
+
       for (final collectionName in collections) {
-        final collection = _db!.collection(collectionName);
-        
-        // Tentativa 1: pacienteId como ObjectId
-        try {
-          final objId = ObjectId.parse(patientId);
-          final list = await collection.find(where.eq('pacienteId', objId)).toList();
-          allData.addAll(list.map((e) => Map<String, dynamic>.from(e)));
-        } catch (_) {}
-        
-        // Tentativa 2: pacienteId como String
-        final list2 = await collection.find(where.eq('pacienteId', patientId)).toList();
-        allData.addAll(list2.map((e) => Map<String, dynamic>.from(e)));
-      }
-      
-      // Normalizar e remover duplicados
-      final normalized = allData.map((doc) {
-        final data = Map<String, dynamic>.from(doc);
-        data['_id'] = data['_id'].toString();
-        if (data['pacienteId'] != null) {
-          data['pacienteId'] = data['pacienteId'].toString();
-        }
-        return data;
-      }).toList();
-      
-      final seen = <String>{};
-      final unique = <Map<String, dynamic>>[];
-      for (final m in normalized) {
-        final idStr = m['_id'].toString();
-        if (!seen.contains(idStr)) {
-          seen.add(idStr);
-          unique.add(m);
+        final docs =
+            await fetchPatientMetricDocuments(collectionName, patientId);
+        final dt = _dataTypeForMetricCollection(collectionName);
+        for (final raw in docs) {
+          final idStr = raw['_id']?.toString() ?? '';
+          if (idStr.isEmpty || seenIds.contains(idStr)) continue;
+          seenIds.add(idStr);
+          try {
+            results.add(HealthData.fromMap(Map<String, dynamic>.from(raw), dt));
+          } catch (_) {}
         }
       }
-      
-      return unique.map((m) => HealthData.fromMap(m)).toList();
+
+      return results;
     } catch (e) {
       rethrow;
     }
@@ -1427,42 +1527,15 @@ class DatabaseService {
           throw 'Tipo de dados não suportado: $dataType';
       }
       
-      final collection = _db!.collection(collectionName);
-      
-      final results = <Map<String, dynamic>>[];
-      
-      // Tentativa 1: pacienteId como ObjectId
-      try {
-        final objId = ObjectId.parse(patientId);
-        final list = await collection.find(where.eq('pacienteId', objId)).toList();
-        results.addAll(list.map((e) => Map<String, dynamic>.from(e)));
-      } catch (_) {}
-      
-      // Tentativa 2: pacienteId como String
-      final list2 = await collection.find(where.eq('pacienteId', patientId)).toList();
-      results.addAll(list2.map((e) => Map<String, dynamic>.from(e)));
-      
-      // Normalizar e remover duplicados
-      final normalized = results.map((doc) {
-        final data = Map<String, dynamic>.from(doc);
-        data['_id'] = data['_id'].toString();
-        if (data['pacienteId'] != null) {
-          data['pacienteId'] = data['pacienteId'].toString();
-        }
-        return data;
-      }).toList();
-      
-      final seen = <String>{};
-      final unique = <Map<String, dynamic>>[];
-      for (final m in normalized) {
-        final idStr = m['_id'].toString();
-        if (!seen.contains(idStr)) {
-          seen.add(idStr);
-          unique.add(m);
-        }
+      final docs = await fetchPatientMetricDocuments(collectionName, patientId);
+      final dt = _dataTypeForMetricCollection(collectionName);
+      final results = <HealthData>[];
+      for (final raw in docs) {
+        try {
+          results.add(HealthData.fromMap(Map<String, dynamic>.from(raw), dt));
+        } catch (_) {}
       }
-      
-      return unique.map((m) => HealthData.fromMap(m)).toList();
+      return results;
     } catch (e) {
       rethrow;
     }
@@ -1472,58 +1545,34 @@ class DatabaseService {
   Future<List<HealthData>> getHealthDataByPeriod(String patientId, DateTime startDate, DateTime endDate) async {
     try {
       await _ensureConnection();
-      
+
       final collections = ['batimentos', 'passos', 'insonias'];
-      final allData = <Map<String, dynamic>>[];
-      
+      final out = <HealthData>[];
+      final seenIds = <String>{};
+
       for (final collectionName in collections) {
-        final collection = _db!.collection(collectionName);
-        
-        final results = <Map<String, dynamic>>[];
-        
-        // Tentativa 1: pacienteId como ObjectId
-        try {
-          final objId = ObjectId.parse(patientId);
-          final list = await collection.find(
-            where.eq('pacienteId', objId)
-                .gte('data', startDate.toIso8601String())
-                .lte('data', endDate.toIso8601String())
-          ).toList();
-          results.addAll(list.map((e) => Map<String, dynamic>.from(e)));
-        } catch (_) {}
-        
-        // Tentativa 2: pacienteId como String
-        final list2 = await collection.find(
-          where.eq('pacienteId', patientId)
-              .gte('data', startDate.toIso8601String())
-              .lte('data', endDate.toIso8601String())
-        ).toList();
-        results.addAll(list2.map((e) => Map<String, dynamic>.from(e)));
-        
-        allData.addAll(results);
-      }
-      
-      // Normalizar e remover duplicados
-      final normalized = allData.map((doc) {
-        final data = Map<String, dynamic>.from(doc);
-        data['_id'] = data['_id'].toString();
-        if (data['pacienteId'] != null) {
-          data['pacienteId'] = data['pacienteId'].toString();
-        }
-        return data;
-      }).toList();
-      
-      final seen = <String>{};
-      final unique = <Map<String, dynamic>>[];
-      for (final m in normalized) {
-        final idStr = m['_id'].toString();
-        if (!seen.contains(idStr)) {
-          seen.add(idStr);
-          unique.add(m);
+        final docs =
+            await fetchPatientMetricDocuments(collectionName, patientId);
+        final dt = _dataTypeForMetricCollection(collectionName);
+        for (final raw in docs) {
+          final idStr = raw['_id']?.toString() ?? '';
+          if (idStr.isEmpty || seenIds.contains(idStr)) continue;
+
+          final rawDate = raw['data'] ?? raw['date'];
+          final d = rawDate is DateTime
+              ? rawDate
+              : DateTime.tryParse(rawDate?.toString() ?? '');
+          if (d == null) continue;
+          if (!_calendarDayInRange(d, startDate, endDate)) continue;
+
+          seenIds.add(idStr);
+          try {
+            out.add(HealthData.fromMap(Map<String, dynamic>.from(raw), dt));
+          } catch (_) {}
         }
       }
-      
-      return unique.map((m) => HealthData.fromMap(m)).toList();
+
+      return out;
     } catch (e) {
       rethrow;
     }

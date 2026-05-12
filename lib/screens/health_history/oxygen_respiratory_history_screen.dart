@@ -3,14 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../utils/health_metric_chart_utils.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../services/health_data_service.dart';
 import '../../theme/app_theme.dart';
 import '../institutional/settings_controller.dart';
+import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../../widgets/pulse_drawer_button.dart';
-import '../../widgets/pulse_bottom_navigation.dart';
 
 class OxygenRespiratoryHistoryScreen extends StatefulWidget {
   const OxygenRespiratoryHistoryScreen({super.key});
@@ -36,21 +37,36 @@ class _OxygenRespiratoryHistoryScreenState
   @override
   void initState() {
     super.initState();
-    _selectedDateTo = DateTime.now();
-    _selectedDateFrom = DateTime.now().subtract(const Duration(days: 30));
-    _loadHealthData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _bootstrapOldestPatientRangeThenLoad('oxigenacao');
+    });
+  }
+
+  Future<void> _bootstrapOldestPatientRangeThenLoad(String collection) async {
+    final user = _authService.currentUser;
+    _selectedDateTo = metricChartDefaultEndDay();
+    if (user?.id == null) {
+      _selectedDateFrom = metricChartDefaultWideStartDay();
+    } else {
+      final bounds =
+          await _db.getPatientMetricDateBounds(collection, user!.id!);
+      _selectedDateFrom = bounds.min != null
+          ? DateTime(bounds.min!.year, bounds.min!.month, bounds.min!.day)
+          : _selectedDateTo;
+    }
+    if (!mounted) return;
+    await _loadHealthData();
   }
 
   String get _collectionName =>
       _selectedMetric == 'oxygen' ? 'oxigenacao' : 'respiracao';
 
-  String get _metricTitle =>
-      _selectedMetric == 'oxygen' ? 'Oxigenação' : 'Respiração';
+  String get _metricUnit =>
+      _selectedMetric == 'oxygen' ? 'health_unit_percent'.tr : 'health_unit_resp_rate'.tr;
 
-  String get _metricUnit => _selectedMetric == 'oxygen' ? '%' : 'irpm';
-
-  IconData get _metricIcon =>
-      _selectedMetric == 'oxygen' ? Icons.air_rounded : Icons.monitor_heart;
+  IconData get _metricIcon => _selectedMetric == 'oxygen'
+      ? Icons.air_rounded
+      : Icons.compress;
 
   Future<void> _loadHealthData() async {
     setState(() {
@@ -65,26 +81,30 @@ class _OxygenRespiratoryHistoryScreenState
         throw 'common_select_period'.tr;
       }
 
-      final collection = await _db.getCollection(_collectionName);
-      final allData = await collection.find({'pacienteId': currentUser!.id!}).toList();
+      final allData = await _db.fetchPatientMetricDocuments(
+        _collectionName,
+        currentUser!.id!,
+      );
 
       final filteredData = allData.where((item) {
-        if (item['data'] == null) return false;
-        final itemDate = item['data'] is DateTime
-            ? item['data'] as DateTime
-            : DateTime.parse(item['data'].toString());
-        return itemDate.isAfter(_selectedDateFrom!.subtract(const Duration(days: 1))) &&
-            itemDate.isBefore(_selectedDateTo!.add(const Duration(days: 1)));
+        final raw = item['data'] ?? item['date'];
+        final itemDate = coerceMongoDateField(raw);
+        if (itemDate == null) return false;
+        return metricDocInSelectedRange(
+          itemDate,
+          _selectedDateFrom!,
+          _selectedDateTo!,
+        );
       }).toList();
 
       final Map<String, List<double>> dailyValues = {};
       for (final item in filteredData) {
-        if (item['valor'] == null) continue;
-        final itemDate = item['data'] is DateTime
-            ? item['data'] as DateTime
-            : DateTime.parse(item['data'].toString());
+        final raw = item['data'] ?? item['date'];
+        final itemDate = coerceMongoDateField(raw);
+        if (itemDate == null) continue;
+        final value = coerceMongoNumber(item['valor'] ?? item['value']);
+        if (value < 0) continue;
         final dateKey = DateFormat('yyyy-MM-dd').format(itemDate);
-        final value = (item['valor'] as num).toDouble();
         dailyValues.putIfAbsent(dateKey, () => []).add(value);
       }
 
@@ -94,15 +114,16 @@ class _OxygenRespiratoryHistoryScreenState
         final average = values.reduce((a, b) => a + b) / values.length;
         return {
           'date': date,
-          'value': average,
+          'value': average.toDouble(),
           'count': values.length,
           'min': values.reduce((a, b) => a < b ? a : b),
           'max': values.reduce((a, b) => a > b ? a : b),
         };
       }).toList();
 
-      _dailyData
-          .sort((a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime));
+      _dailyData.sort(
+        (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime),
+      );
 
       setState(() => _isLoading = false);
     } catch (e) {
@@ -116,12 +137,25 @@ class _OxygenRespiratoryHistoryScreenState
   Future<void> _selectDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      firstDate: DateTime(2020),
+      firstDate: metricChartPickerFirstDate(),
       lastDate: DateTime.now(),
       initialDateRange: _selectedDateFrom != null && _selectedDateTo != null
           ? DateTimeRange(start: _selectedDateFrom!, end: _selectedDateTo!)
           : null,
       locale: Get.find<SettingsController>().effectiveLocale,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppTheme.primaryBlue,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: AppTheme.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -153,11 +187,11 @@ class _OxygenRespiratoryHistoryScreenState
                   decoration: AppTheme.blueContentSheetDecoration,
                   clipBehavior: Clip.antiAlias,
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20.0),
                     child: _isLoading
-                        ? const Center(child: CircularProgressIndicator())
+                        ? _buildLoadingState()
                         : _error != null
-                            ? Text(_error!)
+                            ? _buildErrorState()
                             : _dailyData.isEmpty
                                 ? _buildEmptyState()
                                 : _buildContent(),
@@ -180,29 +214,72 @@ class _OxygenRespiratoryHistoryScreenState
         right: 16,
         bottom: 20,
       ),
-      child: Row(
+      child: Column(
         children: [
-          const PulseDrawerButton(),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              'Oxigenação e Respiração',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
+          Row(
+            children: [
+              const PulseDrawerButton(),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'health_oxygen_respiratory'.tr,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
               ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.sync_rounded, color: Colors.white),
-            onPressed: () async {
-              final userId = _authService.currentUser?.id;
-              if (userId == null) return;
-              await _healthDataService.saveHealthDataFromHealthKit(userId);
-              await Future.delayed(const Duration(milliseconds: 700));
-              await _loadHealthData();
-            },
+              IconButton(
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(
+                    Icons.sync_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                ),
+                onPressed: () async {
+                  if (_authService.currentUser?.id != null) {
+                    try {
+                      Get.snackbar(
+                        'health_syncing'.tr,
+                        'health_sync_msg'.tr,
+                        backgroundColor: Colors.blue,
+                        colorText: Colors.white,
+                        duration: const Duration(seconds: 2),
+                      );
+
+                      await _healthDataService.saveHealthDataFromHealthKit(
+                        _authService.currentUser!.id!,
+                      );
+                      await Future.delayed(const Duration(milliseconds: 1000));
+                      await _loadHealthData();
+
+                      Get.snackbar(
+                        'health_success'.tr,
+                        'health_updated'.tr,
+                        backgroundColor: Colors.green,
+                        colorText: Colors.white,
+                        duration: const Duration(seconds: 2),
+                      );
+                    } catch (e) {
+                      Get.snackbar(
+                        'health_error'.tr,
+                        '${'health_error_sync'.tr}: $e',
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                      );
+                    }
+                  }
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -213,20 +290,22 @@ class _OxygenRespiratoryHistoryScreenState
     final stats = _calculateStats();
     return Column(
       children: [
-        // Seletor de métrica (mesmo padrão de bloco do conteúdo)
         Row(
           children: [
-            Expanded(child: _metricChip('oxygen', 'Oxigenação')),
+            Expanded(
+              child: _metricChip('oxygen', 'health_metric_oxygen'.tr),
+            ),
             const SizedBox(width: 8),
-            Expanded(child: _metricChip('respiration', 'Respiração')),
+            Expanded(
+              child: _metricChip('respiration', 'health_metric_respiration'.tr),
+            ),
           ],
         ),
         const SizedBox(height: 12),
-        // Seletor de período
         InkWell(
           onTap: _selectDateRange,
           child: Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppTheme.lightBlue.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(12),
@@ -236,19 +315,36 @@ class _OxygenRespiratoryHistoryScreenState
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today, color: AppTheme.primaryBlue, size: 20),
+                Icon(Icons.calendar_today,
+                    color: AppTheme.primaryBlue, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    '${DateFormat('dd/MM/yyyy').format(_selectedDateFrom!)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateTo!)}',
-                    style: AppTheme.bodyMedium.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'common_period'.tr,
+                        style: AppTheme.bodySmall.copyWith(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedDateFrom != null && _selectedDateTo != null
+                            ? '${DateFormat('dd/MM/yyyy').format(_selectedDateFrom!)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateTo!)}'
+                            : 'common_select_period'.tr,
+                        style: AppTheme.bodyMedium.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textSecondary),
+                Icon(Icons.arrow_forward_ios,
+                    size: 16, color: AppTheme.textSecondary),
               ],
             ),
           ),
@@ -256,9 +352,16 @@ class _OxygenRespiratoryHistoryScreenState
         const SizedBox(height: 16),
         _buildStats(stats),
         const SizedBox(height: 16),
-        _buildChart(),
-        const SizedBox(height: 16),
+        if (_dailyData.isNotEmpty) ...[
+          _buildChart(),
+          const SizedBox(height: 16),
+        ],
+        if (stats != null) ...[
+          _buildAnalysis(stats),
+          const SizedBox(height: 16),
+        ],
         _buildDataList(),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -268,7 +371,8 @@ class _OxygenRespiratoryHistoryScreenState
     return InkWell(
       onTap: () async {
         setState(() => _selectedMetric = metric);
-        await _loadHealthData();
+        final collection = metric == 'oxygen' ? 'oxigenacao' : 'respiracao';
+        await _bootstrapOldestPatientRangeThenLoad(collection);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -290,17 +394,63 @@ class _OxygenRespiratoryHistoryScreenState
     );
   }
 
-  Map<String, dynamic> _calculateStats() {
-    final values = _dailyData.map((d) => d['value'] as double).toList();
+  Map<String, dynamic>? _calculateStats() {
+    if (_dailyData.isEmpty) return null;
+
+    final values =
+        _dailyData.map((d) => coerceMongoNumber(d['value'])).toList();
     final avg = values.reduce((a, b) => a + b) / values.length;
+    final min = values.reduce((a, b) => a < b ? a : b);
+    final max = values.reduce((a, b) => a > b ? a : b);
+
+    String trend = 'health_trend_stable'.tr;
+    Color trendColor = Colors.grey;
+    if (_dailyData.length >= 4) {
+      final firstHalf = _dailyData.sublist(0, _dailyData.length ~/ 2);
+      final secondHalf = _dailyData.sublist(_dailyData.length ~/ 2);
+      final firstAvg = firstHalf
+              .map((d) => coerceMongoNumber(d['value']))
+              .reduce((a, b) => a + b) /
+          firstHalf.length;
+      final secondAvg = secondHalf
+              .map((d) => coerceMongoNumber(d['value']))
+              .reduce((a, b) => a + b) /
+          secondHalf.length;
+
+      final delta = _selectedMetric == 'oxygen' ? 2.0 : 3.0;
+      if (secondAvg > firstAvg + delta) {
+        trend = 'health_trend_increasing'.tr;
+        trendColor = Colors.orange;
+      } else if (secondAvg < firstAvg - delta) {
+        trend = 'health_trend_decreasing'.tr;
+        trendColor = Colors.blue;
+      }
+    }
+
     return {
       'avg': avg,
-      'min': values.reduce((a, b) => a < b ? a : b),
-      'max': values.reduce((a, b) => a > b ? a : b),
+      'min': min,
+      'max': max,
+      'count': _dailyData.length,
+      'trend': trend,
+      'trendColor': trendColor,
     };
   }
 
-  Widget _buildStats(Map<String, dynamic> stats) {
+  Widget _buildStats(Map<String, dynamic>? stats) {
+    if (stats == null) return const SizedBox.shrink();
+
+    final oxy = _selectedMetric == 'oxygen';
+    final avgStr = oxy
+        ? (stats['avg'] as double).toStringAsFixed(1)
+        : (stats['avg'] as double).round().toString();
+    final minStr = oxy
+        ? (stats['min'] as double).toStringAsFixed(1)
+        : (stats['min'] as double).round().toString();
+    final maxStr = oxy
+        ? (stats['max'] as double).toStringAsFixed(1)
+        : (stats['max'] as double).round().toString();
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: AppTheme.surfaceListCardDecoration(),
@@ -312,7 +462,7 @@ class _OxygenRespiratoryHistoryScreenState
               Icon(Icons.analytics, color: AppTheme.primaryBlue, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Estatísticas do período',
+                'common_period_stats'.tr,
                 style: AppTheme.titleSmall.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -325,11 +475,35 @@ class _OxygenRespiratoryHistoryScreenState
           IntrinsicHeight(
             child: Row(
               children: [
-                Expanded(child: _stat('Média', stats['avg'] as double, AppTheme.secondaryBlue, Icons.trending_up)),
+                Expanded(
+                  child: _buildStatCard(
+                    'health_avg'.tr,
+                    avgStr,
+                    _metricUnit,
+                    AppTheme.secondaryBlue,
+                    Icons.trending_up,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: _stat('Mín', stats['min'] as double, AppTheme.success, Icons.keyboard_arrow_down)),
+                Expanded(
+                  child: _buildStatCard(
+                    'health_min'.tr,
+                    minStr,
+                    _metricUnit,
+                    AppTheme.success,
+                    Icons.keyboard_arrow_down,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: _stat('Máx', stats['max'] as double, AppTheme.error, Icons.keyboard_arrow_up)),
+                Expanded(
+                  child: _buildStatCard(
+                    'health_max'.tr,
+                    maxStr,
+                    _metricUnit,
+                    AppTheme.error,
+                    Icons.keyboard_arrow_up,
+                  ),
+                ),
               ],
             ),
           ),
@@ -338,7 +512,13 @@ class _OxygenRespiratoryHistoryScreenState
     );
   }
 
-  Widget _stat(String label, double value, Color color, IconData icon) {
+  Widget _buildStatCard(
+    String label,
+    String value,
+    String unit,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       height: 120,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
@@ -349,16 +529,21 @@ class _OxygenRespiratoryHistoryScreenState
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(height: 6),
-          Text(
-            '${value.toStringAsFixed(_selectedMetric == 'oxygen' ? 1 : 0)} $_metricUnit',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+          Flexible(
+            child: Text(
+              '$value $unit',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           const SizedBox(height: 4),
@@ -368,6 +553,9 @@ class _OxygenRespiratoryHistoryScreenState
               fontSize: 11,
               color: Colors.grey[600],
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -375,12 +563,18 @@ class _OxygenRespiratoryHistoryScreenState
   }
 
   Widget _buildChart() {
-    final sorted = List<Map<String, dynamic>>.from(_dailyData)
+    if (_dailyData.isEmpty) return const SizedBox.shrink();
+
+    final sortedData = List<Map<String, dynamic>>.from(_dailyData)
       ..sort((a, b) => (a['date'] as DateTime).compareTo(b['date'] as DateTime));
-    final maxY = sorted
-            .map((d) => d['value'] as double)
-            .reduce((a, b) => a > b ? a : b) *
-        1.2;
+
+    final maxY = chartMaxYFromValues(
+      sortedData.map((d) => coerceMongoNumber(d['value'])),
+      minWhenEmptyOrZero: _selectedMetric == 'oxygen' ? 100 : 24,
+    );
+
+    final yInterval = _selectedMetric == 'oxygen' ? 5.0 : 4.0;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: AppTheme.surfaceListCardDecoration(),
@@ -392,7 +586,7 @@ class _OxygenRespiratoryHistoryScreenState
               Icon(Icons.show_chart, color: AppTheme.primaryBlue, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Evolução',
+                'health_evolution'.tr,
                 style: AppTheme.titleSmall.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -406,22 +600,103 @@ class _OxygenRespiratoryHistoryScreenState
             height: 200,
             child: LineChart(
               LineChartData(
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  horizontalInterval: yInterval,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(
+                      color: Colors.grey[200]!,
+                      strokeWidth: 1,
+                    );
+                  },
+                ),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Text(
+                            _selectedMetric == 'oxygen'
+                                ? value.toStringAsFixed(0)
+                                : value.toInt().toString(),
+                            style: AppTheme.bodySmall.copyWith(
+                              fontSize: 10,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                        );
+                      },
+                      interval: yInterval,
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 30,
+                      interval: (sortedData.length / 5)
+                          .clamp(1, sortedData.length)
+                          .toDouble(),
+                      getTitlesWidget: (value, meta) {
+                        final index = value.toInt();
+                        if (index < 0 || index >= sortedData.length) {
+                          return const SizedBox.shrink();
+                        }
+                        final date = sortedData[index]['date'] as DateTime;
+                        return Text(
+                          '${date.day}/${date.month}',
+                          style: AppTheme.bodySmall.copyWith(
+                            fontSize: 10,
+                            color: AppTheme.textSecondary,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                ),
+                borderData: FlBorderData(
+                  show: true,
+                  border: Border.all(color: Colors.grey[300]!, width: 1),
+                ),
                 minX: 0,
-                maxX: (sorted.length - 1).toDouble(),
+                maxX: (sortedData.length - 1).toDouble(),
                 minY: 0,
                 maxY: maxY,
-                titlesData: const FlTitlesData(
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
                 lineBarsData: [
                   LineChartBarData(
+                    spots: sortedData.asMap().entries.map((entry) {
+                      return FlSpot(
+                        entry.key.toDouble(),
+                        coerceMongoNumber(entry.value['value']),
+                      );
+                    }).toList(),
                     isCurved: true,
                     color: AppTheme.primaryBlue,
                     barWidth: 3,
-                    spots: sorted.asMap().entries.map((entry) {
-                      return FlSpot(entry.key.toDouble(), entry.value['value'] as double);
-                    }).toList(),
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) {
+                        return FlDotCirclePainter(
+                          radius: 4,
+                          color: AppTheme.primaryBlue,
+                          strokeWidth: 2,
+                          strokeColor: Colors.white,
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.12),
+                    ),
                   ),
                 ],
               ),
@@ -432,80 +707,293 @@ class _OxygenRespiratoryHistoryScreenState
     );
   }
 
+  Widget _buildAnalysis(Map<String, dynamic> stats) {
+    final avg = stats['avg'] as double;
+    String analysis;
+    Color analysisColor;
+    IconData analysisIcon;
+
+    if (_selectedMetric == 'oxygen') {
+      if (avg >= 95) {
+        analysis = 'health_analysis_spo2_normal'.tr;
+        analysisColor = Colors.green;
+        analysisIcon = Icons.check_circle;
+      } else if (avg >= 90) {
+        analysis = 'health_analysis_spo2_mild'.tr;
+        analysisColor = Colors.orange;
+        analysisIcon = Icons.warning;
+      } else {
+        analysis = 'health_analysis_spo2_low'.tr;
+        analysisColor = Colors.red;
+        analysisIcon = Icons.error;
+      }
+    } else {
+      if (avg >= 12 && avg <= 20) {
+        analysis = 'health_analysis_rr_normal'.tr;
+        analysisColor = Colors.green;
+        analysisIcon = Icons.check_circle;
+      } else if (avg < 12) {
+        analysis = 'health_analysis_rr_low'.tr;
+        analysisColor = Colors.blue;
+        analysisIcon = Icons.warning;
+      } else {
+        analysis = 'health_analysis_rr_elevated'.tr;
+        analysisColor = Colors.orange;
+        analysisIcon = Icons.warning;
+      }
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: analysisColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: analysisColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(analysisIcon, color: analysisColor, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'health_analysis'.tr,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: analysisColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  analysis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'health_trend_label'.trParams({'trend': stats['trend']}),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: stats['trendColor'] as Color,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDataList() {
     return Column(
-      children: _dailyData.map((data) {
-        final date = data['date'] as DateTime;
-        final value = data['value'] as double;
-        final min = data['min'] as double;
-        final max = data['max'] as double;
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(14),
-          decoration: AppTheme.surfaceListCardDecoration(),
-          child: Row(
-            children: [
-              Icon(_metricIcon, color: AppTheme.primaryBlue),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(
+            'health_daily_records'.tr,
+            style: AppTheme.titleSmall.copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+        ),
+        ...List.generate(_dailyData.length, (index) {
+          final data = _dailyData[index];
+          final date = data['date'] as DateTime;
+          final value = coerceMongoNumber(data['value']);
+          final count = (data['count'] as num?)?.toInt() ?? 0;
+          final min = coerceMongoNumber(data['min']);
+          final max = coerceMongoNumber(data['max']);
+          final oxy = _selectedMetric == 'oxygen';
+          final minS = oxy ? min.toStringAsFixed(1) : min.round().toString();
+          final maxS = oxy ? max.toStringAsFixed(1) : max.round().toString();
+          final valueS =
+              oxy ? value.toStringAsFixed(1) : value.round().toString();
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: AppTheme.surfaceListCardDecoration(),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    _metricIcon,
+                    color: AppTheme.primaryBlue,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DateFormat(
+                          'EEEE, dd/MM/yyyy',
+                          Get.find<SettingsController>()
+                              .effectiveLocale
+                              .toString(),
+                        ).format(date),
+                        style: AppTheme.titleSmall.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'health_daily_min_max'
+                            .trParams({'min': minS, 'max': maxS}),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      DateFormat('EEEE, dd/MM/yyyy', Get.find<SettingsController>().effectiveLocale.toString()).format(date),
-                      style: AppTheme.titleSmall.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary,
+                      '$valueS $_metricUnit',
+                      style: AppTheme.titleMedium.copyWith(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryBlue,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Mín ${min.toStringAsFixed(1)} | Máx ${max.toStringAsFixed(1)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
+                    if (count > 1)
+                      Text(
+                        'health_records_count'.trParams({'count': '$count'}),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey[600],
+                        ),
                       ),
-                    ),
                   ],
                 ),
-              ),
-              Text(
-                '${value.toStringAsFixed(_selectedMetric == 'oxygen' ? 1 : 0)} $_metricUnit',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryBlue,
-                ),
-              ),
-            ],
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            valueColor:
+                AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
           ),
-        );
-      }).toList(),
+          const SizedBox(height: 16),
+          Text(
+            'health_loading'.tr,
+            style: AppTheme.bodyLarge.copyWith(
+              color: AppTheme.textSecondary,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Colors.red[300],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'common_error_load'.tr,
+            style: AppTheme.titleSmall.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _error ?? 'common_unknown_error'.tr,
+            style: AppTheme.bodyMedium.copyWith(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _loadHealthData,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryBlue,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('common_try_again'.tr),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildEmptyState() {
+    final emptyMsg = _selectedMetric == 'oxygen'
+        ? 'common_no_records_oxygen'.tr
+        : 'common_no_records_respiration'.tr;
+
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 36),
-        child: Column(
-          children: [
-            Icon(
-              _metricIcon,
-              size: 64,
-              color: Colors.grey[300],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            _metricIcon,
+            size: 64,
+            color: Colors.grey[300],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'common_no_data'.tr,
+            style: AppTheme.titleSmall.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Nenhum dado de $_metricTitle no período selecionado.',
-              style: AppTheme.bodyMedium.copyWith(
-                fontSize: 14,
-                color: AppTheme.textSecondary,
-              ),
-              textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            emptyMsg,
+            style: AppTheme.bodyMedium.copyWith(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
             ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

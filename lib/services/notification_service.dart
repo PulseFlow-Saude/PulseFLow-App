@@ -164,13 +164,14 @@ class NotificationService extends GetxService {
       );
 
       await _onOpenedSubscription?.cancel();
-      _onOpenedSubscription =
-          FirebaseMessaging.onMessageOpenedApp.listen(FirebaseHandlers.handleBackgroundMessage);
+      _onOpenedSubscription = FirebaseMessaging.onMessageOpenedApp.listen(
+        FirebaseHandlers.handleFcmNotificationOpened,
+      );
 
       final RemoteMessage? initialMessage =
           await _firebaseMessaging!.getInitialMessage();
       if (initialMessage != null) {
-        FirebaseHandlers.handleBackgroundMessage(initialMessage);
+        FirebaseHandlers.handleFcmNotificationOpened(initialMessage);
       }
 
       _fcmListenersAttached = true;
@@ -267,7 +268,7 @@ class NotificationService extends GetxService {
     final specialtyPart = specialty.isNotEmpty ? ' ($specialty)' : '';
     final bodyMsg = 'notif_access_body'.trParams({'name': doctorName, 'specialty': specialtyPart});
     final bodyFull = 'notif_access_body_full'.trParams({'name': doctorName, 'specialty': specialtyPart});
-    final contentTitle = '🩺 ${'notif_access_title'.tr}';
+    final contentTitle = 'notif_access_title'.tr;
     final viewRequest = 'notif_view_request'.tr;
 
     final notificationDetails = NotificationBuilders.createDoctorAccessNotification(
@@ -283,7 +284,7 @@ class NotificationService extends GetxService {
 
     await _localNotifications.show(
       notifId == 0 ? 1 : notifId,
-      '🩺 ${'notif_access_title_upper'.tr}',
+      'notif_access_title_upper'.tr,
       bodyMsg,
       notificationDetails,
       payload: 'doctor_access_request|$doctorName|$specialty',

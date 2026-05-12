@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../models/patient.dart';
@@ -25,6 +26,11 @@ class AuthService extends GetxController {
   static const _kBioFirstPromptDone = 'bio_first_login_prompt_done';
   static const _kBioSavedEmail = 'bio_saved_email';
   static const _kBioSavedPassword = 'bio_saved_password';
+  /// Keychain pode sobreviver à desinstalação (iOS). O ID em prefs é apagado na reinstalação — se divergir, limpamos tudo.
+  static const _kKeychainInstallBinding = 'keychain_install_binding';
+  static const _kPrefsInstallInstanceId = 'app_install_instance_id';
+  /// Chave antiga (só biometria); removida após migração / reinstalação.
+  static const _kLegacyBioBoundInstallId = 'bio_bound_install_instance_id';
 
   /// Quando [AppConfig.email2faSkipSmtp] está ativo: código mostrado na UI em vez de e-mail.
   String? _plaintext2FACodeForTesting;
@@ -47,8 +53,78 @@ class AuthService extends GetxController {
 
   // Inicialização do serviço
   Future<AuthService> init() async {
+    await syncKeychainAuthWithInstall();
     await _checkAuthStatus();
     return this;
+  }
+
+  String _newInstallInstanceId() {
+    final r = Random.secure();
+    return List.generate(32, (_) => r.nextInt(16).toRadixString(16)).join();
+  }
+
+  Future<String> _getOrCreateInstallInstanceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    var id = prefs.getString(_kPrefsInstallInstanceId);
+    if (id == null || id.isEmpty) {
+      id = _newInstallInstanceId();
+      await prefs.setString(_kPrefsInstallInstanceId, id);
+    }
+    return id;
+  }
+
+  Future<bool> _keychainHasAuthSecrets() async {
+    final token = await _storage.read(key: 'auth_token');
+    if (token != null && token.isNotEmpty) return true;
+    final remember = await _storage.read(key: 'remember_me');
+    if (remember == 'true') return true;
+    final savedEmail = await _storage.read(key: 'saved_email');
+    if (savedEmail != null && savedEmail.isNotEmpty) return true;
+    if (await biometricLoginEnabledIsOn()) return true;
+    return false;
+  }
+
+  /// Reinstalação (sobretudo iOS): Keychain pode manter token/biometria após desinstalar **sem** logout.
+  /// [SharedPreferences] é limpo na reinstalação — comparamos e forçamos login + 2FA + oferta de biometria.
+  /// Atualização normal (OTA): prefs já tinham dados ou binding alinhado — mantém sessão como antes.
+  Future<void> syncKeychainAuthWithInstall() async {
+    final prefs = await SharedPreferences.getInstance();
+    final prefsKeyCountBefore = prefs.getKeys().length;
+    final hadInstallIdInPrefs = prefs.containsKey(_kPrefsInstallInstanceId);
+    final installId = await _getOrCreateInstallInstanceId();
+
+    final bound = await _storage.read(key: _kKeychainInstallBinding);
+
+    if (bound != null && bound.isNotEmpty && bound != installId) {
+      await _clearPersistedAuthAfterAppReinstall();
+      await _storage.write(key: _kKeychainInstallBinding, value: installId);
+      await _storage.delete(key: _kLegacyBioBoundInstallId);
+      return;
+    }
+
+    if (bound == null || bound.isEmpty) {
+      final hasSecrets = await _keychainHasAuthSecrets();
+      if (hasSecrets &&
+          !hadInstallIdInPrefs &&
+          prefsKeyCountBefore == 0) {
+        await _clearPersistedAuthAfterAppReinstall();
+      }
+      await _storage.write(key: _kKeychainInstallBinding, value: installId);
+      await _storage.delete(key: _kLegacyBioBoundInstallId);
+      return;
+    }
+
+    await _storage.delete(key: _kLegacyBioBoundInstallId);
+  }
+
+  Future<void> _clearPersistedAuthAfterAppReinstall() async {
+    try {
+      await disableBiometricStoredCredentials(resetFirstLoginPrompt: true);
+      await _storage.delete(key: _kLegacyBioBoundInstallId);
+      await logout();
+    } catch (_) {
+      // Mesmo com falha parcial, o próximo arranque re-tenta; binding é atualizado em syncKeychainAuthWithInstall.
+    }
   }
 
   // Verifica se há um token válido

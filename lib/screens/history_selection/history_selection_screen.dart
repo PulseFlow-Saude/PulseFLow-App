@@ -280,8 +280,8 @@ class HistorySelectionScreen extends StatelessWidget {
       _HistoryCardData(
         accent: Colors.teal.shade700,
         icon: Icons.air_rounded,
-        title: 'Oxigenação e Respiração',
-        subtitle: 'Histórico de SpO2 e frequência respiratória',
+        title: 'hist_oxygen_respiratory'.tr,
+        subtitle: 'hist_oxygen_respiratory_sub'.tr,
         onTap: () => Get.toNamed(Routes.OXYGEN_RESPIRATORY_HISTORY),
       ),
       _HistoryCardData(

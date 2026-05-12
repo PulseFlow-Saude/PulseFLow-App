@@ -1,5 +1,8 @@
-import 'package:health/health.dart';
+import 'dart:io';
+
 import 'package:fl_chart/fl_chart.dart';
+import 'package:health/health.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HealthService {
   static final HealthService _instance = HealthService._internal();
@@ -7,6 +10,39 @@ class HealthService {
   HealthService._internal();
 
   final Health _health = Health();
+
+  Future<void>? _configureFuture;
+
+  /// O pacote `health` exige [Health.configure] antes do uso nativo.
+  Future<void> _ensureConfigured() async {
+    _configureFuture ??= _health.configure();
+    await _configureFuture;
+  }
+
+  /// Quando `false`, o app deixa de ler HealthKit / Health Connect (desligar “por dentro”).
+  /// Apple não permite revogar leitura pelo SDK; isto só desativa a integração no Oryon Health.
+  static const String prefAppleHealthInAppEnabled = 'apple_health_in_app_sync_enabled';
+
+  Future<bool> isAppleHealthInAppEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(prefAppleHealthInAppEnabled) ?? true;
+  }
+
+  Future<void> setAppleHealthInAppEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(prefAppleHealthInAppEnabled, enabled);
+  }
+
+  /// Android (Health Connect): revoga permissões no SO. iOS: não faz nada (API não existe).
+  Future<void> revokeOsHealthPermissionsIfAndroid() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _ensureConfigured();
+      await _health.revokePermissions();
+    } catch (e) {
+      print('⚠️ [HealthService] revokePermissions: $e');
+    }
+  }
 
   // Tipos de dados de saúde usados no app hoje (gráficos/sincronização principal)
   static const List<HealthDataType> _coreHealthDataTypes = [
@@ -29,11 +65,9 @@ class HealthService {
   // Solicita permissões para acessar dados de saúde
   Future<bool> requestPermissions() async {
     try {
+      await _ensureConfigured();
       print('🔐 [HealthService] Solicitando permissões do HealthKit...');
-      
-      // Verifica se o HealthKit está disponível (método não disponível na versão 9.0.1)
-      // bool isAvailable = await _health.isHealthDataAvailable();
-      
+
       bool requested = await _health.requestAuthorization(
         _coreHealthDataTypes,
         permissions: _healthDataPermissions,
@@ -55,6 +89,7 @@ class HealthService {
   // Busca dados de frequência cardíaca dos últimos 7 dias
   Future<List<FlSpot>> getHeartRateData() async {
     try {
+      await _ensureConfigured();
       final now = DateTime.now();
       final weekAgo = now.subtract(const Duration(days: 7));
 
@@ -109,6 +144,7 @@ class HealthService {
   // Busca dados de sono dos últimos 7 dias (tempo dormido)
   Future<List<FlSpot>> getSleepData() async {
     try {
+      await _ensureConfigured();
       final now = DateTime.now();
       // Busca dos últimos 30 dias para ter mais dados disponíveis
       final startDate = now.subtract(const Duration(days: 30));
@@ -267,6 +303,7 @@ class HealthService {
   // Busca dados de passos dos últimos 7 dias
   Future<List<FlSpot>> getStepsData() async {
     try {
+      await _ensureConfigured();
       final now = DateTime.now();
       final weekAgo = now.subtract(const Duration(days: 7));
 
@@ -319,6 +356,7 @@ class HealthService {
   // Busca dados de oxigenação (SpO2) dos últimos 7 dias
   Future<List<FlSpot>> getBloodOxygenData() async {
     try {
+      await _ensureConfigured();
       final now = DateTime.now();
       final weekAgo = now.subtract(const Duration(days: 7));
       final healthData = await _health.getHealthDataFromTypes(
@@ -357,6 +395,7 @@ class HealthService {
   // Busca dados de frequência respiratória dos últimos 7 dias
   Future<List<FlSpot>> getRespiratoryRateData() async {
     try {
+      await _ensureConfigured();
       final now = DateTime.now();
       final weekAgo = now.subtract(const Duration(days: 7));
       final healthData = await _health.getHealthDataFromTypes(
@@ -450,25 +489,23 @@ class HealthService {
     return spots;
   }
 
-  // Verifica se as permissões foram concedidas
+  /// Verifica permissões no SO (Android: true/false). No iOS, leitura costuma devolver `null`
+  /// (Apple não revela se concedeu leitura) — **não** dispara pedido automático aqui.
   Future<bool> hasPermissions() async {
     try {
+      await _ensureConfigured();
       final result = await _health.hasPermissions(
         _coreHealthDataTypes,
         permissions: _healthDataPermissions,
       );
-      
-      // Se result é null, significa que as permissões não foram solicitadas ainda
       if (result == null) {
-        print('⚠️ [HealthService] Permissões ainda não foram solicitadas - solicitando automaticamente...');
-        // Solicita permissões automaticamente se nunca foram solicitadas
-        final granted = await requestPermissions();
-        return granted;
+        print(
+          '🔐 [HealthService] Permissões indeterminadas (normal no iOS com dados de leitura).',
+        );
+        return false;
       }
-      
-      final hasPermission = result;
-      print('🔐 [HealthService] Status de permissões: $hasPermission');
-      return hasPermission;
+      print('🔐 [HealthService] Status de permissões: $result');
+      return result;
     } catch (e) {
       print('❌ [HealthService] Erro ao verificar permissões: $e');
       return false;
@@ -479,7 +516,18 @@ class HealthService {
   Future<Map<String, List<FlSpot>>> getAllHealthData() async {
     try {
       print('📊 [HealthService] getAllHealthData() chamado');
-      
+
+      if (!await isAppleHealthInAppEnabled()) {
+        print('📊 [HealthService] Integração Apple Health desligada nas preferências do app.');
+        return {
+          'heartRate': <FlSpot>[],
+          'sleep': <FlSpot>[],
+          'steps': <FlSpot>[],
+          'oxygenation': <FlSpot>[],
+          'respiratoryRate': <FlSpot>[],
+        };
+      }
+
       // iOS/HealthKit pode conceder permissões parcialmente.
       // Não bloqueia coleta total: tenta permissões e segue.
       try {
@@ -529,6 +577,18 @@ class HealthService {
   }) async {
     final now = endDate ?? DateTime.now();
     final from = startDate ?? now.subtract(const Duration(days: 3650));
+
+    if (!await isAppleHealthInAppEnabled()) {
+      return <String, Map<DateTime, double>>{
+        'heartRate': {},
+        'steps': {},
+        'sleep': {},
+        'oxygenation': {},
+        'respiratoryRate': {},
+      };
+    }
+
+    await _ensureConfigured();
 
     final result = <String, Map<DateTime, double>>{
       'heartRate': <DateTime, double>{},
@@ -631,6 +691,11 @@ class HealthService {
   // Método de diagnóstico para verificar dados brutos do Apple Health
   Future<void> diagnoseHealthData() async {
     try {
+      if (!await isAppleHealthInAppEnabled()) {
+        print('🔍 [HealthService] Integração desligada no app — diagnóstico cancelado.');
+        return;
+      }
+      await _ensureConfigured();
       print('🔍 [HealthService] Iniciando diagnóstico de dados do HealthKit...');
       
       // Verifica permissões

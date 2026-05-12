@@ -354,15 +354,10 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildFavoriteSection(HomeController controller) {
     return Obx(() {
-      if (!controller.hasAnyData) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildNoDataMessage(),
-          ],
-        );
+      if (!controller.canShowHomeFavorites) {
+        return const SizedBox.shrink();
       }
-      
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -379,9 +374,10 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     'home_favorites'.tr,
-                    style: AppTheme.titleLarge.copyWith(
+                    style: AppTheme.titleMedium.copyWith(
                       color: AppTheme.textPrimary,
                       fontWeight: FontWeight.bold,
+                      fontSize: 17,
                     ),
                   ),
                 ],
@@ -418,7 +414,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           if (controller.favoriteItems.isEmpty)
             _buildNoFavoritesMessage()
           else
@@ -461,6 +457,30 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // —— Favoritos na home: padding e tipografia mais compactos ——
+  static const EdgeInsets _kFavCardPadding =
+      EdgeInsets.symmetric(horizontal: 12, vertical: 10);
+  static const double _kFavIconSize = 20;
+  static const double _kFavIconBoxRadius = 10;
+  static const double _kFavPrimaryValueSize = 22;
+
+  TextStyle _favCardTitleStyle() => AppTheme.titleSmall.copyWith(
+        fontSize: 15,
+        fontWeight: FontWeight.w800,
+        color: AppTheme.textPrimary,
+      );
+
+  Widget _favLeadingIcon(IconData icon, Color accent) {
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(_kFavIconBoxRadius),
+      ),
+      child: Icon(icon, color: accent, size: _kFavIconSize),
+    );
+  }
+
   Widget _buildNoFavoritesMessage() {
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
@@ -496,11 +516,67 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Cartão quando o favorito está selecionado mas não há dados desse tipo.
+  Widget _buildFavoriteNoDataCard(Map<String, dynamic> itemData) {
+    return Container(
+      padding: _kFavCardPadding,
+      decoration: _homeListCardDecoration(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(_kFavIconBoxRadius),
+            ),
+            child: Icon(
+              Icons.info_outline_rounded,
+              color: AppTheme.primaryBlue.withValues(alpha: 0.9),
+              size: _kFavIconSize,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  itemData['title'] as String,
+                  style: _favCardTitleStyle(),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'home_no_data_available'.tr,
+                  style: AppTheme.bodySmall.copyWith(
+                    fontSize: 13,
+                    color: AppTheme.textPrimary.withValues(alpha: 0.72),
+                    height: 1.35,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'home_fav_empty_hint'.tr,
+                  style: AppTheme.bodySmall.copyWith(
+                    fontSize: 12,
+                    color: AppTheme.textPrimary.withValues(alpha: 0.55),
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFavoriteCharts(HomeController controller) {
     return Column(
       children: controller.favoriteItems.map((item) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.only(bottom: 10),
           child: _buildFavoriteChart(item, controller),
         );
       }).toList(),
@@ -512,47 +588,7 @@ class HomeScreen extends StatelessWidget {
     final stats = _getStatsForItem(controller, item);
     
     if (stats.isEmpty) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: _homeListCardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                itemData['icon'],
-                color: itemData['color'],
-                size: 24,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                itemData['title'],
-                style: AppTheme.titleMedium.copyWith(
-                  color: AppTheme.textPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-            Container(
-              height: 80,
-              width: double.infinity,
-              decoration: _homeEmptyStateDecoration(),
-              child: Center(
-                child: Text(
-                  'home_no_data_available'.tr,
-                  style: TextStyle(
-                    color: AppTheme.textPrimary.withValues(alpha: 0.45),
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
+      return _buildFavoriteNoDataCard(itemData);
     }
     
     // Visualizações específicas por tipo
@@ -567,548 +603,666 @@ class HomeScreen extends StatelessWidget {
         return _buildEventoClinicoCard(itemData, stats);
       case 'menstruacao':
         return _buildMenstruacaoCard(itemData, stats);
+      case 'freq_cardiaca':
+      case 'passos':
+      case 'sono':
+      case 'respiracao':
+        return _buildHomeVitalsFavoriteCard(item, itemData, stats);
+      case 'pressao':
+        return _buildHomePressaoFavoriteCard(itemData, stats);
       default:
         return _buildDefaultCard(itemData, stats);
     }
   }
-  
-  Widget _buildEnxaquecaCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
-    final diasDesdeUltima = stats['diasDesdeUltima'] as int? ?? 0;
-    final frequencia30Dias = stats['frequencia30Dias'] as int? ?? 0;
-    final ultimaIntensidade = stats['ultimaIntensidade'] as int? ?? 0;
-    
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: _homeListCardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-              children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (itemData['color'] as Color).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  itemData['icon'],
-                  color: itemData['color'],
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      itemData['title'],
-                      style: AppTheme.titleMedium.copyWith(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      diasDesdeUltima == 0 ? 'home_today'.tr : diasDesdeUltima == 1 ? 'home_days_ago'.trParams({'n': '1'}) : 'home_days_ago_plural'.trParams({'n': diasDesdeUltima.toString()}),
-                      style: AppTheme.bodySmall.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoBox(
-                  'home_last_intensity'.tr,
-                  '$ultimaIntensidade/10',
-                  itemData['color'],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildInfoBox(
-                  'home_last_30_days'.tr,
-                  '$frequencia30Dias ${'home_crises'.tr}',
-                  Colors.orange,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem('common_avg'.tr, '${stats['media'] ?? 0}/10', Colors.blue),
-              _buildStatItem('common_total'.tr, '${stats['total'] ?? 0}', Colors.grey[600]!),
-            ],
-          ),
-        ],
-      ),
-    );
+
+  String _favoriteSubtitleDays(int diasDesdeUltima) {
+    if (diasDesdeUltima == 0) return 'home_today'.tr;
+    if (diasDesdeUltima == 1) return 'home_days_ago'.trParams({'n': '1'});
+    return 'home_days_ago_plural'
+        .trParams({'n': diasDesdeUltima.toString()});
   }
-  
-  Widget _buildDiabetesCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
-    final ultimaGlicemia = stats['ultimaGlicemia'] as int? ?? 0;
-    final unidade = stats['unidade'] as String? ?? 'mg/dL';
-    final status = stats['status'] as String? ?? 'Normal';
-    final diasDesdeUltima = stats['diasDesdeUltima'] as int? ?? 0;
-    final media7Dias = stats['media7Dias'] as int?;
-    
-    Color statusColor = Colors.green;
-    if (status == 'Alta') statusColor = Colors.red;
-    if (status == 'Baixa') statusColor = Colors.orange;
-    
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: _homeListCardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-            Container(
-                padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                  color: (itemData['color'] as Color).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  itemData['icon'],
-                  color: itemData['color'],
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      itemData['title'],
-                      style: AppTheme.titleMedium.copyWith(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      diasDesdeUltima == 0 ? 'home_today'.tr : diasDesdeUltima == 1 ? 'home_days_ago'.trParams({'n': '1'}) : 'home_days_ago_plural'.trParams({'n': diasDesdeUltima.toString()}),
-                      style: AppTheme.bodySmall.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.28)),
-                  ),
+
+  /// Mesmo padrão dos favoritos de vitais: cabeçalho com chevron, «último», valor em destaque, 3 caixas.
+  Widget _buildFavoriteTriMetricCard({
+    required Map<String, dynamic> itemData,
+    required String route,
+    required String headerSubtitle,
+    required String primaryLabel,
+    required String primaryValue,
+    required Color primaryColor,
+    required String sectionTitle,
+    required String box1Label,
+    required String box1Value,
+    required Color box1Color,
+    required String box2Label,
+    required String box2Value,
+    required Color box2Color,
+    required String box3Label,
+    required String box3Value,
+    required Color box3Color,
+    Widget? underPrimary,
+  }) {
+    final accent = itemData['color'] as Color;
+    return GestureDetector(
+      onTap: () => Get.toNamed(route),
+      child: Container(
+        padding: _kFavCardPadding,
+        decoration: _homeListCardDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _favLeadingIcon(itemData['icon'] as IconData, accent),
+                const SizedBox(width: 10),
+                Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '$ultimaGlicemia',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: statusColor,
-                        ),
+                        itemData['title'] as String,
+                        style: _favCardTitleStyle(),
                       ),
                       Text(
-                        unidade,
-                        style: TextStyle(
-                          fontSize: 12,
+                        headerSubtitle,
+                        style: AppTheme.bodySmall.copyWith(
+                          fontSize: 11,
                           color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: statusColor,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          status == 'Alta' ? 'diab_status_high'.tr : status == 'Baixa' ? 'diab_status_low'.tr : 'diab_status_normal'.tr,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              if (media7Dias != null) ...[
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildInfoBox(
-                    'home_avg_7_days'.tr,
-                    '$media7Dias $unidade',
-                    Colors.blue,
-                  ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22,
+                  color: Colors.grey.withValues(alpha: 0.45),
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              primaryLabel,
+              style: AppTheme.bodySmall.copyWith(
+                fontSize: 11,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              primaryValue,
+              style: TextStyle(
+                fontSize: _kFavPrimaryValueSize,
+                fontWeight: FontWeight.w800,
+                color: primaryColor,
+                letterSpacing: -0.4,
+              ),
+            ),
+            if (underPrimary != null) ...[
+              const SizedBox(height: 6),
+              underPrimary,
             ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem('home_avg_general'.tr, '${stats['media'] ?? 0} $unidade', Colors.blue),
-              _buildStatItem('common_total'.tr, '${stats['total'] ?? 0}', Colors.grey[600]!),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildGastriteCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
-    final diasDesdeUltima = stats['diasDesdeUltima'] as int? ?? 0;
-    final frequencia30Dias = stats['frequencia30Dias'] as int? ?? 0;
-    final ultimaIntensidade = stats['ultimaIntensidade'] as int? ?? 0;
-    
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: _homeListCardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (itemData['color'] as Color).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  itemData['icon'],
-                  color: itemData['color'],
-                  size: 24,
-                ),
+            const SizedBox(height: 10),
+            Text(
+              sectionTitle,
+              style: AppTheme.bodySmall.copyWith(
+                fontSize: 11,
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      itemData['title'],
-                      style: AppTheme.titleMedium.copyWith(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      diasDesdeUltima == 0 ? 'home_today'.tr : diasDesdeUltima == 1 ? 'home_days_ago'.trParams({'n': '1'}) : 'home_days_ago_plural'.trParams({'n': diasDesdeUltima.toString()}),
-                      style: AppTheme.bodySmall.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoBox(
-                  'home_last_intensity'.tr,
-                  '$ultimaIntensidade/10',
-                  itemData['color'],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildInfoBox(
-                  'home_last_30_days'.tr,
-                  '$frequencia30Dias ${'home_crises'.tr}',
-                  Colors.orange,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-              _buildStatItem('common_avg'.tr, '${stats['media'] ?? 0}/10', Colors.blue),
-              _buildStatItem('common_total'.tr, '${stats['total'] ?? 0}', Colors.grey[600]!),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildEventoClinicoCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
-    final totalFuturos = stats['totalFuturos'] as int? ?? 0;
-    final proximoEvento = stats['proximoEvento'] as DateTime?;
-    
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: _homeListCardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (itemData['color'] as Color).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  itemData['icon'],
-                  color: itemData['color'],
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  itemData['title'],
-                  style: AppTheme.titleMedium.copyWith(
-                    color: AppTheme.textPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoBox(
-                  'home_next'.tr,
-                  '$totalFuturos ${'home_events'.tr}',
-                  Colors.green,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildInfoBox(
-                  'home_this_month'.tr,
-                  '${stats['este_mes'] ?? 0} ${'home_events'.tr}',
-                  Colors.blue,
-                ),
-              ),
-            ],
-          ),
-          if (proximoEvento != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.withValues(alpha: 0.28)),
-              ),
+            ),
+            const SizedBox(height: 6),
+            IntrinsicHeight(
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today, color: Colors.orange, size: 18),
-                  const SizedBox(width: 8),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'home_next_event'.tr,
-                  style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        Text(
-                          _formatDate(proximoEvento),
-                          style: TextStyle(
-                    fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange[700],
+                    child: _buildInfoBox(box1Label, box1Value, box1Color),
                   ),
-                ),
-                      ],
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: _buildInfoBox(box2Label, box2Value, box2Color),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: _buildInfoBox(box3Label, box3Value, box3Color),
+                  ),
+                ],
               ),
             ),
           ],
-              ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          _buildStatItem('common_total'.tr, '${stats['total'] ?? 0}', Colors.grey[600]!),
-        ],
+        ),
       ),
     );
   }
-  
+
+  Widget _buildEnxaquecaCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
+    final diasDesdeUltima = stats['diasDesdeUltima'] as int? ?? 0;
+    final ultimaIntensidade = stats['ultimaIntensidade'] as int? ?? 0;
+    final maior = (stats['maior'] as num?)?.toInt() ?? 0;
+    final menor = (stats['menor'] as num?)?.toInt() ?? 0;
+    final media = (stats['media'] as num?)?.toInt() ?? 0;
+    final color = itemData['color'] as Color;
+
+    return _buildFavoriteTriMetricCard(
+      itemData: itemData,
+      route: itemData['route'] as String,
+      headerSubtitle: _favoriteSubtitleDays(diasDesdeUltima),
+      primaryLabel: 'home_fav_last'.tr,
+      primaryValue: '$ultimaIntensidade/10',
+      primaryColor: color,
+      sectionTitle: 'home_fav_stats_records'.tr,
+      box1Label: 'common_min'.tr,
+      box1Value: '$menor/10',
+      box1Color: AppTheme.success,
+      box2Label: 'common_avg'.tr,
+      box2Value: '$media/10',
+      box2Color: AppTheme.secondaryBlue,
+      box3Label: 'common_max'.tr,
+      box3Value: '$maior/10',
+      box3Color: AppTheme.error,
+    );
+  }
+
+  Widget _buildDiabetesCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
+    final ultimaGlicemia = stats['ultimaGlicemia'] as int? ?? 0;
+    final unidade = stats['unidade'] as String? ?? 'mg/dL';
+    final status = stats['status'] as String? ?? 'Normal';
+    final diasDesdeUltima = stats['diasDesdeUltima'] as int? ?? 0;
+    final maior = (stats['maior'] as num?)?.round() ?? ultimaGlicemia;
+    final menor = (stats['menor'] as num?)?.round() ?? ultimaGlicemia;
+    final media = (stats['media'] as num?)?.round() ?? ultimaGlicemia;
+    final color = itemData['color'] as Color;
+
+    Color statusColor = Colors.green;
+    if (status == 'Alta') statusColor = Colors.red;
+    if (status == 'Baixa') statusColor = Colors.orange;
+
+    final statusLabel = status == 'Alta'
+        ? 'diab_status_high'.tr
+        : status == 'Baixa'
+            ? 'diab_status_low'.tr
+            : 'diab_status_normal'.tr;
+
+    final under = Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: statusColor,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          statusLabel,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+
+    return _buildFavoriteTriMetricCard(
+      itemData: itemData,
+      route: itemData['route'] as String,
+      headerSubtitle: _favoriteSubtitleDays(diasDesdeUltima),
+      primaryLabel: 'home_fav_last'.tr,
+      primaryValue: '$ultimaGlicemia $unidade',
+      primaryColor: statusColor,
+      sectionTitle: 'home_fav_stats_records'.tr,
+      box1Label: 'common_min'.tr,
+      box1Value: '$menor $unidade',
+      box1Color: AppTheme.success,
+      box2Label: 'common_avg'.tr,
+      box2Value: '$media $unidade',
+      box2Color: AppTheme.secondaryBlue,
+      box3Label: 'common_max'.tr,
+      box3Value: '$maior $unidade',
+      box3Color: AppTheme.error,
+      underPrimary: under,
+    );
+  }
+
+  Widget _buildGastriteCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
+    final diasDesdeUltima = stats['diasDesdeUltima'] as int? ?? 0;
+    final ultimaIntensidade = stats['ultimaIntensidade'] as int? ?? 0;
+    final maior = (stats['maior'] as num?)?.toInt() ?? 0;
+    final menor = (stats['menor'] as num?)?.toInt() ?? 0;
+    final media = (stats['media'] as num?)?.toInt() ?? 0;
+    final color = itemData['color'] as Color;
+
+    return _buildFavoriteTriMetricCard(
+      itemData: itemData,
+      route: itemData['route'] as String,
+      headerSubtitle: _favoriteSubtitleDays(diasDesdeUltima),
+      primaryLabel: 'home_fav_last'.tr,
+      primaryValue: '$ultimaIntensidade/10',
+      primaryColor: color,
+      sectionTitle: 'home_fav_stats_records'.tr,
+      box1Label: 'common_min'.tr,
+      box1Value: '$menor/10',
+      box1Color: AppTheme.success,
+      box2Label: 'common_avg'.tr,
+      box2Value: '$media/10',
+      box2Color: AppTheme.secondaryBlue,
+      box3Label: 'common_max'.tr,
+      box3Value: '$maior/10',
+      box3Color: AppTheme.error,
+    );
+  }
+
+  Widget _buildEventoClinicoCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
+    final totalFuturos = stats['totalFuturos'] as int? ?? 0;
+    final esteMes = stats['este_mes'] as int? ?? 0;
+    final proximoEvento = stats['proximoEvento'] as DateTime?;
+    final ultimoEvento = stats['ultimoEvento'] as DateTime?;
+    final ultimaData = stats['ultimaData'] as DateTime?;
+    final color = itemData['color'] as Color;
+
+    final headerSubtitle = ultimaData != null
+        ? _homeFavoriteDaysSinceDate(ultimaData)
+        : '';
+
+    final primaryVal = ultimoEvento != null
+        ? DateFormat('dd/MM/yyyy').format(ultimoEvento)
+        : '—';
+
+    final proximoStr = proximoEvento != null
+        ? DateFormat('dd/MM/yyyy').format(proximoEvento)
+        : '—';
+
+    return _buildFavoriteTriMetricCard(
+      itemData: itemData,
+      route: itemData['route'] as String,
+      headerSubtitle: headerSubtitle,
+      primaryLabel: 'home_fav_last'.tr,
+      primaryValue: primaryVal,
+      primaryColor: color,
+      sectionTitle: 'home_fav_stats_records'.tr,
+      box1Label: 'home_fav_upcoming'.tr,
+      box1Value: '$totalFuturos',
+      box1Color: AppTheme.success,
+      box2Label: 'home_this_month'.tr,
+      box2Value: '$esteMes',
+      box2Color: AppTheme.secondaryBlue,
+      box3Label: 'home_next_event'.tr,
+      box3Value: proximoStr,
+      box3Color: Colors.orange.shade700,
+    );
+  }
+
   Widget _buildMenstruacaoCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
     final diasDesdeUltima = stats['diasDesdeUltima'] as int? ?? 0;
     final cicloMedio = stats['cicloMedio'] as int?;
     final proximoCiclo = stats['proximoCiclo'] as DateTime?;
-    
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: _homeListCardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (itemData['color'] as Color).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  itemData['icon'],
-                  color: itemData['color'],
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      itemData['title'],
-                      style: AppTheme.titleMedium.copyWith(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'home_day_cycle'.trParams({'n': diasDesdeUltima.toString()}),
-                      style: AppTheme.bodySmall.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              if (cicloMedio != null)
+    final duracaoAtual = stats['duracaoAtual'] as int? ?? 0;
+    final media = (stats['media'] as num?)?.toInt() ?? 0;
+    final color = itemData['color'] as Color;
+    final dUnit = 'home_days'.tr;
+
+    return _buildFavoriteTriMetricCard(
+      itemData: itemData,
+      route: itemData['route'] as String,
+      headerSubtitle:
+          'home_day_cycle'.trParams({'n': diasDesdeUltima.toString()}),
+      primaryLabel: 'home_fav_last'.tr,
+      primaryValue: '$duracaoAtual $dUnit',
+      primaryColor: color,
+      sectionTitle: 'home_fav_stats_records'.tr,
+      box1Label: 'home_avg_cycle'.tr,
+      box1Value: cicloMedio != null ? '$cicloMedio $dUnit' : '—',
+      box1Color: Colors.purple,
+      box2Label: 'home_avg_duration'.tr,
+      box2Value: '$media $dUnit',
+      box2Color: AppTheme.secondaryBlue,
+      box3Label: 'home_next_cycle'.tr,
+      box3Value:
+          proximoCiclo != null ? DateFormat('dd/MM/yyyy').format(proximoCiclo) : '—',
+      box3Color: Colors.pink.shade400,
+    );
+  }
+
+  String _homeFavoriteDaysSinceDate(DateTime date) {
+    final now = DateTime.now();
+    final dayDate = DateTime(date.year, date.month, date.day);
+    final dayNow = DateTime(now.year, now.month, now.day);
+    final dias = dayNow.difference(dayDate).inDays;
+    if (dias < 0) {
+      return DateFormat('dd/MM/yyyy').format(date);
+    }
+    if (dias == 0) return 'home_today'.tr;
+    if (dias == 1) return 'home_days_ago'.trParams({'n': '1'});
+    return 'home_days_ago_plural'.trParams({'n': dias.toString()});
+  }
+
+  String _formatVitalFavoriteNumber(double v, String metricKey) {
+    if (metricKey == 'sono') return v.toStringAsFixed(1);
+    return v.round().toString();
+  }
+
+  Widget _buildHomeVitalsFavoriteCard(
+    String metricKey,
+    Map<String, dynamic> itemData,
+    Map<String, dynamic> stats,
+  ) {
+    final route = itemData['route'] as String? ?? Routes.HOME;
+    final ultimo = stats['ultimo'] as double? ?? 0;
+    final ultimaData = stats['ultimaData'] as DateTime?;
+    final windowDays = stats['windowDays'] as int? ?? 1;
+    final minW = stats['minWindow'] as double? ?? ultimo;
+    final maxW = stats['maxWindow'] as double? ?? ultimo;
+    final mediaW = stats['media7'] as double? ?? ultimo;
+
+    final accent = itemData['color'] as Color;
+
+    String unit;
+    String ultimoText;
+    String minText;
+    String medText;
+    String maxText;
+
+    switch (metricKey) {
+      case 'freq_cardiaca':
+        unit = 'bpm';
+        ultimoText =
+            '${_formatVitalFavoriteNumber(ultimo, metricKey)} $unit';
+        minText = '${_formatVitalFavoriteNumber(minW, metricKey)} $unit';
+        medText = '${_formatVitalFavoriteNumber(mediaW, metricKey)} $unit';
+        maxText = '${_formatVitalFavoriteNumber(maxW, metricKey)} $unit';
+        break;
+      case 'passos':
+        unit = 'health_unit_steps'.tr;
+        ultimoText =
+            '${_formatVitalFavoriteNumber(ultimo, metricKey)} $unit';
+        minText = '${_formatVitalFavoriteNumber(minW, metricKey)} $unit';
+        medText = '${_formatVitalFavoriteNumber(mediaW, metricKey)} $unit';
+        maxText = '${_formatVitalFavoriteNumber(maxW, metricKey)} $unit';
+        break;
+      case 'sono':
+        unit = 'health_unit_h'.tr;
+        ultimoText = '${ultimo.toStringAsFixed(1)} $unit';
+        minText = '${minW.toStringAsFixed(1)} $unit';
+        medText = '${mediaW.toStringAsFixed(1)} $unit';
+        maxText = '${maxW.toStringAsFixed(1)} $unit';
+        break;
+      case 'respiracao':
+        unit = 'health_unit_resp_rate'.tr;
+        ultimoText =
+            '${_formatVitalFavoriteNumber(ultimo, metricKey)} $unit';
+        minText = '${_formatVitalFavoriteNumber(minW, metricKey)} $unit';
+        medText = '${_formatVitalFavoriteNumber(mediaW, metricKey)} $unit';
+        maxText = '${_formatVitalFavoriteNumber(maxW, metricKey)} $unit';
+        break;
+      default:
+        unit = '';
+        ultimoText = '—';
+        minText = '—';
+        medText = '—';
+        maxText = '—';
+    }
+
+    return GestureDetector(
+      onTap: () => Get.toNamed(route),
+      child: Container(
+        padding: _kFavCardPadding,
+        decoration: _homeListCardDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _favLeadingIcon(itemData['icon'] as IconData, accent),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: _buildInfoBox(
-                    'home_avg_cycle'.tr,
-                    '$cicloMedio dias',
-                    Colors.purple,
-                  ),
-                ),
-              if (cicloMedio != null) const SizedBox(width: 12),
-              Expanded(
-                child: _buildInfoBox(
-                  'home_avg_duration'.tr,
-                  '${stats['media'] ?? 0} dias',
-                  Colors.pink,
-                ),
-              ),
-            ],
-          ),
-          if (proximoCiclo != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.pink.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.pink.withValues(alpha: 0.28)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.calendar_today, color: Colors.pink, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        itemData['title'] as String,
+                        style: _favCardTitleStyle(),
+                      ),
+                      if (ultimaData != null)
                         Text(
-                          'home_next_cycle'.tr,
-                          style: TextStyle(
+                          _homeFavoriteDaysSinceDate(ultimaData),
+                          style: AppTheme.bodySmall.copyWith(
                             fontSize: 11,
                             color: Colors.grey[600],
                           ),
                         ),
-                        Text(
-                          _formatDate(proximoCiclo),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.pink[700],
-                          ),
-                        ),
-                      ],
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22,
+                  color: Colors.grey.withValues(alpha: 0.45),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'home_fav_last'.tr,
+              style: AppTheme.bodySmall.copyWith(
+                fontSize: 11,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              ultimoText,
+              style: TextStyle(
+                fontSize: _kFavPrimaryValueSize,
+                fontWeight: FontWeight.w800,
+                color: accent,
+                letterSpacing: -0.4,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'home_fav_window_stats'.trParams({'n': '$windowDays'}),
+              style: AppTheme.bodySmall.copyWith(
+                fontSize: 11,
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            IntrinsicHeight(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoBox(
+                      'common_min'.tr,
+                      minText,
+                      AppTheme.success,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: _buildInfoBox(
+                      'common_avg'.tr,
+                      medText,
+                      AppTheme.secondaryBlue,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: _buildInfoBox(
+                      'common_max'.tr,
+                      maxText,
+                      AppTheme.error,
                     ),
                   ),
                 ],
               ),
             ),
           ],
-          const SizedBox(height: 12),
-          _buildStatItem('home_total_records'.tr, '${stats['total'] ?? 0}', Colors.grey[600]!),
-        ],
+        ),
       ),
     );
   }
-  
+
+  Widget _buildHomePressaoFavoriteCard(
+    Map<String, dynamic> itemData,
+    Map<String, dynamic> stats,
+  ) {
+    final route = itemData['route'] as String? ?? Routes.PRESSAO;
+    final sys = stats['sistolica'] as int? ?? 0;
+    final dia = stats['diastolica'] as int? ?? 0;
+    final ultimaData = stats['ultimaData'] as DateTime?;
+    final mSys = stats['mediaSistolica7'] as int? ?? sys;
+    final mDia = stats['mediaDiastolica7'] as int? ?? dia;
+    final minSys = stats['minSistolicaWindow'] as int? ?? sys;
+    final maxSys = stats['maxSistolicaWindow'] as int? ?? sys;
+    final windowMedicoes = stats['windowMedicoes'] as int? ?? 1;
+    final accent = itemData['color'] as Color;
+
+    return GestureDetector(
+      onTap: () => Get.toNamed(route),
+      child: Container(
+        padding: _kFavCardPadding,
+        decoration: _homeListCardDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _favLeadingIcon(itemData['icon'] as IconData, accent),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        itemData['title'] as String,
+                        style: _favCardTitleStyle(),
+                      ),
+                      if (ultimaData != null)
+                        Text(
+                          _homeFavoriteDaysSinceDate(ultimaData),
+                          style: AppTheme.bodySmall.copyWith(
+                            fontSize: 11,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22,
+                  color: Colors.grey.withValues(alpha: 0.45),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'home_fav_last'.tr,
+              style: AppTheme.bodySmall.copyWith(
+                fontSize: 11,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '$sys / $dia mmHg',
+              style: TextStyle(
+                fontSize: _kFavPrimaryValueSize,
+                fontWeight: FontWeight.w800,
+                color: accent,
+                letterSpacing: -0.4,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'home_fav_window_stats_bp'.trParams({'n': '$windowMedicoes'}),
+              style: AppTheme.bodySmall.copyWith(
+                fontSize: 11,
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            IntrinsicHeight(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoBox(
+                      'home_fav_bp_min_sys'.tr,
+                      '$minSys mmHg',
+                      AppTheme.success,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: _buildInfoBox(
+                      'common_avg'.tr,
+                      '$mSys/$mDia mmHg',
+                      AppTheme.secondaryBlue,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: _buildInfoBox(
+                      'home_fav_bp_max_sys'.tr,
+                      '$maxSys mmHg',
+                      AppTheme.error,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDefaultCard(Map<String, dynamic> itemData, Map<String, dynamic> stats) {
+    final color = itemData['color'] as Color;
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: _kFavCardPadding,
       decoration: _homeListCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                itemData['icon'],
-                color: itemData['color'],
-                size: 24,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                itemData['title'],
-                style: AppTheme.titleMedium.copyWith(
-                  color: AppTheme.textPrimary,
-                  fontWeight: FontWeight.bold,
+              _favLeadingIcon(itemData['icon'] as IconData, color),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  itemData['title'] as String,
+                  style: _favCardTitleStyle(),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem('common_max'.tr, stats['maior']?.toString() ?? 'N/A', Colors.red),
-              _buildStatItem('common_min'.tr, stats['menor']?.toString() ?? 'N/A', Colors.green),
-              _buildStatItem('common_avg'.tr, stats['media']?.toString() ?? 'N/A', Colors.blue),
+              _buildStatItem(
+                'common_max'.tr,
+                stats['maior']?.toString() ?? 'N/A',
+                Colors.red,
+                compact: true,
+              ),
+              _buildStatItem(
+                'common_min'.tr,
+                stats['menor']?.toString() ?? 'N/A',
+                Colors.green,
+                compact: true,
+              ),
+              _buildStatItem(
+                'common_avg'.tr,
+                stats['media']?.toString() ?? 'N/A',
+                Colors.blue,
+                compact: true,
+              ),
             ],
           ),
         ],
@@ -1118,10 +1272,10 @@ class HomeScreen extends StatelessWidget {
   
   Widget _buildInfoBox(String label, String value, Color color) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: color.withValues(alpha: 0.28)),
       ),
       child: Column(
@@ -1130,15 +1284,15 @@ class HomeScreen extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               color: Colors.grey[600],
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text(
             value,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
               color: color,
             ),
@@ -1173,19 +1327,26 @@ class HomeScreen extends StatelessWidget {
         return controller.getEventoClinicoStats();
       case 'menstruacao':
         return controller.getMenstruacaoStats();
+      case 'freq_cardiaca':
+      case 'passos':
+      case 'sono':
+      case 'respiracao':
+      case 'pressao':
+        return controller.getHomeVitalStats(item);
       default:
         return {};
     }
   }
 
   // Widget para exibir um item de estatística
-  Widget _buildStatItem(String label, String value, Color color) {
+  Widget _buildStatItem(String label, String value, Color color,
+      {bool compact = false}) {
     return Column(
       children: [
         Text(
           value,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: compact ? 15 : 18,
             fontWeight: FontWeight.bold,
             color: color,
           ),
@@ -1194,7 +1355,7 @@ class HomeScreen extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: compact ? 10 : 12,
             color: Colors.grey[600],
           ),
         ),
@@ -1465,6 +1626,7 @@ class HomeScreen extends StatelessWidget {
           'title': 'home_enxaqueca'.tr,
           'subtitle': 'home_enxaqueca_sub'.tr,
           'color': Colors.purple,
+          'route': Routes.ENXAQUECA,
         };
       case 'diabetes':
         return {
@@ -1472,6 +1634,7 @@ class HomeScreen extends StatelessWidget {
           'title': 'home_diabetes'.tr,
           'subtitle': 'home_diabetes_sub'.tr,
           'color': Colors.red,
+          'route': Routes.DIABETES,
         };
       case 'crise_gastrite':
         return {
@@ -1479,6 +1642,7 @@ class HomeScreen extends StatelessWidget {
           'title': 'home_gastrite'.tr,
           'subtitle': 'home_gastrite_sub'.tr,
           'color': Colors.orange,
+          'route': Routes.CRISE_GASTRITE_HISTORY,
         };
       case 'evento_clinico':
         return {
@@ -1486,6 +1650,7 @@ class HomeScreen extends StatelessWidget {
           'title': 'home_eventos'.tr,
           'subtitle': 'home_eventos_sub'.tr,
           'color': Colors.blue,
+          'route': Routes.EVENTO_CLINICO_HISTORY,
         };
       case 'menstruacao':
         return {
@@ -1493,6 +1658,47 @@ class HomeScreen extends StatelessWidget {
           'title': 'home_menstruacao'.tr,
           'subtitle': 'home_menstruacao_sub'.tr,
           'color': Colors.pink,
+          'route': Routes.MENSTRUACAO_HISTORY,
+        };
+      case 'freq_cardiaca':
+        return {
+          'icon': Icons.favorite_rounded,
+          'title': 'health_heart_rate'.tr,
+          'subtitle': 'hist_heart_rate_sub'.tr,
+          'color': Colors.red.shade700,
+          'route': Routes.HEART_RATE_HISTORY,
+        };
+      case 'passos':
+        return {
+          'icon': Icons.directions_walk_rounded,
+          'title': 'hist_steps'.tr,
+          'subtitle': 'hist_steps_sub'.tr,
+          'color': Colors.blueGrey.shade600,
+          'route': Routes.STEPS_HISTORY,
+        };
+      case 'sono':
+        return {
+          'icon': Icons.bedtime_rounded,
+          'title': 'hist_sleep'.tr,
+          'subtitle': 'hist_sleep_sub'.tr,
+          'color': Colors.indigo.shade600,
+          'route': Routes.SLEEP_HISTORY,
+        };
+      case 'respiracao':
+        return {
+          'icon': Icons.compress,
+          'title': 'health_metric_respiration'.tr,
+          'subtitle': 'hist_oxygen_respiratory_sub'.tr,
+          'color': Colors.teal.shade700,
+          'route': Routes.OXYGEN_RESPIRATORY_HISTORY,
+        };
+      case 'pressao':
+        return {
+          'icon': Icons.monitor_heart_outlined,
+          'title': 'menu_pressao'.tr,
+          'subtitle': 'menu_pressao_sub'.tr,
+          'color': AppTheme.primaryBlue,
+          'route': Routes.PRESSAO,
         };
       default:
         return {
@@ -1557,6 +1763,11 @@ class HomeScreen extends StatelessWidget {
                   _buildFavoriteOption('crise_gastrite', 'home_gastrite'.tr, controller),
                   _buildFavoriteOption('evento_clinico', 'home_eventos'.tr, controller),
                   _buildFavoriteOption('menstruacao', 'home_menstruacao'.tr, controller),
+                  _buildFavoriteOption('freq_cardiaca', 'health_heart_rate'.tr, controller),
+                  _buildFavoriteOption('passos', 'hist_steps'.tr, controller),
+                  _buildFavoriteOption('sono', 'hist_sleep'.tr, controller),
+                  _buildFavoriteOption('respiracao', 'health_metric_respiration'.tr, controller),
+                  _buildFavoriteOption('pressao', 'menu_pressao'.tr, controller),
                 ],
               )),
             ),
@@ -1661,6 +1872,12 @@ class HomeScreen extends StatelessWidget {
         return controller.hasEventoClinico;
       case 'menstruacao':
         return controller.hasMenstruacao;
+      case 'freq_cardiaca':
+      case 'passos':
+      case 'sono':
+      case 'respiracao':
+      case 'pressao':
+        return true;
       default:
         return false;
     }

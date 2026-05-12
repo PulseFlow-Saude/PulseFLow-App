@@ -1,7 +1,7 @@
 name: pulseflow_app
 description: Oryon Health — aplicativo Flutter para gestão de pacientes com integração MongoDB.
 publish_to: 'none'
-version: 2.0.0+3
+version: 2.0.0+4
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

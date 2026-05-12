@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../utils/health_metric_chart_utils.dart';
 import '../../utils/intl_locale.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
@@ -12,6 +13,7 @@ import '../institutional/settings_controller.dart';
 import '../../widgets/pulse_bottom_navigation.dart';
 import '../../widgets/pulse_side_menu.dart';
 import '../../widgets/pulse_drawer_button.dart';
+import '../../models/pressao_arterial.dart';
 
 class HeartRateHistoryScreen extends StatefulWidget {
   const HeartRateHistoryScreen({super.key});
@@ -31,13 +33,40 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
   DateTime? _selectedDateTo;
   
   List<Map<String, dynamic>> _dailyData = [];
+  List<Map<String, dynamic>> _dailyBpData = [];
+  /// `heart` = batimentos; `pressure` = pressão arterial (mesmo padrão de abas que oxigenação/respiração).
+  String _selectedHeartTab = 'heart';
 
   @override
   void initState() {
     super.initState();
-    _selectedDateTo = DateTime.now();
-    _selectedDateFrom = DateTime.now().subtract(const Duration(days: 30));
-    _loadHealthData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _bootstrapOldestPatientRangeThenLoad('batimentos');
+    });
+  }
+
+  Future<void> _bootstrapOldestPatientRangeThenLoad(String collection) async {
+    final user = _authService.currentUser;
+    _selectedDateTo = metricChartDefaultEndDay();
+    if (user?.id == null) {
+      _selectedDateFrom = metricChartDefaultWideStartDay();
+    } else {
+      DateTime? oldest;
+      final bounds = await _db.getPatientMetricDateBounds(collection, user!.id!);
+      if (bounds.min != null) {
+        oldest = DateTime(bounds.min!.year, bounds.min!.month, bounds.min!.day);
+      }
+      try {
+        final pressoes = await _db.getPressoesByPacienteId(user.id!);
+        for (final p in pressoes) {
+          final d = DateTime(p.data.year, p.data.month, p.data.day);
+          if (oldest == null || d.isBefore(oldest)) oldest = d;
+        }
+      } catch (_) {}
+      _selectedDateFrom = oldest ?? _selectedDateTo;
+    }
+    if (!mounted) return;
+    await _loadHealthData();
   }
 
   Future<void> _loadHealthData() async {
@@ -57,21 +86,21 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
       }
 
       // Busca dados diretamente da coleção 'batimentos'
-      final collection = await _db.getCollection('batimentos');
-      
-      // Busca todos os dados do paciente
-      final allData = await collection.find({
-        'pacienteId': currentUser!.id!,
-      }).toList();
+      final allData = await _db.fetchPatientMetricDocuments(
+        'batimentos',
+        currentUser!.id!,
+      );
 
-      // Filtra por período
+      // Filtra por período (dias civis inclusivos)
       final filteredData = allData.where((item) {
-        if (item['data'] == null) return false;
-        final itemDate = item['data'] is DateTime 
-            ? item['data'] as DateTime 
-            : DateTime.parse(item['data'].toString());
-        return itemDate.isAfter(_selectedDateFrom!.subtract(const Duration(days: 1))) && 
-               itemDate.isBefore(_selectedDateTo!.add(const Duration(days: 1)));
+        final raw = item['data'] ?? item['date'];
+        final itemDate = coerceMongoDateField(raw);
+        if (itemDate == null) return false;
+        return metricDocInSelectedRange(
+          itemDate,
+          _selectedDateFrom!,
+          _selectedDateTo!,
+        );
       }).toList();
 
       print('📊 [HeartRateHistory] Total de registros encontrados: ${filteredData.length}');
@@ -80,12 +109,12 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
       final Map<String, List<double>> dailyValues = {};
       
       for (final item in filteredData) {
-        if (item['valor'] == null) continue;
-        final itemDate = item['data'] is DateTime 
-            ? item['data'] as DateTime 
-            : DateTime.parse(item['data'].toString());
+        final raw = item['data'] ?? item['date'];
+        final itemDate = coerceMongoDateField(raw);
+        if (itemDate == null) continue;
+        final valor = coerceMongoNumber(item['valor'] ?? item['value']);
+        if (valor < 0) continue;
         final dateKey = DateFormat('yyyy-MM-dd').format(itemDate);
-        final valor = (item['valor'] as num).toDouble();
         dailyValues.putIfAbsent(dateKey, () => []).add(valor);
       }
 
@@ -97,7 +126,7 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
         
         return {
           'date': date,
-          'value': average,
+          'value': average.toDouble(),
           'count': values.length,
           'min': values.reduce((a, b) => a < b ? a : b),
           'max': values.reduce((a, b) => a > b ? a : b),
@@ -107,8 +136,61 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
       // Ordena por data (mais recente primeiro)
       _dailyData.sort((a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime));
 
+      final rangeStart = DateTime(
+        _selectedDateFrom!.year,
+        _selectedDateFrom!.month,
+        _selectedDateFrom!.day,
+      );
+      final rangeEnd = DateTime(
+        _selectedDateTo!.year,
+        _selectedDateTo!.month,
+        _selectedDateTo!.day,
+      );
+
+      _dailyBpData = [];
+      try {
+        final list = await _db.getPressoesByPacienteId(currentUser!.id!);
+        final filteredBp = list.where((p) {
+          final d = DateTime(p.data.year, p.data.month, p.data.day);
+          return !d.isBefore(rangeStart) && !d.isAfter(rangeEnd);
+        }).toList();
+
+        final byDay = <String, List<PressaoArterial>>{};
+        for (final p in filteredBp) {
+          final key = DateFormat('yyyy-MM-dd').format(
+            DateTime(p.data.year, p.data.month, p.data.day),
+          );
+          byDay.putIfAbsent(key, () => []).add(p);
+        }
+
+        _dailyBpData = byDay.entries.map((e) {
+          final date = DateTime.parse(e.key);
+          final regs = e.value;
+          final avgSys = regs.map((r) => r.sistolica).reduce((a, b) => a + b) /
+              regs.length;
+          final avgDia =
+              regs.map((r) => r.diastolica).reduce((a, b) => a + b) /
+                  regs.length;
+          return {
+            'date': date,
+            'sistolica': avgSys,
+            'diastolica': avgDia,
+            'count': regs.length,
+          };
+        }).toList();
+
+        _dailyBpData.sort(
+          (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime),
+        );
+      } catch (_) {}
+
       setState(() {
         _isLoading = false;
+        if (_dailyData.isEmpty && _dailyBpData.isNotEmpty) {
+          _selectedHeartTab = 'pressure';
+        } else if (_dailyBpData.isEmpty && _dailyData.isNotEmpty) {
+          _selectedHeartTab = 'heart';
+        }
       });
     } catch (e) {
       setState(() {
@@ -121,7 +203,7 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
   Future<void> _selectDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      firstDate: DateTime(2020),
+      firstDate: metricChartPickerFirstDate(),
       lastDate: DateTime.now(),
       initialDateRange: _selectedDateFrom != null && _selectedDateTo != null
           ? DateTimeRange(start: _selectedDateFrom!, end: _selectedDateTo!)
@@ -176,7 +258,7 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
                         ? _buildLoadingState()
                         : _error != null
                             ? _buildErrorState()
-                            : _dailyData.isEmpty
+                            : _dailyData.isEmpty && _dailyBpData.isEmpty
                                 ? _buildEmptyState()
                                 : _buildContent(),
                   ),
@@ -208,7 +290,7 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'health_heart_rate'.tr,
+                  'hist_heart_rate'.tr,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -275,88 +357,426 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
 
 
   Widget _buildContent() {
-    // Calcula estatísticas
     final stats = _calculateStats();
-    
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _heartTabChip('heart', 'health_heart_rate'.tr),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _heartTabChip('pressure', 'menu_pressao'.tr),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        InkWell(
+          onTap: _selectDateRange,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.lightBlue.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppTheme.primaryBlue.withValues(alpha: 0.14),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_today,
+                    color: AppTheme.primaryBlue, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'common_period'.tr,
+                        style: AppTheme.bodySmall.copyWith(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedDateFrom != null && _selectedDateTo != null
+                            ? '${DateFormat('dd/MM/yyyy').format(_selectedDateFrom!)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateTo!)}'
+                            : 'common_select_period'.tr,
+                        style: AppTheme.bodyMedium.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios,
+                    size: 16, color: AppTheme.textSecondary),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (_selectedHeartTab == 'heart') ...[
+          if (_dailyData.isNotEmpty) ...[
+            _buildStats(stats),
+            const SizedBox(height: 16),
+            _buildChart(),
+            const SizedBox(height: 16),
+            if (stats != null) ...[
+              _buildAnalysis(stats),
+              const SizedBox(height: 16),
+            ],
+            _buildDataList(),
+          ] else
+            _buildNoMetricHint(
+              'common_no_records_heart'.tr,
+              Icons.favorite_border_rounded,
+            ),
+        ] else ...[
+          if (_dailyBpData.isNotEmpty) ...[
+            _buildBloodPressureChart(),
+            const SizedBox(height: 16),
+            _buildBloodPressureList(),
+          ] else
+            _buildNoMetricHint(
+              'common_no_records_pressure'.tr,
+              Icons.monitor_heart_outlined,
+            ),
+        ],
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _heartTabChip(String tab, String label) {
+    final selected = _selectedHeartTab == tab;
+    return InkWell(
+      onTap: () => setState(() => _selectedHeartTab = tab),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+        decoration: BoxDecoration(
+          color: selected ? AppTheme.primaryBlue : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.primaryBlue.withValues(alpha: 0.2)),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: selected ? Colors.white : AppTheme.textPrimary,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoMetricHint(String message, IconData icon) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: AppTheme.surfaceListCardDecoration(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Seletor de período
-          InkWell(
-            onTap: _selectDateRange,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.lightBlue.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppTheme.primaryBlue.withValues(alpha: 0.14),
+          Icon(icon, size: 32, color: AppTheme.textSecondary),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTheme.bodyMedium.copyWith(
+                fontSize: 14,
+                color: AppTheme.textSecondary,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBloodPressureChart() {
+    final sorted = List<Map<String, dynamic>>.from(_dailyBpData)
+      ..sort(
+        (a, b) => (a['date'] as DateTime).compareTo(b['date'] as DateTime),
+      );
+    if (sorted.isEmpty) return const SizedBox.shrink();
+
+    final sysSpots = <FlSpot>[];
+    final diaSpots = <FlSpot>[];
+    for (var i = 0; i < sorted.length; i++) {
+      final s = sorted[i]['sistolica'] as double;
+      final d = sorted[i]['diastolica'] as double;
+      sysSpots.add(FlSpot(i.toDouble(), s));
+      diaSpots.add(FlSpot(i.toDouble(), d));
+    }
+
+    final allY = <double>[
+      ...sorted.map((e) => e['sistolica'] as double),
+      ...sorted.map((e) => e['diastolica'] as double),
+    ];
+    final maxY = chartMaxYFromValues(allY, minWhenEmptyOrZero: 140);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: AppTheme.surfaceListCardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.show_chart, color: AppTheme.primaryBlue, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'press_chart_title'.tr,
+                  style: AppTheme.titleSmall.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_today,
-                      color: AppTheme.primaryBlue, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'common_period'.tr,
-                          style: AppTheme.bodySmall.copyWith(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary,
-                          ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _bpLegendDot(Colors.red.shade700, 'health_bp_systolic'.tr),
+              const SizedBox(width: 16),
+              _bpLegendDot(AppTheme.primaryBlue, 'health_bp_diastolic'.tr),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 200,
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  horizontalInterval: 20,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: Colors.grey[200]!,
+                    strokeWidth: 1,
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 36,
+                      interval: 20,
+                      getTitlesWidget: (value, meta) => Text(
+                        value.toInt().toString(),
+                        style: AppTheme.bodySmall.copyWith(
+                          fontSize: 10,
+                          color: AppTheme.textSecondary,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _selectedDateFrom != null && _selectedDateTo != null
-                              ? '${DateFormat('dd/MM/yyyy').format(_selectedDateFrom!)} - ${DateFormat('dd/MM/yyyy').format(_selectedDateTo!)}'
-                              : 'common_select_period'.tr,
-                          style: AppTheme.bodyMedium.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios,
-                      size: 16, color: AppTheme.textSecondary),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 28,
+                      interval:
+                          (sorted.length / 4).clamp(1, sorted.length).toDouble(),
+                      getTitlesWidget: (value, meta) {
+                        final i = value.toInt();
+                        if (i < 0 || i >= sorted.length) {
+                          return const SizedBox.shrink();
+                        }
+                        final dt = sorted[i]['date'] as DateTime;
+                        return Text(
+                          '${dt.day}/${dt.month}',
+                          style: AppTheme.bodySmall.copyWith(
+                            fontSize: 10,
+                            color: AppTheme.textSecondary,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                ),
+                borderData: FlBorderData(
+                  show: true,
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                minX: 0,
+                maxX: sorted.length <= 1 ? 1 : (sorted.length - 1).toDouble(),
+                minY: 40,
+                maxY: maxY,
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: sysSpots,
+                    isCurved: true,
+                    color: Colors.red.shade700,
+                    barWidth: 3,
+                    dotData: const FlDotData(show: true),
+                  ),
+                  LineChartBarData(
+                    spots: diaSpots,
+                    isCurved: true,
+                    color: AppTheme.primaryBlue,
+                    barWidth: 3,
+                    dotData: const FlDotData(show: true),
+                  ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          
-          // Estatísticas
-          _buildStats(stats),
-          const SizedBox(height: 16),
-          
-          // Gráfico
-          if (_dailyData.isNotEmpty) ...[
-            _buildChart(),
-            const SizedBox(height: 16),
-          ],
-          
-          // Análise
-          if (stats != null) ...[
-            _buildAnalysis(stats),
-            const SizedBox(height: 16),
-          ],
-          
-          // Lista de dados
-          _buildDataList(),
-          const SizedBox(height: 16),
         ],
-      );
+      ),
+    );
+  }
+
+  Widget _bpLegendDot(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: AppTheme.bodySmall.copyWith(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBloodPressureList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(
+            'health_daily_records'.tr,
+            style: AppTheme.titleSmall.copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+        ),
+        ...List.generate(_dailyBpData.length, (index) {
+          final data = _dailyBpData[index];
+          final date = data['date'] as DateTime;
+          final s = data['sistolica'] as double;
+          final di = data['diastolica'] as double;
+          final count = data['count'] as int;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: AppTheme.surfaceListCardDecoration(),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.monitor_heart_outlined,
+                    color: AppTheme.primaryBlue,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DateFormat(
+                          'EEEE, dd/MM/yyyy',
+                          Get.find<SettingsController>()
+                              .effectiveLocale
+                              .toString(),
+                        ).format(date),
+                        style: AppTheme.titleSmall.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'health_daily_avg'.tr,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${s.round()}/${di.round()} mmHg',
+                      style: AppTheme.titleMedium.copyWith(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryBlue,
+                      ),
+                    ),
+                    if (count > 1)
+                      Text(
+                        'health_records_count'.trParams({'count': '$count'}),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
   }
 
   Map<String, dynamic>? _calculateStats() {
     if (_dailyData.isEmpty) return null;
     
-    final values = _dailyData.map((d) => d['value'] as double).toList();
+    final values =
+        _dailyData.map((d) => coerceMongoNumber(d['value'])).toList();
     final avg = values.reduce((a, b) => a + b) / values.length;
     final min = values.reduce((a, b) => a < b ? a : b);
     final max = values.reduce((a, b) => a > b ? a : b);
@@ -367,8 +787,14 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
     if (_dailyData.length >= 4) {
       final firstHalf = _dailyData.sublist(0, _dailyData.length ~/ 2);
       final secondHalf = _dailyData.sublist(_dailyData.length ~/ 2);
-      final firstAvg = firstHalf.map((d) => d['value'] as double).reduce((a, b) => a + b) / firstHalf.length;
-      final secondAvg = secondHalf.map((d) => d['value'] as double).reduce((a, b) => a + b) / secondHalf.length;
+      final firstAvg = firstHalf
+              .map((d) => coerceMongoNumber(d['value']))
+              .reduce((a, b) => a + b) /
+          firstHalf.length;
+      final secondAvg = secondHalf
+              .map((d) => coerceMongoNumber(d['value']))
+              .reduce((a, b) => a + b) /
+          secondHalf.length;
       
       if (secondAvg > firstAvg + 5) {
         trend = 'health_trend_increasing'.tr;
@@ -572,13 +998,21 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
                   border: Border.all(color: Colors.grey[300]!, width: 1),
                 ),
                 minX: 0,
-                maxX: (sortedData.length - 1).toDouble(),
+                maxX: sortedData.length <= 1
+                    ? 1
+                    : (sortedData.length - 1).toDouble(),
                 minY: 0,
-                maxY: sortedData.map((d) => d['value'] as double).reduce((a, b) => a > b ? a : b) * 1.2,
+                maxY: chartMaxYFromValues(
+                  sortedData.map((d) => coerceMongoNumber(d['value'])),
+                  minWhenEmptyOrZero: 120,
+                ),
                 lineBarsData: [
                   LineChartBarData(
                     spots: sortedData.asMap().entries.map((entry) {
-                      return FlSpot(entry.key.toDouble(), entry.value['value'] as double);
+                      return FlSpot(
+                        entry.key.toDouble(),
+                        coerceMongoNumber(entry.value['value']),
+                      );
                     }).toList(),
                     isCurved: true,
                     color: AppTheme.primaryBlue,
@@ -700,10 +1134,10 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
         ...List.generate(_dailyData.length, (index) {
           final data = _dailyData[index];
           final date = data['date'] as DateTime;
-          final value = data['value'] as double;
-          final count = data['count'] as int;
-          final min = data['min'] as double;
-          final max = data['max'] as double;
+          final value = coerceMongoNumber(data['value']);
+          final count = (data['count'] as num?)?.toInt() ?? 0;
+          final min = coerceMongoNumber(data['min']);
+          final max = coerceMongoNumber(data['max']);
           
           return Container(
           margin: const EdgeInsets.only(bottom: 12),
@@ -862,7 +1296,7 @@ class _HeartRateHistoryScreenState extends State<HeartRateHistoryScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'common_no_records_heart'.tr,
+            'heart_history_empty_sub'.tr,
             style: AppTheme.bodyMedium.copyWith(
               fontSize: 14,
               color: AppTheme.textSecondary,

@@ -647,7 +647,7 @@ class AppointmentSchedulerScreen extends StatelessWidget {
         onPressed: () async {
           final success = await controller.confirmAppointment();
           if (success) {
-            // stay on screen, summary already updated
+            // Navegação para próximas consultas é feita no controller após sucesso.
           }
         },
         label: Text(

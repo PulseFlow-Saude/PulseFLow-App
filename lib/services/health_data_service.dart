@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import '../models/health_data.dart';
@@ -12,14 +14,22 @@ class HealthDataService {
   Future<void> saveHealthDataFromHealthKit(String patientId) async {
     try {
       print('💾 [HealthDataService] Iniciando salvamento de dados do HealthKit...');
-      
-      // Permissões no iOS podem falhar parcialmente por tipo/dispositivo.
-      // Fazemos solicitação "best effort" e seguimos com leitura por tipo.
+
+      if (!await _healthService.isAppleHealthInAppEnabled()) {
+        print('💾 [HealthDataService] Integração Apple Health desligada no app — ignorando.');
+        return;
+      }
+
+      // No iOS, hasPermissions com READ devolve indeterminado — pedimos autorização e lemos.
       try {
-        final hasPermissions = await _healthService.hasPermissions();
-        if (!hasPermissions) {
-          print('⚠️ [HealthDataService] Permissões incompletas, tentando solicitar...');
+        if (Platform.isIOS) {
           await _healthService.requestPermissions();
+        } else {
+          final hasPermissions = await _healthService.hasPermissions();
+          if (!hasPermissions) {
+            print('⚠️ [HealthDataService] Permissões incompletas, tentando solicitar...');
+            await _healthService.requestPermissions();
+          }
         }
       } catch (e) {
         print('⚠️ [HealthDataService] Falha ao verificar/solicitar permissões: $e');
@@ -200,7 +210,8 @@ class HealthDataService {
 
       final collection = await _db.getCollection('oxigenacao');
       final now = DateTime.now();
-      final existingData = await collection.find({'pacienteId': patientId}).toList();
+      final existingData =
+          await _db.fetchPatientMetricDocuments('oxigenacao', patientId);
 
       for (int i = 0; i < healthData['oxygenation']!.length; i++) {
         final spot = healthData['oxygenation']![i];
@@ -235,7 +246,7 @@ class HealthDataService {
           );
         } else {
           await collection.insert({
-            'pacienteId': patientId,
+            'pacienteId': _patientIdForDb(patientId),
             'valor': spot.y,
             'data': dateKey,
             'fonte': 'HealthKit',
@@ -265,7 +276,8 @@ class HealthDataService {
 
       final collection = await _db.getCollection('respiracao');
       final now = DateTime.now();
-      final existingData = await collection.find({'pacienteId': patientId}).toList();
+      final existingData =
+          await _db.fetchPatientMetricDocuments('respiracao', patientId);
 
       for (int i = 0; i < healthData['respiratoryRate']!.length; i++) {
         final spot = healthData['respiratoryRate']![i];
@@ -300,7 +312,7 @@ class HealthDataService {
           );
         } else {
           await collection.insert({
-            'pacienteId': patientId,
+            'pacienteId': _patientIdForDb(patientId),
             'valor': spot.y,
             'data': dateKey,
             'fonte': 'HealthKit',
@@ -716,10 +728,18 @@ class HealthDataService {
   Future<void> syncHealthData(String patientId) async {
     try {
       
-      // Verifica se tem permissões
-      final hasPermissions = await _healthService.hasPermissions();
-      if (!hasPermissions) {
+      if (!await _healthService.isAppleHealthInAppEnabled()) {
         return;
+      }
+
+      // No iOS, hasPermissions com leitura é indeterminado — não abortar sync aqui.
+      if (Platform.isIOS) {
+        await _healthService.requestPermissions();
+      } else {
+        final hasPermissions = await _healthService.hasPermissions();
+        if (!hasPermissions) {
+          return;
+        }
       }
 
       // Busca dados existentes do banco

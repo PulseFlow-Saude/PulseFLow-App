@@ -24,7 +24,6 @@ import '../screens/profile/profile_screen.dart';
 import '../screens/profile/profile_controller.dart';
 import '../screens/pulse_key/pulse_key_screen.dart';
 import '../screens/smartwatch/smartwatch_screen.dart';
-import '../screens/health_history/health_history_screen.dart';
 import '../screens/health_history/heart_rate_history_screen.dart';
 import '../screens/health_history/steps_history_screen.dart';
 import '../screens/health_history/sleep_history_screen.dart';
@@ -239,13 +238,6 @@ class AppPages {
     GetPage(
       name: Routes.SMARTWATCH,
       page: () => const SmartwatchScreen(),
-      transition: Transition.cupertino,
-      transitionDuration: _kRouteTransition,
-      curve: Curves.fastOutSlowIn,
-    ),
-    GetPage(
-      name: Routes.HEALTH_HISTORY,
-      page: () => const HealthHistoryScreen(),
       transition: Transition.cupertino,
       transitionDuration: _kRouteTransition,
       curve: Curves.fastOutSlowIn,

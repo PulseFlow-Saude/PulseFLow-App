@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../utils/health_metric_chart_utils.dart';
 import '../../utils/intl_locale.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
@@ -35,9 +36,24 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDateTo = DateTime.now();
-    _selectedDateFrom = DateTime.now().subtract(const Duration(days: 30));
-    _loadHealthData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _bootstrapOldestPatientRangeThenLoad('insonias');
+    });
+  }
+
+  Future<void> _bootstrapOldestPatientRangeThenLoad(String collection) async {
+    final user = _authService.currentUser;
+    _selectedDateTo = metricChartDefaultEndDay();
+    if (user?.id == null) {
+      _selectedDateFrom = metricChartDefaultWideStartDay();
+    } else {
+      final bounds = await _db.getPatientMetricDateBounds(collection, user!.id!);
+      _selectedDateFrom = bounds.min != null
+          ? DateTime(bounds.min!.year, bounds.min!.month, bounds.min!.day)
+          : _selectedDateTo;
+    }
+    if (!mounted) return;
+    await _loadHealthData();
   }
 
   Future<void> _loadHealthData() async {
@@ -56,22 +72,20 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
         throw 'common_select_period'.tr;
       }
 
-      // Busca dados diretamente da coleção 'insonias'
-      final collection = await _db.getCollection('insonias');
-      
-      // Busca todos os dados do paciente
-      final allData = await collection.find({
-        'pacienteId': currentUser!.id!,
-      }).toList();
+      final allData = await _db.fetchPatientMetricDocuments(
+        'insonias',
+        currentUser!.id!,
+      );
 
-      // Filtra por período
       final filteredData = allData.where((item) {
-        if (item['data'] == null) return false;
-        final itemDate = item['data'] is DateTime 
-            ? item['data'] as DateTime 
-            : DateTime.parse(item['data'].toString());
-        return itemDate.isAfter(_selectedDateFrom!.subtract(const Duration(days: 1))) && 
-               itemDate.isBefore(_selectedDateTo!.add(const Duration(days: 1)));
+        final raw = item['data'] ?? item['date'];
+        final itemDate = coerceMongoDateField(raw);
+        if (itemDate == null) return false;
+        return metricDocInSelectedRange(
+          itemDate,
+          _selectedDateFrom!,
+          _selectedDateTo!,
+        );
       }).toList();
 
       print('📊 [SleepHistory] Total de registros encontrados: ${filteredData.length}');
@@ -80,12 +94,12 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
       final Map<String, List<double>> dailyValues = {};
       
       for (final item in filteredData) {
-        if (item['valor'] == null) continue;
-        final itemDate = item['data'] is DateTime 
-            ? item['data'] as DateTime 
-            : DateTime.parse(item['data'].toString());
+        final raw = item['data'] ?? item['date'];
+        final itemDate = coerceMongoDateField(raw);
+        if (itemDate == null) continue;
+        final valor = coerceMongoNumber(item['valor'] ?? item['value']);
+        if (valor < 0) continue;
         final dateKey = DateFormat('yyyy-MM-dd').format(itemDate);
-        final valor = (item['valor'] as num).toDouble();
         dailyValues.putIfAbsent(dateKey, () => []).add(valor);
       }
 
@@ -97,7 +111,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
         
         return {
           'date': date,
-          'value': total,
+          'value': total.toDouble(),
           'count': values.length,
         };
       }).toList();
@@ -119,7 +133,7 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
   Future<void> _selectDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
-      firstDate: DateTime(2020),
+      firstDate: metricChartPickerFirstDate(),
       lastDate: DateTime.now(),
       initialDateRange: _selectedDateFrom != null && _selectedDateTo != null
           ? DateTimeRange(start: _selectedDateFrom!, end: _selectedDateTo!)
@@ -354,7 +368,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
   Map<String, dynamic>? _calculateStats() {
     if (_dailyData.isEmpty) return null;
     
-    final values = _dailyData.map((d) => d['value'] as double).toList();
+    final values =
+        _dailyData.map((d) => coerceMongoNumber(d['value'])).toList();
     final avg = values.reduce((a, b) => a + b) / values.length;
     final min = values.reduce((a, b) => a < b ? a : b);
     final max = values.reduce((a, b) => a > b ? a : b);
@@ -365,8 +380,14 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
     if (_dailyData.length >= 4) {
       final firstHalf = _dailyData.sublist(0, _dailyData.length ~/ 2);
       final secondHalf = _dailyData.sublist(_dailyData.length ~/ 2);
-      final firstAvg = firstHalf.map((d) => d['value'] as double).reduce((a, b) => a + b) / firstHalf.length;
-      final secondAvg = secondHalf.map((d) => d['value'] as double).reduce((a, b) => a + b) / secondHalf.length;
+      final firstAvg = firstHalf
+              .map((d) => coerceMongoNumber(d['value']))
+              .reduce((a, b) => a + b) /
+          firstHalf.length;
+      final secondAvg = secondHalf
+              .map((d) => coerceMongoNumber(d['value']))
+              .reduce((a, b) => a + b) /
+          secondHalf.length;
       
       if (secondAvg > firstAvg + 0.5) {
         trend = 'health_trend_increasing'.tr;
@@ -571,11 +592,17 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
                 minX: 0,
                 maxX: (sortedData.length - 1).toDouble(),
                 minY: 0,
-                maxY: sortedData.map((d) => d['value'] as double).reduce((a, b) => a > b ? a : b) * 1.2,
+                maxY: chartMaxYFromValues(
+                  sortedData.map((d) => coerceMongoNumber(d['value'])),
+                  minWhenEmptyOrZero: 10,
+                ),
                 lineBarsData: [
                   LineChartBarData(
                     spots: sortedData.asMap().entries.map((entry) {
-                      return FlSpot(entry.key.toDouble(), entry.value['value'] as double);
+                      return FlSpot(
+                        entry.key.toDouble(),
+                        coerceMongoNumber(entry.value['value']),
+                      );
                     }).toList(),
                     isCurved: true,
                     color: AppTheme.primaryBlue,
@@ -701,8 +728,8 @@ class _SleepHistoryScreenState extends State<SleepHistoryScreen> {
         ...List.generate(_dailyData.length, (index) {
           final data = _dailyData[index];
           final date = data['date'] as DateTime;
-          final value = data['value'] as double;
-          final count = data['count'] as int;
+          final value = coerceMongoNumber(data['value']);
+          final count = (data['count'] as num?)?.toInt() ?? 0;
           
           return Container(
             margin: const EdgeInsets.only(bottom: 12),

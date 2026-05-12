@@ -11,6 +11,22 @@ Map<String, Map<String, String>> get extraLocaleTranslations => {
 // Base comum: chaves em inglês para reutilizar onde o idioma for próximo ou fallback
 Map<String, String> _baseEn() => {
   'menu_home': 'Home',
+  'home_fav_last': 'Latest',
+  'home_fav_stats_records': 'Across your records',
+  'home_fav_upcoming': 'Upcoming',
+  'home_fav_empty_hint':
+      'Sync with Apple Health or add data in this metric history screen.',
+  'home_fav_window_stats': 'Across the last @n day(s) with data',
+  'home_fav_footer':
+      '@dias distinct day(s) with data · @n readings in total',
+  'home_fav_window_stats_bp': 'Across the last @n readings',
+  'home_fav_footer_bp': 'Summary from the latest @m of @n readings.',
+  'home_fav_bp_min_sys': 'Min sys.',
+  'home_fav_bp_max_sys': 'Max sys.',
+  'common_no_records_pressure':
+      'No blood pressure records in the selected period',
+  'health_bp_systolic': 'Systolic',
+  'health_bp_diastolic': 'Diastolic',
   'menu_history': 'History',
   'menu_records': 'Records',
   'menu_appointments': 'Appointments',
@@ -340,12 +356,31 @@ Map<String, String> _baseEn() => {
   'hist_gastrite_sub': 'Crises and related symptoms',
   'hist_menstrual': 'Menstrual History',
   'hist_menstrual_sub': 'Cycles and tracking',
-  'hist_heart_rate': 'Heart Rate',
-  'hist_heart_rate_sub': 'Heart rate history',
+  'hist_heart_rate': 'Heart',
+  'hist_heart_rate_sub':
+      'Heart rate and blood pressure in the same period',
   'hist_steps': 'Steps',
   'hist_steps_sub': 'Daily steps history',
   'hist_sleep': 'Insomnia / Sleep',
   'hist_sleep_sub': 'Time in bed history',
+  'hist_oxygen_respiratory': 'Oxygen & Breathing',
+  'hist_oxygen_respiratory_sub': 'SpO2 and respiratory rate history',
+  'common_no_records_oxygen': 'No blood oxygen (SpO2) records in the selected period',
+  'common_no_records_respiration': 'No respiratory rate records in the selected period',
+  'health_oxygen_respiratory': 'Oxygen & Breathing',
+  'health_metric_oxygen': 'Oxygenation',
+  'health_metric_respiration': 'Respiration',
+  'health_unit_percent': '%',
+  'health_unit_resp_rate': 'rpm',
+  'health_analysis_spo2_normal':
+      'Oxygen saturation in the usual range. Values vary with measurement and context; see a clinician if you have symptoms.',
+  'health_analysis_spo2_mild':
+      'Saturation below ideal. Monitor and seek medical advice if it persists or worsens.',
+  'health_analysis_spo2_low': 'Low saturation. Seek medical advice.',
+  'health_analysis_rr_normal': 'Respiratory rate within the usual resting range.',
+  'health_analysis_rr_low': 'Respiratory rate below usual. See a clinician if it persists.',
+  'health_analysis_rr_elevated':
+      'Elevated respiratory rate. Monitor and see a clinician if it persists.',
   'hist_access': 'Access History',
   'hist_access_sub': 'See who accessed your record',
   'hist_tap_to_access': 'Tap to open @title',

@@ -36,18 +36,54 @@ class HealthData {
     };
   }
 
-  // Cria instância a partir do Map do MongoDB
-  factory HealthData.fromMap(Map<String, dynamic> map) {
+  static DateTime? _coerceDate(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is DateTime) return raw;
+    return DateTime.tryParse(raw.toString());
+  }
+
+  static double _coerceDouble(dynamic raw) {
+    if (raw == null) return 0.0;
+    if (raw is num) return raw.toDouble();
+    return double.tryParse(raw.toString()) ?? 0.0;
+  }
+
+  /// [dataTypeHint] — documentos das coleções `batimentos` / `passos` / `insonias`
+  /// guardam chaves em PT (`pacienteId`, `valor`, `data`, `fonte`) sem `dataType`.
+  factory HealthData.fromMap(Map<String, dynamic> map, [String? dataTypeHint]) {
+    final dynamic pid = map['patientId'] ?? map['pacienteId'];
+    final patientId = pid?.toString() ?? '';
+
+    final dataType =
+        (dataTypeHint ?? map['dataType'])?.toString() ?? '';
+
+    final value = _coerceDouble(map['value'] ?? map['valor']);
+
+    final rawDate = map['date'] ?? map['data'];
+    final date = _coerceDate(rawDate);
+    if (date == null) {
+      throw FormatException('HealthData.fromMap: campo de data em falta ou inválido');
+    }
+
+    final source = map['source']?.toString() ?? map['fonte']?.toString();
+
+    DateTime coalesceTs(dynamic v) {
+      final d = _coerceDate(v);
+      return d ?? DateTime.now();
+    }
+
     return HealthData(
       id: map['_id']?.toString(),
-      patientId: map['patientId'] ?? '',
-      dataType: map['dataType'] ?? '',
-      value: (map['value'] ?? 0.0).toDouble(),
-      date: map['date'] is DateTime ? map['date'] : DateTime.parse(map['date']),
-      source: map['source'],
-      metadata: map['metadata'] != null ? Map<String, dynamic>.from(map['metadata']) : null,
-      createdAt: map['createdAt'] is DateTime ? map['createdAt'] : DateTime.parse(map['createdAt']),
-      updatedAt: map['updatedAt'] is DateTime ? map['updatedAt'] : DateTime.parse(map['updatedAt']),
+      patientId: patientId,
+      dataType: dataType,
+      value: value,
+      date: date,
+      source: source,
+      metadata: map['metadata'] != null
+          ? Map<String, dynamic>.from(map['metadata'] as Map)
+          : null,
+      createdAt: coalesceTs(map['createdAt']),
+      updatedAt: coalesceTs(map['updatedAt']),
     );
   }
 

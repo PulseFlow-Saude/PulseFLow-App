@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:get/get.dart';
+import '../../config/app_config.dart';
 import '../api_service.dart';
 import '../auth_service.dart';
 import '../notification_service.dart';
@@ -50,11 +51,14 @@ class AccessRequestChecker {
         if (_shownRequests.contains(requestId)) continue;
         _shownRequests.add(requestId);
         try {
-          await _showAccessRequestNotification(
-            doctorName: doctorName,
-            specialty: specialty,
-            requestId: requestId,
-          );
+          // Com Firebase, o push já é enviado ao criar Notification no servidor (evita duplicar na bandeija).
+          if (!AppConfig.useFirebase) {
+            await _showAccessRequestNotification(
+              doctorName: doctorName,
+              specialty: specialty,
+              requestId: requestId,
+            );
+          }
           await _apiService.marcarSolicitacaoVisualizada(requestId);
         } catch (_) {
           _shownRequests.remove(requestId);

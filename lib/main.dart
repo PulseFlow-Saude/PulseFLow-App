@@ -110,6 +110,14 @@ Future<void> _bootstrapServices({
   required AuthService authService,
   required SettingsController settingsController,
 }) async {
+  // Antes de gravar prefs (definições): reinstalação sem logout deixa Keychain com token/biometria;
+  // prefs vazios permitem detetar e limpar. [AuthService.init] volta a sincronizar depois.
+  try {
+    await authService
+        .syncKeychainAuthWithInstall()
+        .timeout(const Duration(seconds: 3));
+  } catch (_) {}
+
   // Preferências e locale primeiro — leves; UI já pode atualizar quando MyApp faz rebuild.
   await _safeAwait(
     settingsController.ensurePreferencesLoaded,

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/biometric_login_service.dart';
 import '../../../theme/app_theme.dart';
+import '../../../widgets/animated_face_fingerprint_icon.dart';
 import '../../../widgets/round_progress_indicator.dart';
 import '../../institutional/settings_controller.dart';
 
@@ -178,10 +179,9 @@ class _BiometricFirstLoginSheetState extends State<BiometricFirstLoginSheet>
                               width: 2,
                             ),
                           ),
-                          child: Icon(
-                            Icons.fingerprint_rounded,
-                            size: 52,
+                          child: AnimatedFaceFingerprintIcon(
                             color: AppTheme.primaryBlue.withValues(alpha: 0.95),
+                            size: 52,
                           ),
                         ),
                       ),

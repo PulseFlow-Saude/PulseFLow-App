@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
@@ -11,7 +12,9 @@ import '../../models/diabetes.dart';
 import '../../models/crise_gastrite.dart';
 import '../../models/evento_clinico.dart';
 import '../../models/menstruacao.dart';
+import '../../models/pressao_arterial.dart';
 import '../../utils/greeting_utils.dart';
+import '../../utils/health_metric_chart_utils.dart';
 
 class AppointmentBooking {
   final String id;
@@ -35,6 +38,8 @@ class AppointmentBooking {
   });
 }
 
+enum _HomeVitalsDayAgg { sum, average }
+
 class HomeController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
   final DatabaseService _databaseService = Get.find<DatabaseService>();
@@ -52,6 +57,9 @@ class HomeController extends GetxController {
   
   // Favoritos personalizáveis
   final _favoriteItems = <String>[].obs;
+
+  /// Resumo para cartões de favoritos (passos, sono, FC, respiração, pressão).
+  final Map<String, Map<String, dynamic>> _homeVitalsStats = {};
   
   // Dados para estatísticas
   final _enxaquecaData = <Enxaqueca>[].obs;
@@ -80,6 +88,13 @@ class HomeController extends GetxController {
   
   // Getters para favoritos
   List<String> get favoriteItems => _favoriteItems;
+
+  /// Mostra a área de favoritos na home (utilizador com paciente identificado).
+  bool get canShowHomeFavorites => currentPatient?.id != null;
+
+  /// Estatísticas agregadas para um favorito de sinais vitais (chaves: freq_cardiaca, passos, sono, respiracao, pressao).
+  Map<String, dynamic> getHomeVitalStats(String key) =>
+      Map<String, dynamic>.from(_homeVitalsStats[key] ?? {});
   
   @override
   void onInit() {
@@ -252,7 +267,9 @@ class HomeController extends GetxController {
       
       // Inicializa favoritos com dados disponíveis
       _updateFavoriteItems();
-      
+
+      await _loadHomeVitalsStats(patientId);
+
       print('✅ [HomeController] Dados carregados com sucesso');
     } catch (e, stackTrace) {
       print('❌ [HomeController] Erro ao carregar dados disponíveis: $e');
@@ -380,6 +397,7 @@ class HomeController extends GetxController {
       'media': media.round(),
       'total': intensidades.length,
       'ultimaCrise': ultimaCrise.data,
+      'ultimaData': ultimaCrise.data,
       'diasDesdeUltima': diasDesdeUltima,
       'frequencia30Dias': crisesUltimos30Dias,
       'ultimaIntensidade': int.tryParse(ultimaCrise.intensidade) ?? 0,
@@ -431,6 +449,7 @@ class HomeController extends GetxController {
       'media': media.round(),
       'total': glicoses.length,
       'ultimaMedicao': ultimaMedicao.data,
+      'ultimaData': ultimaMedicao.data,
       'ultimaGlicemia': ultimaMedicao.glicemia.round(),
       'unidade': ultimaMedicao.unidade,
       'status': status,
@@ -464,6 +483,7 @@ class HomeController extends GetxController {
       'media': media.round(),
       'total': intensidades.length,
       'ultimaCrise': ultimaCrise.data,
+      'ultimaData': ultimaCrise.data,
       'diasDesdeUltima': diasDesdeUltima,
       'frequencia30Dias': crisesUltimos30Dias,
       'ultimaIntensidade': ultimaCrise.intensidadeDor,
@@ -495,6 +515,7 @@ class HomeController extends GetxController {
       'total': _eventoClinicoData.length,
       'este_mes': thisMonthEvents,
       'ultimoEvento': ultimoEvento.dataHora,
+      'ultimaData': ultimoEvento.dataHora,
       'proximoEvento': proximoEvento?.dataHora,
       'totalFuturos': eventosFuturos.length,
     };
@@ -541,6 +562,7 @@ class HomeController extends GetxController {
       'media': media.round(),
       'total': duracoes.length,
       'ultimaMenstruacao': ultimaMenstruacao.dataInicio,
+      'ultimaData': ultimaMenstruacao.dataInicio,
       'diasDesdeUltima': diasDesdeUltima,
       'cicloMedio': cicloMedio,
       'proximoCiclo': proximoCiclo,
@@ -548,6 +570,137 @@ class HomeController extends GetxController {
     };
   }
 
+  Future<void> _loadHomeVitalsStats(String patientId) async {
+    _homeVitalsStats.clear();
+    try {
+      final batimentos = await _databaseService.fetchPatientMetricDocuments(
+        'batimentos',
+        patientId,
+      );
+      final passos = await _databaseService.fetchPatientMetricDocuments(
+        'passos',
+        patientId,
+      );
+      final sono = await _databaseService.fetchPatientMetricDocuments(
+        'insonias',
+        patientId,
+      );
+      final respiracao = await _databaseService.fetchPatientMetricDocuments(
+        'respiracao',
+        patientId,
+      );
+      final pressoes = await _databaseService.getPressoesByPacienteId(patientId);
+
+      _homeVitalsStats['freq_cardiaca'] =
+          _statsFromDailyDocs(batimentos, dayAggregate: _HomeVitalsDayAgg.average);
+      _homeVitalsStats['passos'] =
+          _statsFromDailyDocs(passos, dayAggregate: _HomeVitalsDayAgg.sum);
+      _homeVitalsStats['sono'] =
+          _statsFromDailyDocs(sono, dayAggregate: _HomeVitalsDayAgg.sum);
+      _homeVitalsStats['respiracao'] =
+          _statsFromDailyDocs(respiracao, dayAggregate: _HomeVitalsDayAgg.average);
+      _homeVitalsStats['pressao'] = _statsPressaoFavorite(pressoes);
+    } catch (e) {
+      print('⚠️ [HomeController] Resumo de sinais vitais (favoritos): $e');
+    }
+  }
+
+  List<Map<String, dynamic>> _dailyRowsFromDocs(
+    List<Map<String, dynamic>> docs,
+    _HomeVitalsDayAgg dayAggregate,
+  ) {
+    final dailyValues = <String, List<double>>{};
+    for (final item in docs) {
+      final raw = item['data'] ?? item['date'];
+      final itemDate = coerceMongoDateField(raw);
+      if (itemDate == null) continue;
+      final value = coerceMongoNumber(item['valor'] ?? item['value']);
+      if (value < 0) continue;
+      final dateKey = DateFormat('yyyy-MM-dd').format(itemDate);
+      dailyValues.putIfAbsent(dateKey, () => []).add(value);
+    }
+    final rows = <Map<String, dynamic>>[];
+    for (final e in dailyValues.entries) {
+      final date = DateTime.parse(e.key);
+      final vals = e.value;
+      final v = dayAggregate == _HomeVitalsDayAgg.sum
+          ? vals.reduce((a, b) => a + b)
+          : vals.reduce((a, b) => a + b) / vals.length;
+      rows.add({'date': date, 'value': v.toDouble()});
+    }
+    rows.sort(
+      (a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime),
+    );
+    return rows;
+  }
+
+  bool _isDateInLastCalendarDays(DateTime d, int inclusiveDays) {
+    final end = DateTime.now();
+    final start = end.subtract(Duration(days: inclusiveDays - 1));
+    final day = DateTime(d.year, d.month, d.day);
+    final s = DateTime(start.year, start.month, start.day);
+    final e = DateTime(end.year, end.month, end.day);
+    return !day.isBefore(s) && !day.isAfter(e);
+  }
+
+  Map<String, dynamic> _statsFromDailyDocs(
+    List<Map<String, dynamic>> docs, {
+    required _HomeVitalsDayAgg dayAggregate,
+  }) {
+    final daily = _dailyRowsFromDocs(docs, dayAggregate);
+    if (daily.isEmpty) return {};
+
+    final ultimo = daily.first;
+    // Até 7 dias mais recentes **que tenham dados** (evita média vazia quando o calendário não coincide).
+    final windowLen = daily.length >= 7 ? 7 : daily.length;
+    final window = daily.sublist(0, windowLen);
+    final values = window.map((e) => e['value'] as double).toList();
+    final minW = values.reduce((a, b) => a < b ? a : b);
+    final maxW = values.reduce((a, b) => a > b ? a : b);
+    final mediaW = values.reduce((a, b) => a + b) / values.length;
+
+    return {
+      'ultimo': ultimo['value'] as double,
+      'media7': mediaW,
+      'minWindow': minW,
+      'maxWindow': maxW,
+      'windowDays': window.length,
+      'diasComRegisto': daily.length,
+      'total': docs.length,
+      'ultimaData': ultimo['date'] as DateTime,
+    };
+  }
+
+  Map<String, dynamic> _statsPressaoFavorite(List<PressaoArterial> list) {
+    if (list.isEmpty) return {};
+    final sorted = List<PressaoArterial>.from(list)
+      ..sort((a, b) => b.data.compareTo(a.data));
+    final last = sorted.first;
+    final now = DateTime.now();
+    final windowLen = sorted.length >= 7 ? 7 : sorted.length;
+    final window = sorted.sublist(0, windowLen);
+    final sysVals = window.map((e) => e.sistolica).toList();
+    final diaVals = window.map((e) => e.diastolica).toList();
+    final minSys = sysVals.reduce((a, b) => a < b ? a : b);
+    final maxSys = sysVals.reduce((a, b) => a > b ? a : b);
+    final mediaSys =
+        sysVals.reduce((a, b) => a + b) / sysVals.length;
+    final mediaDia =
+        diaVals.reduce((a, b) => a + b) / diaVals.length;
+
+    return {
+      'sistolica': last.sistolica.round(),
+      'diastolica': last.diastolica.round(),
+      'diasDesdeUltima': now.difference(last.data).inDays,
+      'mediaSistolica7': mediaSys.round(),
+      'mediaDiastolica7': mediaDia.round(),
+      'minSistolicaWindow': minSys.round(),
+      'maxSistolicaWindow': maxSys.round(),
+      'windowMedicoes': window.length,
+      'total': list.length,
+      'ultimaData': last.data,
+    };
+  }
 
   Future<void> logout() async {
     try {

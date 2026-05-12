@@ -15,9 +15,9 @@ class NotificationBuilders {
     String? bodyFull,
     String? viewRequestLabel,
   }) {
-    final title = contentTitle ?? '🩺 Solicitação de acesso';
+    final title = contentTitle ?? 'Nova solicitação de acesso';
     final body = bodyFull ??
-        'Dr(a). $doctorName ${specialty.isNotEmpty ? "($specialty)" : ""} solicitou acesso ao seu prontuário médico. Gere o código direto no Oryon Health.';
+        'Dr(a). $doctorName ${specialty.isNotEmpty ? "($specialty)" : ""} solicitou acesso ao seu prontuário pela Chave Oryon. Gere o código no Oryon Health.';
     final actionLabel = viewRequestLabel ?? 'Ver Solicitação';
 
     final androidDetails = AndroidNotificationDetails(

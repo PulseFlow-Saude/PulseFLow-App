@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../models/patient.dart';
 import '../../utils/residence_date_format.dart';
 import '../../services/auth_service.dart';
@@ -83,19 +84,39 @@ class ProfileController extends GetxController {
   // Verifica permissões do HealthKit na inicialização
   Future<void> _checkHealthPermissions() async {
     try {
-      final hasPermissions = await _healthService.hasPermissions();
-      _healthDataAccessGranted.value = hasPermissions;
-      
-      if (hasPermissions) {
-        await _loadHealthData();
-      } else {
-        // Se permissões são null (nunca solicitadas), solicita automaticamente
+      final inApp = await _healthService.isAppleHealthInAppEnabled();
+      if (!inApp) {
+        _healthDataAccessGranted.value = false;
+        await _loadHealthDataFromDatabase();
+        return;
+      }
+
+      // iOS: o plugin devolve `null` para leitura em hasPermissions (privacidade Apple) —
+      // não dá para distinguir "nunca pediu" de "já concedeu". Pedimos autorização e seguimos.
+      if (Platform.isIOS) {
         final granted = await _healthService.requestPermissions();
-        
         if (granted) {
           _healthDataAccessGranted.value = true;
           await _loadHealthData();
-          
+        } else {
+          _healthDataAccessGranted.value = false;
+          await _loadHealthDataFromDatabase();
+          // Não desligar a integração in-app no iOS: falha pode ser técnica; o utilizador pode voltar a tentar.
+        }
+        return;
+      }
+
+      final hasPermissions = await _healthService.hasPermissions();
+      if (hasPermissions) {
+        _healthDataAccessGranted.value = true;
+        await _loadHealthData();
+      } else {
+        final granted = await _healthService.requestPermissions();
+
+        if (granted) {
+          _healthDataAccessGranted.value = true;
+          await _loadHealthData();
+
           Get.snackbar(
             'profile_success'.tr,
             'profile_success_health'.tr,
@@ -104,12 +125,12 @@ class ProfileController extends GetxController {
             duration: const Duration(seconds: 3),
           );
         } else {
-          // Se não tem permissões, tenta carregar dados do banco
+          await _healthService.setAppleHealthInAppEnabled(false);
+          _healthDataAccessGranted.value = false;
           await _loadHealthDataFromDatabase();
         }
       }
     } catch (e) {
-      // Tenta carregar do banco em caso de erro
       await _loadHealthDataFromDatabase();
     }
   }
@@ -494,16 +515,18 @@ class ProfileController extends GetxController {
   Future<void> requestHealthDataAccess() async {
     try {
       _isRequestingHealthPermissions.value = true;
-      
+
+      await _healthService.setAppleHealthInAppEnabled(true);
+
       // Solicita permissões reais do HealthKit
       final granted = await _healthService.requestPermissions();
       
       if (granted) {
         _healthDataAccessGranted.value = true;
-        
+
         // Carrega dados reais do HealthKit
         await _loadHealthData();
-        
+
         Get.snackbar(
           'profile_success'.tr,
           'profile_success_health_granted'.tr,
@@ -511,6 +534,10 @@ class ProfileController extends GetxController {
           colorText: Colors.white,
         );
       } else {
+        if (Platform.isAndroid) {
+          await _healthService.setAppleHealthInAppEnabled(false);
+        }
+        _healthDataAccessGranted.value = false;
         Get.snackbar(
           'profile_permission_denied'.tr,
           'profile_permission_health'.tr,
@@ -534,17 +561,24 @@ class ProfileController extends GetxController {
   Future<void> _loadHealthData() async {
     try {
       print('📱 [ProfileController] Iniciando carregamento de dados do HealthKit...');
-      
-      // Verifica se tem permissões
-      final hasPermissions = await _healthService.hasPermissions();
-      print('📱 [ProfileController] Permissões: $hasPermissions');
-      
-      if (!hasPermissions) {
-        print('📱 [ProfileController] Solicitando permissões...');
-        final granted = await _healthService.requestPermissions();
-        if (!granted) {
-          print('⚠️ [ProfileController] Permissões negadas pelo usuário');
-          // Usa dados simulados mas ainda tenta salvar
+
+      if (!await _healthService.isAppleHealthInAppEnabled()) {
+        print('📱 [ProfileController] Integração Apple Health desligada no app.');
+        await _loadHealthDataFromDatabase();
+        return;
+      }
+
+      // No iOS, hasPermissions para READ é indeterminado no HealthKit — não usar como bloqueio.
+      if (!Platform.isIOS) {
+        final hasPermissions = await _healthService.hasPermissions();
+        print('📱 [ProfileController] Permissões: $hasPermissions');
+
+        if (!hasPermissions) {
+          print('📱 [ProfileController] Solicitando permissões...');
+          final granted = await _healthService.requestPermissions();
+          if (!granted) {
+            print('⚠️ [ProfileController] Permissões negadas pelo utilizador');
+          }
         }
       }
 
@@ -623,34 +657,52 @@ class ProfileController extends GetxController {
     );
   }
 
-  // Desconecta do Apple Health
+  // Desconecta do Apple Health (desliga leitura no app; no Android revoga Health Connect)
   Future<void> disconnectFromAppleHealth() async {
     try {
-      // Verifica se ainda tem permissões
-      final hasPermissions = await _healthService.hasPermissions();
-      
-      if (!hasPermissions) {
-        _healthDataAccessGranted.value = false;
-        _heartRate.value = 0.0;
-        _sleepQuality.value = 0.0;
-        _dailySteps.value = 0;
-        
-        Get.snackbar(
-          'profile_disconnected'.tr,
-          'profile_permissions_revoked'.tr,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
-      } else {
-        Get.snackbar(
-          'profile_warning'.tr,
-          'profile_revoke_hint'.tr,
-          backgroundColor: Colors.blue,
-          colorText: Colors.white,
-        );
-      }
+      await _healthService.setAppleHealthInAppEnabled(false);
+      await _healthService.revokeOsHealthPermissionsIfAndroid();
+
+      _healthDataAccessGranted.value = false;
+      _heartRate.value = 0.0;
+      _sleepQuality.value = 0.0;
+      _dailySteps.value = 0;
+
+      await _loadHealthDataFromDatabase();
+
+      final iosHint = 'profile_apple_health_disconnect_ios_hint'.tr;
+      final androidHint = 'profile_apple_health_disconnect_android_hint'.tr;
+
+      Get.snackbar(
+        'profile_disconnected'.tr,
+        Platform.isIOS ? iosHint : androidHint,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.shade100,
+        colorText: const Color(0xFF1E293B),
+        duration: const Duration(seconds: 8),
+        margin: const EdgeInsets.all(12),
+        mainButton: TextButton(
+          onPressed: () async {
+            await openAppSettings();
+          },
+          child: Text(
+            'profile_open_settings'.tr,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF00324A),
+            ),
+          ),
+        ),
+      );
     } catch (e) {
       _healthDataAccessGranted.value = false;
+      Get.snackbar(
+        'auth_error'.tr,
+        '${'profile_error_health_request'.tr}: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: const Color(0xFF1E293B),
+      );
     }
   }
 
@@ -667,18 +719,35 @@ class ProfileController extends GetxController {
         return;
       }
 
-      _isRequestingHealthPermissions.value = true;
-      
-      // Verifica permissões
-      final hasPermissions = await _healthService.hasPermissions();
-      if (!hasPermissions) {
+      if (!await _healthService.isAppleHealthInAppEnabled()) {
         Get.snackbar(
-          'profile_permission_needed'.tr,
-          'profile_permission_required'.tr,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
+          'profile_warning'.tr,
+          'profile_apple_health_sync_off'.tr,
+          backgroundColor: Colors.orange.shade100,
+          colorText: const Color(0xFF1E293B),
         );
         return;
+      }
+
+      _isRequestingHealthPermissions.value = true;
+
+      // No iOS, hasPermissions com leitura devolve indeterminado no plugin; não bloquear sync aqui.
+      if (Platform.isIOS) {
+        await _healthService.requestPermissions();
+      } else {
+        var ok = await _healthService.hasPermissions();
+        if (!ok) {
+          ok = await _healthService.requestPermissions();
+        }
+        if (!ok) {
+          Get.snackbar(
+            'profile_permission_needed'.tr,
+            'profile_permission_required'.tr,
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+          );
+          return;
+        }
       }
 
       // Sincroniza dados (salva dados do HealthKit no banco)
@@ -716,6 +785,16 @@ class ProfileController extends GetxController {
           'profile_error_user'.tr,
           backgroundColor: Colors.red,
           colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (!await _healthService.isAppleHealthInAppEnabled()) {
+        Get.snackbar(
+          'profile_warning'.tr,
+          'profile_apple_health_sync_off'.tr,
+          backgroundColor: Colors.orange.shade100,
+          colorText: const Color(0xFF1E293B),
         );
         return;
       }

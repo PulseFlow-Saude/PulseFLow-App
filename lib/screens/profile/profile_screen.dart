@@ -231,9 +231,11 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: isEditing ? () => _showPhotoOptions(controller) : null,
+                  behavior: HitTestBehavior.opaque,
                   child: _buildAvatar(
                     controller: controller,
                     initials: _initialsFromName(fullName),
+                    isEditing: isEditing,
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -793,6 +795,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildAvatar({
     required ProfileController controller,
     required String initials,
+    required bool isEditing,
   }) {
     final borderColor = const Color(0xFF00324A).withOpacity(0.3);
 
@@ -861,14 +864,50 @@ class ProfileScreen extends StatelessWidget {
       content = buildImage(FileImage(file));
     }
 
-    return Container(
-      width: 90,
-      height: 90,
+    const double avatarSize = 90;
+
+    final circleAvatar = Container(
+      width: avatarSize,
+      height: avatarSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: borderColor, width: 2),
       ),
       child: content,
+    );
+
+    if (!isEditing) return circleAvatar;
+
+    return SizedBox(
+      width: avatarSize + 16,
+      height: avatarSize + 16,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          circleAvatar,
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Material(
+              elevation: 4,
+              color: const Color(0xFF00324A),
+              shape: CircleBorder(
+                side: BorderSide(color: Colors.white, width: 2.5),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Icon(
+                  Icons.camera_alt_rounded,
+                  color: Colors.white,
+                  size: 20,
+                  semanticLabel: 'profile_select_photo'.tr,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

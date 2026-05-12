@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../services/database_service.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
+import '../../routes/app_routes.dart';
 import '../../utils/specialty_translations.dart';
 
 class SpecialtyInfo {
@@ -875,6 +876,9 @@ class AppointmentSchedulerController extends GetxController {
         colorText: const Color(0xFF1E293B),
         duration: const Duration(seconds: 3),
       );
+
+      // Mesmo padrão do separador Consultas: ecrã principal de próximas consultas.
+      Get.offAllNamed(Routes.UPCOMING_APPOINTMENTS);
 
       return true;
     } catch (e) {

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../services/api_service.dart';
 import '../../routes/app_routes.dart';
+import '../../utils/notification_content_i18n.dart';
 import '../home/home_controller.dart';
 import '../../services/notifications/notification_storage.dart';
 
@@ -109,10 +110,16 @@ class NotificationsController extends GetxController {
           final localDate =
               DateTime.tryParse(local['createdAt']?.toString() ?? '');
 
+          final locCode = NotificationContentI18n.effectiveLocaleCodeSync();
+          final lt = local['title']?.toString() ?? '';
+          final lm = local['message']?.toString() ?? '';
+          final locItem =
+              NotificationContentI18n.localize(lt, lm, localeCode: locCode);
+
           notificationsList.add(NotificationItem(
             id: localId,
-            title: local['title']?.toString() ?? 'notif_default'.tr,
-            message: local['message']?.toString() ?? '',
+            title: lt.isEmpty ? 'notif_default'.tr : locItem.title,
+            message: locItem.message,
             date: localDate ?? DateTime.now(),
             isRead: local['isRead'] == true,
             isArchived: local['isArchived'] == true,
@@ -151,8 +158,17 @@ class NotificationsController extends GetxController {
         return null;
       }
 
-      final title = notif['title']?.toString() ?? 'notif_default'.tr;
-      final description = notif['description']?.toString() ?? '';
+      final titleRaw = notif['title']?.toString() ?? '';
+      final descriptionRaw = notif['description']?.toString() ?? '';
+      final locCode = NotificationContentI18n.effectiveLocaleCodeSync();
+      final localized = NotificationContentI18n.localize(
+        titleRaw,
+        descriptionRaw,
+        localeCode: locCode,
+      );
+      final title =
+          titleRaw.isEmpty ? 'notif_default'.tr : localized.title;
+      final description = localized.message;
       final unread = notif['unread'] == true ||
           notif['unread'] == 'true' ||
           notif['unread'] == 1 ||
@@ -359,9 +375,10 @@ class NotificationsController extends GetxController {
 
   void handleNotificationTap(NotificationItem notification) {
     markAsRead(notification.id);
-    
-    if (notification.type == 'appointment') {
-      Get.toNamed(Routes.APPOINTMENT_SCHEDULER);
+
+    final t = (notification.type ?? '').toLowerCase();
+    if (t == 'appointment' || t == 'appointments') {
+      Get.toNamed(Routes.UPCOMING_APPOINTMENTS);
     } else if (notification.type == 'exam') {
       Get.toNamed(Routes.EXAME_LIST);
     } else if (notification.type == 'prescription') {
